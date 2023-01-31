@@ -45,3 +45,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
     USERNAME_FIELD = 'email'
+
+class Category(models.Model):
+    """Categories used for classifying expenditure"""
+
+    name = models.CharField(max_length=50, blank=False)
+    week_limit = models.PositiveIntegerField()
