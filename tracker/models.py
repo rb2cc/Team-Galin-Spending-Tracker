@@ -42,9 +42,16 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    available_categories = models.ManyToManyField('self', symmetrical = True)
 
     objects = UserManager()
     USERNAME_FIELD = 'email'
+
+    def _add_category(self, category):
+        self.available_categories.add(category)
+
+    def _remove_category(self, category):
+        self.available_categories.remove(category)
 
 class Category(models.Model):
     """Categories used for classifying expenditure"""
