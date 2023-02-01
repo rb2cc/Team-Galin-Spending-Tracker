@@ -9,6 +9,7 @@ class UserManager(BaseUserManager):
 
     use_in_migrations = True
 
+
     def _create_user(self, email, password, **extra_fields):
         if not email:
             raise ValueError('The given email must be set')
@@ -42,7 +43,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    available_categories = models.ManyToManyField('self', symmetrical = True)
+    available_categories = models.ManyToManyField('Category', symmetrical = False, related_name = 'users')
 
     objects = UserManager()
     USERNAME_FIELD = 'email'

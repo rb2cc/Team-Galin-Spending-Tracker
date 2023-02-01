@@ -1,5 +1,5 @@
 from .forms import SignUpForm, LogInForm
-from .models import User
+from .models import User, Category
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import redirect, render
@@ -25,6 +25,8 @@ def sign_up(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             user = form.save()
+            global_categories = Category.objects.filter(is_global = True)
+            user.available_categories.add(*global_categories)
             login(request, user)
             return redirect('landing_page')
     else:
