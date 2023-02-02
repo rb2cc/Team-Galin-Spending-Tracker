@@ -56,4 +56,8 @@ class ExpenditureForm(forms.ModelForm):
     class Meta:
         """Form options"""
         model = Expenditure
-        fields = ['title', 'expense','description', 'image']
+        fields = ['title','expense','description', 'image']
+        
+    # description = forms.CharField(label="Description", widget=forms.CharField(attrs={'size':100}))
+    # field_order=['title', 'description', 'expense']
+

@@ -16,6 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from tracker import views
+from django.urls.conf import include  
+from django.conf import settings  
+from django.conf.urls.static import static  
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,3 +30,7 @@ urlpatterns = [
     path('expenditure_list', views.expenditure_list, name='expenditure_list'),
     path('create_expenditure/', views.create_expenditure, name='create_expenditure' )
 ]
+
+
+if settings.DEBUG:  
+        urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)  

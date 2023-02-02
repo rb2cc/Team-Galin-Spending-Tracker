@@ -50,9 +50,9 @@ class Expenditure(models.Model):
     """Expenditure model for user spending"""
 
     title = models.CharField(max_length=25, blank=False)
-    description = models.CharField(max_length=280, blank=False)
-    image = models.ImageField(editable=True, blank=True)#upload_to='files/image') #need to research how to save uploaded images properly
-    expense = models.DecimalField(max_digits=6,decimal_places=2, null=False)
+    description = models.TextField(max_length=280, blank=False)
+    image = models.ImageField(editable=True, blank=True, upload_to='images')
+    expense = models.DecimalField(max_digits=20,decimal_places=2, null=False)
     date_created = models.DateField(auto_now=True)
     # category = models.ForeignKey(Category, on_delete=models.CASCADE) #uncomment when category model is implemented
 

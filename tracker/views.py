@@ -47,7 +47,7 @@ def expenditure_list(request):
 
 def create_expenditure(request):
     if request.method == 'POST':
-        form=ExpenditureForm(request.POST)
+        form=ExpenditureForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return redirect('expenditure_list')
@@ -56,3 +56,4 @@ def create_expenditure(request):
     else:
         form = ExpenditureForm()
     return render(request, 'create_expenditure.html', {'form': form})
+    
