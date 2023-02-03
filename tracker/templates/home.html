@@ -5,7 +5,7 @@
         <div class="row h-100">
             <div class="my-auto">
                 <div class="card cover-card">
-                    <p></p>
+                    <p></p><p></p>
                     <p class="cover-text" style="font-weight:bold; text-align:center">Galin Spending Tracker</p>
                     <p></p><p></p>
                     <form action = "{% url 'home' %}" method="post">
@@ -14,9 +14,10 @@
                         {% include 'partials/messages.html' %}
                         <input type="submit" value="Log in" class='btn btn-primary'>
                     </form>
-                    <p></p><p></p><p></p><p></p><p></p><p></p>
-                    <div style="text-align:center"> <a href = '{% url 'sign_up' %}'>Register</a> </div>
+                    <div style="text-align:center; position:fixed; left:0; right:0; top:64%"> <a href = '{% url 'sign_up' %}'>Register↗</a> </div>
+                    <div style="text-align:center; position:fixed; left:0; right:0; top:68%"> <a href = '{% url 'reset_password' %}'>Reset Password↗</a> </div>
                 </div>
+            </div>
             </div>
         </div>
     </div>

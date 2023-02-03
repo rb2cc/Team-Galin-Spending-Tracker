@@ -1,0 +1,16 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<div class='container'>
+    <div class='row'>
+        <div class='col-8 offset-2'>
+            <h1>Create new expenditure</h1>
+            <p>enter in the fields below bro</p>
+            <form method="POST" enctype='multipart/form-data'>
+                {% csrf_token %}
+                {{ form.as_p }} 
+                <button type = "submit">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
