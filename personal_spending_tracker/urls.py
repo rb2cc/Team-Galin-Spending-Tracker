@@ -55,7 +55,7 @@ urlpatterns = [
         template_name='password_reset_templates/password_reset_done.html'),
         name="password_reset_complete"),
 
-    path('edit_user/', UserEditView.as_view(), name='edit_user')
+    path('edit_user/', UserEditView.as_view(), name='edit_user'),
 
     path('expenditure_list', views.expenditure_list, name='expenditure_list'),
     path('create_expenditure/', views.create_expenditure, name='create_expenditure' )
