@@ -1,5 +1,5 @@
 from .forms import SignUpForm, LogInForm, ExpenditureForm
-from .models import User, Category
+from .models import User, Category, Expenditure
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import redirect, render
@@ -44,8 +44,8 @@ def user_test(user):
 def landing_page(request):
     return render(request, 'landing_page.html')
 
-def expenditure_list(request):
-    return render(request, 'expenditure_list.html')
+# def expenditure_list(request):
+#     return render(request, 'expenditure_list.html')
 
 def create_expenditure(request):
     if request.method == 'POST':
@@ -59,3 +59,6 @@ def create_expenditure(request):
         form = ExpenditureForm()
     return render(request, 'create_expenditure.html', {'form': form})
     
+def display_expenditures(request):
+    expenditures = Expenditure.objects.all()
+    return render(request, 'expenditure_list.html', {'expenditures':expenditures})

@@ -6,6 +6,30 @@
             <h1>Expenditures</h1>
             <p>paginated view of expenditures will go here</p>
             <h2><a href='{% url 'create_expenditure' %}' class="btn btn-success">New Expenditure</a></h2>
+            <div class="mb-3">
+                <!-- <p id="count">Total Requests: </p> -->
+                <table>
+                    <tr>
+                      <th>Title</th>
+                      <th>Description</th>
+                      <th>Expense</th>
+                      <th>Category</th>
+                      <th>Image</th>
+                      <th>Date Created</th>
+                    </tr>
+                {% for i in expenditures %}
+                        <tr>
+                            <td style ='text-align: left; vertical-align: middle'>{{i.title}}</td>
+                            <td style ='text-align: left; vertical-align: middle'>{{i.description}}</td>
+                            <td style ='text-align: left; vertical-align: middle'>{{i.expense}}</td>
+                            <td style ='text-align: left; vertical-align: middle'>{{i.category}}</td>
+                            <td style ='text-align: center; vertical-align: middle'><img src="{{ i.image.url }}" width="40"></td>
+                            <td style ='text-align: left; vertical-align: middle'>{{i.date_created}}</td>
+                        </tr>
+                {% endfor %}
+              </table>  
+            </div>
+
         </div>
     </div>
 </div>
