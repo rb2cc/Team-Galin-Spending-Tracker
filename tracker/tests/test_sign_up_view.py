@@ -2,8 +2,8 @@ from django.contrib.auth.hashers import check_password
 from django.test import TestCase
 from django.urls import reverse
 from tracker.forms import SignUpForm
-from tracker.models import User
-from .helpers import LogInTester
+from tracker.models import User, Category
+from .helpers import LogInTester, CategoryFunctions
 
 
 class SignUpViewTestCase(TestCase, LogInTester):
@@ -17,6 +17,7 @@ class SignUpViewTestCase(TestCase, LogInTester):
             'new_password' : 'Lu123',
             'password_confirmation' : 'Lu123'
         }
+        CategoryFunctions._make_categories(self)
 
     def test_sign_up_url(self):
         self.assertEqual(self.url, '/sign_up/')
@@ -56,3 +57,11 @@ class SignUpViewTestCase(TestCase, LogInTester):
         is_password_correct = check_password('Lu123', user.password)
         self.assertTrue(is_password_correct)
         self.assertTrue(self._is_logged_in())
+
+    def test_global_categories_assigned_on_signup(self):
+        self.client.post(self.url, self.form_input, follow=True)
+        user = User.objects.get(email = 'james@example.org')
+        self.assertEqual(Category.objects.all().count(), 3)
+        self.assertEqual(user.available_categories.all().count(), 2)
+
+
