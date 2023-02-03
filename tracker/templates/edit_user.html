@@ -1,0 +1,22 @@
+
+
+{% extends 'base_content.html' %}
+{% block content %}
+
+
+<div class='container'>
+    <div class='row'>
+        <div class='col-6 offset-3'>
+            <h1> Edit User </h1>
+<div class="form-group">
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p}}
+        <button class="btn btn-secondary"> Update
+        </button>
+    </div>
+</div>
+</div>
+</div>
+
+{% endblock %}

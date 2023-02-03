@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'personal_spending_tracker',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -138,8 +139,20 @@ MESSAGE_TAGS = {
     message_constants.ERROR: 'danger'
 }
 
+
+
+# SMTP Configuration
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "	teamgalin.moneysaver@gmail.com"
+EMAIL_HOST_PASSWORD = "boqk cfkx yybp uhxt"
+
 # Base url to serve media files  
 MEDIA_URL = '/media/'  
   
 # Path where media is stored  
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')  
+
