@@ -48,6 +48,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
     USERNAME_FIELD = 'email'
 
+
     def _add_category(self, category):
         self.available_categories.add(category)
 
@@ -64,3 +65,15 @@ class Category(models.Model):
     class Meta:
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
+
+class Expenditure(models.Model):
+    """Expenditure model for user spending"""
+
+    title = models.CharField(max_length=25, blank=False)
+    description = models.TextField(max_length=280, blank=False)
+    image = models.ImageField(editable=True, blank=True, upload_to='images')
+    expense = models.DecimalField(max_digits=20,decimal_places=2, null=False)
+    date_created = models.DateField(auto_now=True)
+    # category = models.ForeignKey(Category, on_delete=models.CASCADE) #uncomment when category model is implemented
+
+

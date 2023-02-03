@@ -16,6 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from tracker import views
+from django.urls.conf import include  
+from django.conf import settings  
+from django.conf.urls.static import static  
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -23,4 +27,10 @@ urlpatterns = [
     path('log_out/', views.log_out, name='log_out'),
     path('sign_up/', views.sign_up, name='sign_up'),
     path('landing_page/', views.landing_page, name='landing_page'),
+    path('expenditure_list', views.expenditure_list, name='expenditure_list'),
+    path('create_expenditure/', views.create_expenditure, name='create_expenditure' )
 ]
+
+
+if settings.DEBUG:  
+        urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)  

@@ -1,4 +1,4 @@
-from .forms import SignUpForm, LogInForm
+from .forms import SignUpForm, LogInForm, ExpenditureForm
 from .models import User, Category
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -43,3 +43,19 @@ def user_test(user):
 @user_passes_test(user_test, login_url='log_out')
 def landing_page(request):
     return render(request, 'landing_page.html')
+
+def expenditure_list(request):
+    return render(request, 'expenditure_list.html')
+
+def create_expenditure(request):
+    if request.method == 'POST':
+        form=ExpenditureForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('expenditure_list')
+        messages.add_message(request, messages.ERROR, "The inputs provided were invalid")
+
+    else:
+        form = ExpenditureForm()
+    return render(request, 'create_expenditure.html', {'form': form})
+    

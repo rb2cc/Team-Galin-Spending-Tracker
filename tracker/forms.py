@@ -1,7 +1,7 @@
 from django.core.validators import validate_email
 from django.core.validators import RegexValidator
 from django import forms
-from .models import User
+from .models import User, Expenditure
 
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""
@@ -50,3 +50,14 @@ class SignUpForm(forms.ModelForm):
             password = self.cleaned_data.get('new_password')
         )
         return user
+
+class ExpenditureForm(forms.ModelForm):
+    """Form enabling users to create expenditures"""
+    class Meta:
+        """Form options"""
+        model = Expenditure
+        fields = ['title','expense','description', 'image']
+        
+    # description = forms.CharField(label="Description", widget=forms.CharField(attrs={'size':100}))
+    # field_order=['title', 'description', 'expense']
+

@@ -1,0 +1,12 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<div class='container'>
+    <div class='row'>
+        <div class='col-8 offset-2'>
+            <h1>Expenditures</h1>
+            <p>paginated view of expenditures will go here</p>
+            <h2><a href='{% url 'create_expenditure' %}' class="btn btn-success">New Expenditure</a></h2>
+        </div>
+    </div>
+</div>
+{% endblock %}
