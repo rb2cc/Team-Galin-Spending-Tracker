@@ -11,6 +11,7 @@ class UserManager(BaseUserManager):
 
     use_in_migrations = True
 
+
     def _create_user(self, email, password, **extra_fields):
         if not email:
             raise ValueError('The given email must be set')
@@ -44,9 +45,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    available_categories = models.ManyToManyField('Category', symmetrical = False, related_name = 'users')
 
     objects = UserManager()
     USERNAME_FIELD = 'email'
+
 
 
 class Profile(models.Model):
@@ -56,3 +59,33 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.user.email
+
+    def _add_category(self, category):
+        self.available_categories.add(category)
+
+    def _remove_category(self, category):
+        self.available_categories.remove(category)
+
+class Category(models.Model):
+    """Categories used for classifying expenditure"""
+
+    name = models.CharField(max_length=50, blank=False)
+    week_limit = models.PositiveIntegerField()
+    is_global = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'Category'
+        verbose_name_plural = 'Categories'
+
+class Expenditure(models.Model):
+    """Expenditure model for user spending"""
+
+    title = models.CharField(max_length=25, blank=False)
+    description = models.TextField(max_length=280, blank=False)
+    image = models.ImageField(editable=True, blank=True, upload_to='images')
+    expense = models.DecimalField(max_digits=20,decimal_places=2, null=False)
+    date_created = models.DateField(auto_now=True)
+    # category = models.ForeignKey(Category, on_delete=models.CASCADE) #uncomment when category model is implemented
+
+
+

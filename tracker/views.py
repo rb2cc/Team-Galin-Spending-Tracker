@@ -1,6 +1,11 @@
+
 from .forms import SignUpForm, LogInForm, EditUserForm
 from django.contrib.auth.forms import UserChangeForm
 from .models import User
+
+from .forms import SignUpForm, LogInForm, ExpenditureForm
+from .models import User, Category
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import redirect, render
@@ -31,6 +36,8 @@ def sign_up(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             user = form.save()
+            global_categories = Category.objects.filter(is_global = True)
+            user.available_categories.add(*global_categories)
             login(request, user)
             return redirect('landing_page')
     else:
@@ -52,6 +59,7 @@ def landing_page(request):
     return render(request, 'landing_page.html')
 
 
+
 def change_password_success(request):
     return render(request, 'change_password_success.html')
 
@@ -71,3 +79,20 @@ class UserEditView(generic.UpdateView):
             form.save()
             return render(request, 'edit_user.html')
         return render(request, 'edit_user.html')
+
+def expenditure_list(request):
+    return render(request, 'expenditure_list.html')
+
+def create_expenditure(request):
+    if request.method == 'POST':
+        form=ExpenditureForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('expenditure_list')
+        messages.add_message(request, messages.ERROR, "The inputs provided were invalid")
+
+    else:
+        form = ExpenditureForm()
+    return render(request, 'create_expenditure.html', {'form': form})
+    
+

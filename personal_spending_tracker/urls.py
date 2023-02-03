@@ -19,7 +19,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from tracker import views
+
 from tracker.views import UserEditView
+
+from django.urls.conf import include  
+from django.conf import settings  
+from django.conf.urls.static import static  
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,6 +34,7 @@ urlpatterns = [
     path('log_out/', views.log_out, name='log_out'),
     path('sign_up/', views.sign_up, name='sign_up'),
     path('landing_page/', views.landing_page, name='landing_page'),
+
 
     path('change_password', auth_views.PasswordChangeView.as_view(
         template_name='change_password.html', success_url='change_password_success'),  name='change_password'),
@@ -48,4 +56,12 @@ urlpatterns = [
         name="password_reset_complete"),
 
     path('edit_user/', UserEditView.as_view(), name='edit_user')
+
+    path('expenditure_list', views.expenditure_list, name='expenditure_list'),
+    path('create_expenditure/', views.create_expenditure, name='create_expenditure' )
+
 ]
+
+
+if settings.DEBUG:  
+        urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)  
