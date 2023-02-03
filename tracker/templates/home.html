@@ -5,14 +5,17 @@
         <div class="row h-100">
             <div class="col-12 my-auto">
                 <div class="card cover-card">
-                    <p class="cover-text" style="font-weight:bold; text-align:center">Welcome to Spending Tracker</p>
+                    <p class="cover-text" style="font-weight:bold; text-align:center">Welcome to </p>
+                    <p class="cover-text" style="font-weight:bold; text-align:center">Spending Tracker</p>
+                    <p></p><p></p><p></p>
                     <form action = "{% url 'home' %}" method="post">
                         {% csrf_token %}
                         {% include 'partials/bootstrap_form.html' with form=form %}
                         {% include 'partials/messages.html' %}
                         <input type="submit" value="Log in" class='btn btn-primary'>
                     </form>
-                    <div style="text-align:right"> <a href = '{% url 'sign_up' %}'>Register</a> </div>
+                    <p></p><p></p><p></p><p></p><p></p><p></p>
+                    <div style="text-align:center"> <a href = '{% url 'sign_up' %}'>Register</a> </div>
                 </div>
             </div>
         </div>

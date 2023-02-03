@@ -1,14 +1,20 @@
-{% extends 'base_content.html' %}
-{% block content %}
-<div class='container'>
-    <div class='row'>
-        <div class='col-6 offset-3'>
-            <h1>Sign up</h1>
-            <form action = '{% url 'sign_up' %}' method = 'post'>
-                {% csrf_token %}
-                {% include 'partials/bootstrap_form.html' with form=form %}
-                <input type = 'submit' value = 'Sign up' class='btn btn-primary'>
-            </form>
+{% extends 'base.html' %}
+{% block body %}
+<div id="cover-image">
+    <div class="container vh-100">
+        <div class="row h-100">
+            <div class="col-12 my-auto">
+                <div class="card cover-card">
+                    <p class="cover-text" style="font-weight:bold; text-align:center">Welcome to </p>
+                    <p class="cover-text" style="font-weight:bold; text-align:center">Spending Tracker</p>
+                    <form action = "{% url 'home' %}" method="post">
+                        {% csrf_token %}
+                        {% include 'partials/bootstrap_form.html' with form=form %}
+                        {% include 'partials/messages.html' %}
+                        <input type="submit" value="Sign Up" class='btn btn-primary'>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>
