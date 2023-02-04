@@ -1,12 +1,36 @@
 {% extends 'base_content.html' %}
 {% block content %}
-<div class='container'>
-    <div class='row'>
-        <div class='col-8 offset-2'>
-            <h1>Expenditures</h1>
-            <p>paginated view of expenditures will go here</p>
-            <h2><a href='{% url 'create_expenditure' %}' class="btn btn-success">New Expenditure</a></h2>
-        </div>
+<div class='container vh-100'>
+    <div class='row h-100'>
+            <div class="card full-card">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Title</th>
+                            <th scope="col">Expense</th>
+                            <th scope="col">Time</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Image</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <div class="Spending">
+                            {% for spending in spendings %}
+                                <tr>
+                                    <td>{{ spending.title }}</td>
+                                    <td>{{ spending.expense }}</td>
+                                    <td>{{ spending.date_created }}</td>
+                                    <td>{{ spending.description }}</td>
+                                    {% if spending.image %}
+                                        <td><img src="media/{{ spending.image }} " alt="image"></td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        </div>
+                    </tbody>
+                </table>
+            </div>
     </div>
 </div>
+
 {% endblock %}

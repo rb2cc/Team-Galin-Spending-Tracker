@@ -4,15 +4,37 @@
     <div class='row h-100'>
         <div class = 'col-3'>
             <div class="card main-cardOne">
-                show list of spending, and a button lead to a page with a full spending list
-                <h2><a href='{% url 'expenditure_list' %}' class="btn btn-warning">View Expenditures</a></h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Title</th>
+                            <th scope="col">Expense</th>
+                            <th scope="col">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <div class="Spending">
+                            {% for spending in spendings %}
+                                <tr>
+                                    <td>{{ spending.title }}</td>
+                                    <td>{{ spending.expense }}</td>
+                                    <td>{{ spending.date_created.month }}.{{ spending.date_created.day }}</td>
+                                </tr>
+                            {% endfor %}
+                        </div>
+                    </tbody>
+                </table>
+                <h2><a href='{% url 'expenditure_list' %}' class="btn btn-primary">View Full Expenditures</a></h2>
             </div>
         </div>
         <div class = 'col-9'>
             <div class = 'row'>
                 <div class="card main-cardTwo">
-                    <p>add spending?</p>
-                    <p>to be implemented</p>
+                    <form method="POST" enctype='multipart/form-data'>
+                        {% csrf_token %}
+                        {% include 'partials/bootstrap_form.html' with form=form %}
+                        <input type="submit" value="+  ADD  A  NEW  SPENDING" class='btn btn-primary'>
+                    </form>
                 </div>
                 <div class="card main-cardThree">
                     <p>target or gamification stuff</p>

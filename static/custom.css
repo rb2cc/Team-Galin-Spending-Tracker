@@ -39,15 +39,28 @@ p.cover-text {
   border-radius: 10px;
 }
 
-.main-cardOne {
-  background-color: rgba(255, 255, 255, 0.9);
-  margin-left: 0;
+.full-card {
+  background-color: rgb(255, 255, 255, 0.9);
+  margin-left: auto;
+  margin-right: auto;
   width: 100%;
-  height: 1200px;
+  height: 100%;
   padding-top: 40px;
   padding-left: 50px;
   padding-right: 50px;
   padding-bottom: 30px;
+  border-radius: 10px;
+}
+
+.main-cardOne {
+  background-color: rgba(255, 255, 255, 0.9);
+  margin-left: 0;
+  width: 100%;
+  height: 1220px;
+  padding-top: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 20px;
   border-radius: 10px;
 }
 
@@ -55,11 +68,11 @@ p.cover-text {
   background-color: rgba(255, 255, 255, 0.9);
   margin-left: 1%;
   width: 48.5%;
-  height: 400px;
-  padding-top: 40px;
-  padding-left: 50px;
-  padding-right: 50px;
-  padding-bottom: 30px;
+  height: 420px;
+  padding-top: 20px;
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-bottom: 20px;
   border-radius: 10px;
 }
 
@@ -67,7 +80,7 @@ p.cover-text {
   background-color: rgba(255, 255, 255, 0.9);
   margin-left: 2%;
   width: 48.5%;
-  height: 400px;
+  height: 420px;
   padding-top: 40px;
   padding-left: 50px;
   padding-right: 50px;
@@ -91,7 +104,7 @@ p.cover-text {
 .btn-primary {
   background: url('images/btn-p.jpg') no-repeat;
   margin-top: 20px;
-  width: 350px;
+  width: 100%;
   border-radius: 50px 50px 50px 50px;
   color:rgb(255, 255, 255);
 }
