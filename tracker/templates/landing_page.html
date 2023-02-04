@@ -1,15 +1,34 @@
 {% extends 'base_content.html' %}
 {% block content %}
-<div class='container'>
-    <div class='row'>
-        <div class='col-8 offset-2'>
-
-            <h1>spending tracker 1000</h1>
-
-            <h1>spending tracker</h1>
-            <h2><a href='{% url 'expenditure_list' %}' class="btn btn-warning">View Expenditures</a></h2>
-
+<div class='container vh-100'>
+    <div class='row h-100'>
+        <div class = 'col-3'>
+            <div class="card main-cardOne">
+                show list of spending, and a button lead to a page with a full spending list
+                <h2><a href='{% url 'expenditure_list' %}' class="btn btn-warning">View Expenditures</a></h2>
+            </div>
+        </div>
+        <div class = 'col-9'>
+            <div class = 'row'>
+                <div class="card main-cardTwo">
+                    <p>add spending?</p>
+                    <p>to be implemented</p>
+                </div>
+                <div class="card main-cardThree">
+                    <p>target or gamification stuff</p>
+                    <p>to be implemented</p>
+                </div>
+            </div>
+            <div class = 'row'>
+                <div class="card main-cardFour">
+                    <p>simple graph</p>
+                    <p>to be implemented</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
 {% endblock %}
+
+
