@@ -1,36 +1,33 @@
 {% extends 'base_content.html' %}
 {% block content %}
-<div class='container vh-100'>
-    <div class='row h-100'>
-            <div class="card full-card">
-                <table class="table">
-                    <thead>
+<div class='row'>
+    <div class="card full-card">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Title</th>
+                    <th scope="col">Expense</th>
+                    <th scope="col">Time</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Image</th>
+                </tr>
+            </thead>
+            <tbody>
+                <div class="Spending">
+                    {% for spending in spendings %}
                         <tr>
-                            <th scope="col">Title</th>
-                            <th scope="col">Expense</th>
-                            <th scope="col">Time</th>
-                            <th scope="col">Description</th>
-                            <th scope="col">Image</th>
+                            <td>{{ spending.title }}</td>
+                            <td>{{ spending.expense }}</td>
+                            <td>{{ spending.date_created }}</td>
+                            <td>{{ spending.description }}</td>
+                            {% if spending.image %}
+                                <td><img src="media/{{ spending.image }} " alt="image"></td>
+                            {% endif %}
                         </tr>
-                    </thead>
-                    <tbody>
-                        <div class="Spending">
-                            {% for spending in spendings %}
-                                <tr>
-                                    <td>{{ spending.title }}</td>
-                                    <td>{{ spending.expense }}</td>
-                                    <td>{{ spending.date_created }}</td>
-                                    <td>{{ spending.description }}</td>
-                                    {% if spending.image %}
-                                        <td><img src="media/{{ spending.image }} " alt="image"></td>
-                                    {% endif %}
-                                </tr>
-                            {% endfor %}
-                        </div>
-                    </tbody>
-                </table>
-            </div>
+                    {% endfor %}
+                </div>
+            </tbody>
+        </table>
     </div>
 </div>
-
 {% endblock %}

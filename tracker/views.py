@@ -65,7 +65,7 @@ def landing_page(request):
             return redirect('landing_page')
     else:
         form = ExpenditureForm()
-    spendingList = Expenditure.objects.filter(user=request.user).order_by('-date_created')[0:25]
+    spendingList = Expenditure.objects.filter(user=request.user).order_by('-date_created')[0:16]
     return render(request, 'landing_page.html', {'form': form, 'spendings':spendingList})
 
 

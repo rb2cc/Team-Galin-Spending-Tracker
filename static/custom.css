@@ -11,11 +11,9 @@
  */
 
 #cover-image {
-  background: url('images/bg-01.jpg') no-repeat center center fixed;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
+  background: url('images/bg-01.jpg') no-repeat center;
   background-size: cover;
-  -o-background-size: cover;
+  overflow : auto
 }
 
 h1.cover-heading {
@@ -41,34 +39,38 @@ p.cover-text {
 
 .full-card {
   background-color: rgb(255, 255, 255, 0.9);
+  margin-top: 10px;
   margin-left: auto;
   margin-right: auto;
-  width: 100%;
-  height: 100%;
+  width: 1300px;
+  height: 850px;
   padding-top: 40px;
   padding-left: 50px;
   padding-right: 50px;
   padding-bottom: 30px;
   border-radius: 10px;
+  overflow-y:auto;
 }
 
 .main-cardOne {
   background-color: rgba(255, 255, 255, 0.9);
-  margin-left: 0;
-  width: 100%;
-  height: 1220px;
+  margin-bottom: 30px;
+  margin-top: 10px;
+  width: 350px;
+  height: 1000px;
   padding-top: 20px;
   padding-left: 20px;
   padding-right: 20px;
-  padding-bottom: 20px;
   border-radius: 10px;
 }
 
 .main-cardTwo {
   background-color: rgba(255, 255, 255, 0.9);
-  margin-left: 1%;
-  width: 48.5%;
-  height: 420px;
+  margin-left: 10px;
+  margin-right: 20px;
+  margin-top: 10px;
+  width: 450px;
+  height: 500px;
   padding-top: 20px;
   padding-left: 30px;
   padding-right: 30px;
@@ -78,9 +80,10 @@ p.cover-text {
 
 .main-cardThree {
   background-color: rgba(255, 255, 255, 0.9);
-  margin-left: 2%;
-  width: 48.5%;
-  height: 420px;
+  margin-left: 10px;
+  margin-top: 10px;
+  width: 450px;
+  height: 500px;
   padding-top: 40px;
   padding-left: 50px;
   padding-right: 50px;
@@ -90,10 +93,10 @@ p.cover-text {
 
 .main-cardFour {
   background-color: rgba(255, 255, 255, 0.9);
-  margin-left: 1%;
-  margin-top: 2%;
-  width: 99%;
-  height: 785px;
+  margin-left: 10px;
+  margin-top: 30px;
+  width: 930px;
+  height: 470px;
   padding-top: 40px;
   padding-left: 50px;
   padding-right: 50px;
@@ -126,4 +129,5 @@ input[type=password] {
 .dropdown-menu {
   background-color: rgb(255, 255, 255, 0.5);
 }
+
 
