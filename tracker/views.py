@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserChangeForm
 from .models import User
 
 from .forms import SignUpForm, LogInForm, ExpenditureForm
-from .models import User, Category
+from .models import User, Category, Expenditure
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -56,8 +56,17 @@ def user_test(user):
 
 @user_passes_test(user_test, login_url='log_out')
 def landing_page(request):
-    return render(request, 'landing_page.html')
-
+    if request.method == 'POST':
+        form=ExpenditureForm(request.POST, request.FILES)
+        if form.is_valid():
+            expenditure = form.save(commit=False)
+            expenditure.user = request.user
+            expenditure.save()
+            return redirect('landing_page')
+    else:
+        form = ExpenditureForm()
+    spendingList = Expenditure.objects.filter(user=request.user).order_by('-date_created')[0:19]
+    return render(request, 'landing_page.html', {'form': form, 'spendings':spendingList})
 
 
 def change_password_success(request):
@@ -81,18 +90,8 @@ class UserEditView(generic.UpdateView):
         return render(request, 'edit_user.html')
 
 def expenditure_list(request):
-    return render(request, 'expenditure_list.html')
+    spendingList = Expenditure.objects.filter(user=request.user).order_by('-date_created')
+    return render(request, 'expenditure_list.html', {'spendings':spendingList})
 
-def create_expenditure(request):
-    if request.method == 'POST':
-        form=ExpenditureForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect('expenditure_list')
-        messages.add_message(request, messages.ERROR, "The inputs provided were invalid")
-
-    else:
-        form = ExpenditureForm()
-    return render(request, 'create_expenditure.html', {'form': form})
     
 

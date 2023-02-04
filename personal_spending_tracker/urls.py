@@ -26,6 +26,8 @@ from django.urls.conf import include
 from django.conf import settings  
 from django.conf.urls.static import static  
 
+from tracker.forms import UserPasswordResetForm
+
 
 
 urlpatterns = [
@@ -41,7 +43,8 @@ urlpatterns = [
     path('change_password_success', views.change_password_success, name='change_password_success'),
 
     path('reset_password/', auth_views.PasswordResetView.as_view(
-        template_name='password_reset_templates/password_reset.html'), name="reset_password"),
+        template_name='password_reset_templates/password_reset.html', 
+        form_class=UserPasswordResetForm), name="reset_password"),
 
     path('reset_password_sent/', auth_views.PasswordResetDoneView.as_view(
         template_name='password_reset_templates/password_reset_sent.html'),
@@ -58,7 +61,6 @@ urlpatterns = [
     path('edit_user/', UserEditView.as_view(), name='edit_user'),
 
     path('expenditure_list', views.expenditure_list, name='expenditure_list'),
-    path('create_expenditure/', views.create_expenditure, name='create_expenditure' )
 
 ]
 

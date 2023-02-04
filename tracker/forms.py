@@ -3,7 +3,7 @@ from django.core.validators import RegexValidator
 from django import forms
 
 from .models import User
-from django.contrib.auth.forms import UserChangeForm, UserCreationForm
+from django.contrib.auth.forms import UserChangeForm, UserCreationForm, PasswordResetForm
 
 
 from .models import User, Expenditure
@@ -11,8 +11,8 @@ from .models import User, Expenditure
 
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""
-    email = forms.CharField(label='Email')
-    password = forms.CharField(label='Password', widget=forms.PasswordInput())
+    email = forms.CharField(label='', widget=forms.TextInput(attrs={'placeholder': 'Email'}))
+    password = forms.CharField(label='', widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
 
 
 class SignUpForm(forms.ModelForm):
@@ -24,17 +24,19 @@ class SignUpForm(forms.ModelForm):
         model = User
         fields = ['first_name', 'last_name']
 
-    email = forms.CharField(label='Email', validators=[validate_email])
+    first_name = forms.CharField(label='', widget=forms.TextInput(attrs={'placeholder': 'First Name'}))
+    last_name = forms.CharField(label='', widget=forms.TextInput(attrs={'placeholder': 'Last Name'}))
+    email = forms.CharField(label='', validators=[validate_email] , widget=forms.TextInput(attrs={'placeholder': 'Email'}))
     new_password = forms.CharField(
-        label='Password',
-        widget=forms.PasswordInput(),
+        label='',
+        widget=forms.PasswordInput(attrs={'placeholder': 'Password'}),
         validators=[RegexValidator(
             regex=r'^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).*$',
             message='Password must contain an uppercase character, a lowercase character, a number.'
         )]
     )
     password_confirmation = forms.CharField(
-        label='Password confirmation', widget=forms.PasswordInput())
+        label='', widget=forms.PasswordInput(attrs={'placeholder': 'Password Comfirmation'}))
 
     def clean(self):
         """Clean the data and generate messages for any errors."""
@@ -83,8 +85,17 @@ class ExpenditureForm(forms.ModelForm):
         """Form options"""
         model = Expenditure
         fields = ['title','expense','description', 'image']
+
+    description = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
+    expense = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
+    title = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
         
     # description = forms.CharField(label="Description", widget=forms.CharField(attrs={'size':100}))
     # field_order=['title', 'description', 'expense']
+
+class UserPasswordResetForm(PasswordResetForm):
+    def __init__(self, *args, **kwargs):
+        super(UserPasswordResetForm, self).__init__(*args, **kwargs)
+    email = forms.EmailField(label='', widget=forms.EmailInput(attrs={'placeholder': 'Email',}))
 
 

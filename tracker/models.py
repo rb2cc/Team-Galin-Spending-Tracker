@@ -84,7 +84,8 @@ class Expenditure(models.Model):
     description = models.TextField(max_length=280, blank=False)
     image = models.ImageField(editable=True, blank=True, upload_to='images')
     expense = models.DecimalField(max_digits=20,decimal_places=2, null=False)
-    date_created = models.DateField(auto_now=True)
+    date_created = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     # category = models.ForeignKey(Category, on_delete=models.CASCADE) #uncomment when category model is implemented
 
 

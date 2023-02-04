@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 {% block body %}
+<div id="cover-image">
+    <div class='container vh-100'>
     {% include 'partials/navbar.html' %}
     {% include 'partials/messages.html' %}
     {% block content %}
     {% endblock %}
+    </div>
+</div>
 {% endblock %}
