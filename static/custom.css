@@ -95,12 +95,24 @@ p.cover-text {
   background-color: rgba(255, 255, 255, 0.9);
   margin-left: 10px;
   margin-top: 30px;
+  margin-bottom: 30px;
   width: 930px;
-  height: 470px;
+  height: 800px;
   padding-top: 40px;
   padding-left: 50px;
   padding-right: 50px;
   padding-bottom: 30px;
+  border-radius: 10px;
+}
+
+.main-cardFive {
+  background-color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 30px;
+  width: 350px;
+  height: 300px;
+  padding-top: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
   border-radius: 10px;
 }
 
