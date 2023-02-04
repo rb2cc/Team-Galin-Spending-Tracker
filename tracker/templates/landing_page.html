@@ -4,6 +4,7 @@
     <div class='row h-100'>
         <div class = 'col-3'>
             <div class="card main-cardOne">
+                <b style="font-size:larger; text-align:center; padding-bottom:10px">Recent Spending</b>
                 <table class="table">
                     <thead>
                         <tr>
@@ -18,7 +19,7 @@
                                 <tr>
                                     <td>{{ spending.title }}</td>
                                     <td>{{ spending.expense }}</td>
-                                    <td>{{ spending.date_created.month }}.{{ spending.date_created.day }}</td>
+                                    <td>{{ spending.date_created|date:"M" }}.{{ spending.date_created.day }}</td>
                                 </tr>
                             {% endfor %}
                         </div>

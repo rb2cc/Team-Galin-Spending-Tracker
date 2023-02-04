@@ -59,11 +59,13 @@ def landing_page(request):
     if request.method == 'POST':
         form=ExpenditureForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            expenditure = form.save(commit=False)
+            expenditure.user = request.user
+            expenditure.save()
             return redirect('landing_page')
     else:
         form = ExpenditureForm()
-    spendingList = Expenditure.objects.all().order_by('-date_created')
+    spendingList = Expenditure.objects.filter(user=request.user).order_by('-date_created')[0:25]
     return render(request, 'landing_page.html', {'form': form, 'spendings':spendingList})
 
 
@@ -88,19 +90,8 @@ class UserEditView(generic.UpdateView):
         return render(request, 'edit_user.html')
 
 def expenditure_list(request):
-    spendingList = Expenditure.objects.all().order_by('-date_created')
+    spendingList = Expenditure.objects.filter(user=request.user).order_by('-date_created')
     return render(request, 'expenditure_list.html', {'spendings':spendingList})
 
-def create_expenditure(request):
-    if request.method == 'POST':
-        form=ExpenditureForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect('landing_page')
-        messages.add_message(request, messages.ERROR, "The inputs provided were invalid")
-
-    else:
-        form = ExpenditureForm()
-    return render(request, 'landing_page.html', {'form': form})
     
 
