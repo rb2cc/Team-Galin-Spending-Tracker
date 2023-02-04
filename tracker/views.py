@@ -91,7 +91,7 @@ def expenditure_list(request):
     return render(request, 'expenditure_list.html', {'spendings':spendingList})
 
     
-def display_expenditures(request):
-    expenditures = Expenditure.objects.all()
-    return render(request, 'expenditure_list.html', {'expenditures':expenditures})
+# def display_expenditures(request):
+#     expenditures = Expenditure.objects.all()
+#     return render(request, 'expenditure_list.html', {'expenditures':expenditures})
 
