@@ -1,22 +1,17 @@
-
-
 {% extends 'base_content.html' %}
 {% block content %}
-
-
-<div class='container'>
-    <div class='row'>
-        <div class='col-6 offset-3'>
-            <h1> Edit User </h1>
-<div class="form-group">
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p}}
-        <button class="btn btn-secondary"> Update
-        </button>
+<div class="row">
+    <div class="my-auto">
+        <div class="card cover-card">
+            <p></p><p></p>
+            <p class="cover-text" style="font-weight:bold; text-align:center">Edit Profile</p>
+            <form method="post">
+                {% csrf_token %}
+                {% include 'partials/bootstrap_form.html' with form=form %}
+                {% include 'partials/messages.html' %}
+                <input type="submit" value="Update" class='btn btn-primary'>
+            </form>
+        </div>
     </div>
 </div>
-</div>
-</div>
-
 {% endblock %}

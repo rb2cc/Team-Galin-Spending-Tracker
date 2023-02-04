@@ -1,15 +1,58 @@
 {% extends 'base_content.html' %}
 {% block content %}
-<div class='container'>
-    <div class='row'>
-        <div class='col-8 offset-2'>
-
-            <h1>spending tracker 1000</h1>
-
-            <h1>spending tracker</h1>
-            <h2><a href='{% url 'expenditure_list' %}' class="btn btn-warning">View Expenditures</a></h2>
-
+<div class='row'>
+    <div class = 'col'>
+        <div class="card main-cardOne">
+            <b style="font-size:larger; text-align:center; padding-bottom:10px">Recent Spending</b>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Title</th>
+                        <th scope="col">Expense</th>
+                        <th scope="col">Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <div class="Spending">
+                        {% for spending in spendings %}
+                            <tr>
+                                <td>{{ spending.title }}</td>
+                                <td>{{ spending.expense }}</td>
+                                <td>{{ spending.date_created|date:"M" }}.{{ spending.date_created.day }}</td>
+                            </tr>
+                        {% endfor %}
+                    </div>
+                </tbody>
+            </table>
+            <h2><a href='{% url 'expenditure_list' %}' class="btn btn-primary">View Full Expenditures</a></h2>
+        </div>
+        <div class="card main-cardFive">
+            <p>More functions</p>
+            <p>to be implemented</p>
+        </div>
+    </div>
+    <div class = 'col'>
+        <div class = 'row'>
+            <div class="card main-cardTwo">
+                <form method="POST" enctype='multipart/form-data'>
+                    {% csrf_token %}
+                    {% include 'partials/bootstrap_form.html' with form=form %}
+                    <input type="submit" value="+  ADD  A  NEW  SPENDING" class='btn btn-primary'>
+                </form>
+            </div>
+            <div class="card main-cardThree">
+                <p>target or gamification stuff</p>
+                <p>to be implemented</p>
+            </div>
+        </div>
+        <div class = 'row'>
+            <div class="card main-cardFour">
+                <p>simple graph</p>
+                <p>to be implemented</p>
+            </div>
         </div>
     </div>
 </div>
 {% endblock %}
+
+
