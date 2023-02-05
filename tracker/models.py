@@ -83,10 +83,10 @@ class Category(models.Model):
 class Expenditure(models.Model):
     """Expenditure model for user spending"""
 
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True) #uncomment when category model is implemented
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, default=1) #uncomment when category model is implemented
     title = models.CharField(max_length=25, blank=False)
     description = models.TextField(max_length=280, blank=False)
-    image = models.ImageField(editable=True, upload_to='images')
+    image = models.ImageField(editable=True, upload_to='images', blank=True)
     expense = models.DecimalField(max_digits=20,decimal_places=2, null=False)
     date_created = models.DateField(auto_now=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)

@@ -18,5 +18,5 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(Expenditure)
 class UserAdmin(admin.ModelAdmin):
     """Configuration of the admin interface for expenditures"""
-    list_display = ['id','title', 'expense','description', 'category','image','date_created']
+    list_display = ['id','user','title', 'expense','description', 'category','image','date_created']
 
