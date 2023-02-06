@@ -66,8 +66,16 @@ class ExpenditureModelTestCase(TestCase):
         self.expenditure.title=""
         self._assert_expenditure_is_invalid
 
+    def test_title_cannot_be_more_than_25_characters(self):
+        self.expenditure.title = "x"*26
+        self._assert_expenditure_is_invalid
+
     def test_description_cannot_be_blank(self):
         self.expenditure.description=""
+        self._assert_expenditure_is_invalid
+
+    def test_description_cannot_be_more_than_280_characters(self):
+        self.expenditure.description="x"*281
         self._assert_expenditure_is_invalid
 
     def _assert_expenditure_is_valid(self):
