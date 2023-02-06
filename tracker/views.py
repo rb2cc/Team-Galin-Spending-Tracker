@@ -90,6 +90,11 @@ def expenditure_list(request):
     spendingList = Expenditure.objects.filter(user=request.user).order_by('-date_created')
     return render(request, 'expenditure_list.html', {'spendings':spendingList})
 
+def category_list(request):
+    user_id = request.user.id
+    categoryList = Category.objects.filter(users__id=user_id).order_by('is_global')
+    return render(request, 'category_list.html', {'categories':categoryList})
+
     
 # def display_expenditures(request):
 #     expenditures = Expenditure.objects.all()

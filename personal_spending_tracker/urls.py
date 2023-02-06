@@ -55,7 +55,8 @@ urlpatterns = [
         name="password_reset_complete"),
 
     path('edit_user/', UserEditView.as_view(), name='edit_user'),
-    path('expenditure_list', views.expenditure_list, name='expenditure_list')
+    path('expenditure_list', views.expenditure_list, name='expenditure_list'),
+    path('category_list', views.category_list, name='category_list')
 
 
 ]
