@@ -10,6 +10,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse_lazy
 from django.views import generic
+from django.db.models import Sum
 
 # Create your views here.
 
@@ -63,7 +64,25 @@ def landing_page(request):
     else:
         form = ExpenditureForm()
     spendingList = Expenditure.objects.filter(user=request.user).order_by('-date_created')[0:19]
-    return render(request, 'landing_page.html', {'form': form, 'spendings':spendingList})
+
+    '''Get data for chart in landing page'''
+    categoryList = []
+    expenseList = []
+    for x in Category.objects.all():
+        tempList = Expenditure.objects.filter(user=request.user).filter(category=x)
+        if tempList.exists():
+            categoryList.append(x)
+        tempInt = 0
+        for y in tempList:
+            tempInt += y.expense
+        expenseList.append(tempInt)
+
+    return render(request, 'landing_page.html', {
+        'form': form, 
+        'spendings':spendingList,
+        'categoryList':categoryList,
+        'expenseList':expenseList,
+    })
 
 
 def change_password_success(request):
