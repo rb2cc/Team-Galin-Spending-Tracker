@@ -47,8 +47,25 @@
         </div>
         <div class = 'row'>
             <div class="card main-cardFour">
-                <p>simple graph</p>
-                <p>to be implemented</p>
+                <!-- JavaScript to print the chart -->
+                <div style="width:300px; height:300px;">
+                    <canvas id="expenseChart"></canvas>
+                </div>         
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>       
+                <script>
+                    const ctx = document.getElementById('expenseChart');
+                    new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: [{%for data in categoryList%}'{{data}}',{%endfor%}],
+                            datasets: [{
+                                label: '# of Votes',
+                                data: [{%for data in expenseList%}'{{data}}',{%endfor%}],
+                                borderWidth: 1
+                            }]
+                        },
+                    });
+                </script>
             </div>
         </div>
     </div>
