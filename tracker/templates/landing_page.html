@@ -59,7 +59,6 @@
                         data: {
                             labels: [{%for data in categoryList%}'{{data}}',{%endfor%}],
                             datasets: [{
-                                label: '# of Votes',
                                 data: [{%for data in expenseList%}'{{data}}',{%endfor%}],
                                 borderWidth: 1
                             }]
