@@ -2,7 +2,7 @@
 from .forms import SignUpForm, LogInForm, EditUserForm
 from django.contrib.auth.forms import UserChangeForm
 from .models import User
-from .forms import SignUpForm, LogInForm, ExpenditureForm
+from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm
 from .models import User, Category, Expenditure
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -92,8 +92,17 @@ def expenditure_list(request):
 
 def category_list(request):
     user_id = request.user.id
+    if request.method == 'POST':
+        form=AddCategoryForm(request.POST, request.FILES)
+        if form.is_valid():
+            category = form.save(commit=False)
+            category.save()
+            request.user.available_categories.add(category)
+            return redirect('category_list')
+    else:
+        form = AddCategoryForm()
     categoryList = Category.objects.filter(users__id=user_id).order_by('is_global')
-    return render(request, 'category_list.html', {'categories':categoryList})
+    return render(request, 'category_list.html', {'categories':categoryList, 'form':form})
 
     
 # def display_expenditures(request):

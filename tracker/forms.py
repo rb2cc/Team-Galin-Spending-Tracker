@@ -6,7 +6,7 @@ from .models import User
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm, PasswordResetForm
 
 
-from .models import User, Expenditure
+from .models import User, Expenditure, Category
 
 
 class LogInForm(forms.Form):
@@ -97,5 +97,15 @@ class UserPasswordResetForm(PasswordResetForm):
     def __init__(self, *args, **kwargs):
         super(UserPasswordResetForm, self).__init__(*args, **kwargs)
     email = forms.EmailField(label='', widget=forms.EmailInput(attrs={'placeholder': 'Email',}))
+
+class AddCategoryForm(forms.ModelForm):
+    """Form enabling users to create custom categories"""
+    class Meta:
+        """Form options."""
+        model = Category
+        fields = ['name', 'week_limit']
+
+    name = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
+    week_limit = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
 
 
