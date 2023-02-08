@@ -68,6 +68,11 @@ def landing_page(request):
     '''Get data for chart in landing page'''
     categoryList = []
     expenseList = []
+    dateList = []
+    dailyExpenseList = []
+    cumulativeExpenseList = []
+
+    '''Data for pie chart'''
     for x in Category.objects.all():
         tempList = Expenditure.objects.filter(user=request.user).filter(category=x)
         if tempList.exists():
@@ -75,13 +80,34 @@ def landing_page(request):
         tempInt = 0
         for y in tempList:
             tempInt += y.expense
-        expenseList.append(tempInt)
+        expenseList.append(tempInt)   
+
+    '''Data for bar chart'''
+    for x in Expenditure.objects.filter(user=request.user).order_by('date_created'): 
+        dateList.append(x.date_created.date())
+        dailyExpenseList.append(x.expense)
+    for x in range(0, len(dateList)):
+        try:
+            while dateList[x]==dateList[x+1]:
+                dailyExpenseList[x]+=dailyExpenseList[x+1]
+                dailyExpenseList.pop(x+1)
+                dateList.pop(x+1)
+        except IndexError: break
+
+    '''Data for line chart'''
+    cumulativeExpense = 0
+    for x in dailyExpenseList:
+        cumulativeExpense+=x
+        cumulativeExpenseList.append(cumulativeExpense)
 
     return render(request, 'landing_page.html', {
         'form': form, 
         'spendings':spendingList,
         'categoryList':categoryList,
         'expenseList':expenseList,
+        'dateList':dateList,
+        'dailyExpenseList':dailyExpenseList,
+        'cumulativeExpenseList':cumulativeExpenseList,
     })
 
 
