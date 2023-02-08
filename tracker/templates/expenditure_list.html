@@ -6,6 +6,7 @@
         <table class="table">
             <thead>
                 <tr>
+                    <th scope="col">Category</th>
                     <th scope="col">Title</th>
                     <th scope="col">Expense</th>
                     <th scope="col">Time</th>
@@ -17,6 +18,7 @@
                 <div class="Spending">
                     {% for spending in spendings %}
                         <tr>
+                            <td>{{ spending.category }}</td>
                             <td>{{ spending.title }}</td>
                             <td>{{ spending.expense }}</td>
                             <td>{{ spending.date_created }}</td>
