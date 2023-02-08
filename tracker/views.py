@@ -54,14 +54,14 @@ def user_test(user):
 @user_passes_test(user_test, login_url='log_out')
 def landing_page(request):
     if request.method == 'POST':
-        form=ExpenditureForm(request.POST, request.FILES)
+        form=ExpenditureForm(request.POST, request.FILES, r=request)
         if form.is_valid():
             expenditure = form.save(commit=False)
             expenditure.user = request.user
             expenditure.save()
             return redirect('landing_page')
     else:
-        form = ExpenditureForm()
+        form = ExpenditureForm(r=request)
     spendingList = Expenditure.objects.filter(user=request.user).order_by('-date_created')[0:19]
     return render(request, 'landing_page.html', {'form': form, 'spendings':spendingList})
 

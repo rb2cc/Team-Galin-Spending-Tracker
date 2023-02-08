@@ -90,6 +90,12 @@ class ExpenditureForm(forms.ModelForm):
     expense = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
     title = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
         
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("r")
+        super(ExpenditureForm, self).__init__(*args, **kwargs)
+
+        #initialises the category queryset so it only shows categories the user is subscribed to (fixes glitch)
+        self.fields['category'].queryset = Category.objects.filter(users__id=self.request.user.id)
     # description = forms.CharField(label="Description", widget=forms.CharField(attrs={'size':100}))
     # field_order=['title', 'description', 'expense']
 
