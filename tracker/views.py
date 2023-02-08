@@ -10,6 +10,8 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse_lazy
 from django.views import generic
+from django.core.paginator import Paginator
+from django.http import HttpResponseRedirect
 
 # Create your views here.
 
@@ -22,7 +24,10 @@ def home(request):
             user = authenticate(email=email, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('landing_page')
+                if user.is_superuser == True:
+                    return redirect('superuser_dashboard')
+                else:
+                    return redirect('landing_page')
         messages.add_message(request, messages.ERROR, "The credentials provided were invalid")
     form = LogInForm()
     return render(request, 'home.html', {'form': form})
@@ -63,7 +68,7 @@ def landing_page(request):
     else:
         form = ExpenditureForm()
     spendingList = Expenditure.objects.filter(user=request.user).order_by('-date_created')[0:19]
-    return render(request, 'landing_page.html', {'form': form, 'spendings':spendingList})
+    return render(request, 'landing_page.html', {'form': form, 'spendings':spendingList, 'is_superuser': request.user.is_superuser})
 
 
 def change_password_success(request):
@@ -90,8 +95,41 @@ def expenditure_list(request):
     spendingList = Expenditure.objects.filter(user=request.user).order_by('-date_created')
     return render(request, 'expenditure_list.html', {'spendings':spendingList})
 
-    
+def superuser_dashboard(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # change to admin if checked
+            return redirect('superuser_dashboard')
+    else:
+        form = SignUpForm()
+
+    user_list = User.objects.all()
+    paginator = Paginator(user_list, 20)
+    page_number = request.GET.get('page')
+    page = paginator.get_page(page_number)
+
+    return render(request, 'superuser_dashboard.html', {'form': form, 'page': page})
+
+def user_delete(request):
+    if request.method == "POST":
+        try:
+            user_pk = request.POST['user_pk']
+            u = User.objects.get(pk = user_pk)
+            u.delete()
+            return redirect('superuser_dashboard')
+
+        except User.DoesNotExist:
+            return redirect('superuser_dashboard')
+
+        # except Exception as e:
+        #     return render(request, 'front.html',{'err':e.message})
+
+
+        # except Exception as e:
+        #     return render(request, 'front.html',{'err':e.message})
+
 # def display_expenditures(request):
 #     expenditures = Expenditure.objects.all()
 #     return render(request, 'expenditure_list.html', {'expenditures':expenditures})
-
