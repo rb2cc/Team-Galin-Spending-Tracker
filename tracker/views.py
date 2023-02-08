@@ -104,6 +104,14 @@ def category_list(request):
     categoryList = Category.objects.filter(users__id=user_id).order_by('is_global')
     return render(request, 'category_list.html', {'categories':categoryList, 'form':form})
 
+def remove_category(request, id):
+    category = Category.objects.get(id = id)
+    if category.is_global:
+        request.user.available_categories.remove(category)
+    else:
+        category.delete()
+    return redirect('category_list')
+
     
 # def display_expenditures(request):
 #     expenditures = Expenditure.objects.all()
