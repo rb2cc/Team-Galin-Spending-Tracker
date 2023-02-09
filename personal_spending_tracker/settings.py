@@ -123,6 +123,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
+
 ]
 
 # Default primary key field type
@@ -140,7 +141,6 @@ MESSAGE_TAGS = {
 }
 
 
-
 # SMTP Configuration
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -150,9 +150,8 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "	teamgalin.moneysaver@gmail.com"
 EMAIL_HOST_PASSWORD = "boqk cfkx yybp uhxt"
 
-# Base url to serve media files  
-MEDIA_URL = '/media/'  
-  
-# Path where media is stored  
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')  
+# Base url to serve media files
+MEDIA_URL = '/media/'
 
+# Path where media is stored
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')

@@ -20,11 +20,18 @@ from django.contrib import admin
 from django.urls import path
 from tracker import views
 from tracker.views import UserEditView
+
+
+
 from django.urls.conf import include  
 from django.conf import settings  
 from django.conf.urls.static import static  
 from tracker.forms import UserPasswordResetForm
 
+
+from django.urls.conf import include
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 urlpatterns = [
@@ -55,6 +62,24 @@ urlpatterns = [
         name="password_reset_complete"),
 
     path('edit_user/', UserEditView.as_view(), name='edit_user'),
+
+
+    path('expenditure_list', views.expenditure_list, name='expenditure_list'),
+    path('create_expenditure/', views.create_expenditure, name='create_expenditure'),
+
+    path('forum_home/', views.forum_home, name='forum_home'),
+    path('posts/', views.posts, name='posts'),
+    path('detail/', views.detail, name='detail'),
+
+
+
+
+]
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
     path('expenditure_list', views.expenditure_list, name='expenditure_list')
 
 
@@ -62,3 +87,4 @@ urlpatterns = [
 
 if settings.DEBUG:  
         urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)  
+

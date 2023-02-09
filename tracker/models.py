@@ -14,7 +14,6 @@ class UserManager(BaseUserManager):
 
     use_in_migrations = True
 
-
     def _create_user(self, email, password, **extra_fields):
         if not email:
             raise ValueError('The given email must be set')
@@ -48,11 +47,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    available_categories = models.ManyToManyField('Category', symmetrical = False, related_name = 'users')
+    available_categories = models.ManyToManyField(
+        'Category', symmetrical=False, related_name='users')
 
     objects = UserManager()
     USERNAME_FIELD = 'email'
-
 
 
 class Profile(models.Model):
@@ -69,6 +68,7 @@ class Profile(models.Model):
     def _remove_category(self, category):
         self.available_categories.remove(category)
 
+
 class Category(models.Model):
     """Categories used for classifying expenditure"""
 
@@ -80,8 +80,11 @@ class Category(models.Model):
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
 
+
+
     def __str__(self):
         return self.name
+
 
 class Expenditure(models.Model):
     """Expenditure model for user spending"""
@@ -89,10 +92,17 @@ class Expenditure(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, default=1) #uncomment when category model is implemented
     title = models.CharField(max_length=20, blank=False)
     description = models.TextField(max_length=280, blank=False)
+
+    image = models.ImageField(editable=True, blank=True, upload_to='images')
+    expense = models.DecimalField(max_digits=20, decimal_places=2, null=False)
+    date_created = models.DateField(auto_now=True)
+    # category = models.ForeignKey(Category, on_delete=models.CASCADE) #uncomment when category model is implemented
+
     image = models.ImageField(editable=True, upload_to='images', blank=True)
     expense = models.DecimalField(max_digits=20, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))], null=False)
     date_created = models.DateTimeField(default=timezone.now)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+
 
 
 

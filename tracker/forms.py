@@ -60,7 +60,6 @@ class SignUpForm(forms.ModelForm):
         return user
 
 
-
 class EditUserForm(UserChangeForm):
 
     email = forms.CharField(
@@ -79,11 +78,18 @@ class EditUserForm(UserChangeForm):
         model = User
         fields = ['email', 'first_name', 'last_name']
 
+
 class ExpenditureForm(forms.ModelForm):
     """Form enabling users to create expenditures"""
     class Meta:
         """Form options"""
         model = Expenditure
+
+        fields = ['title', 'expense', 'description', 'image']
+
+    # description = forms.CharField(label="Description", widget=forms.CharField(attrs={'size':100}))
+    # field_order=['title', 'description', 'expense']
+
         fields = ['title','expense','description', 'category', 'image']
 
     description = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
@@ -97,5 +103,6 @@ class UserPasswordResetForm(PasswordResetForm):
     def __init__(self, *args, **kwargs):
         super(UserPasswordResetForm, self).__init__(*args, **kwargs)
     email = forms.EmailField(label='', widget=forms.EmailInput(attrs={'placeholder': 'Email',}))
+
 
 
