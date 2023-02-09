@@ -64,24 +64,24 @@ def landing_page(request):
             return redirect('landing_page')
     else:
         form = ExpenditureForm()
-
-    current_date = date.today()
     objectList = Expenditure.objects.filter(user=request.user)
+
+    '''Data for list display'''
+    spendingList = objectList.order_by('-date_created')[0:19]
+
+    '''Data for chart display'''
+    current_date = date.today()
     objectList7 = objectList.filter(date_created__range=(current_date-timezone.timedelta(days=6),current_date+timezone.timedelta(days=1)))
     objectList30 = objectList.filter(date_created__range=(current_date-timezone.timedelta(days=29),current_date+timezone.timedelta(days=1)))
     objectList90 = objectList.filter(date_created__range=(current_date-timezone.timedelta(days=89),current_date+timezone.timedelta(days=1)))
-    
     dataTuple7 = getAllList(objectList7)
     dataTuple30 = getAllList(objectList30)
     dataTuple90 = getAllList(objectList90)
-
     categoryList = {7:dataTuple7[0], 30:dataTuple30[0], 90:dataTuple90[0]}
     expenseList = {7:dataTuple7[1], 30:dataTuple30[1], 90:dataTuple90[1]}
     dateList = {7:dataTuple7[2], 30:dataTuple30[2], 90:dataTuple90[2]}
     dailyExpenseList = {7:dataTuple7[3], 30:dataTuple30[3], 90:dataTuple90[3]}
     cumulativeExpenseList = {7:dataTuple7[4], 30:dataTuple30[4], 90:dataTuple90[4]}
-
-    spendingList = objectList.order_by('-date_created')[0:19]
 
     return render(request, 'landing_page.html', {
         'form': form, 
