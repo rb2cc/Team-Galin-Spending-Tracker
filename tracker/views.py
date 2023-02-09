@@ -10,7 +10,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse_lazy
 from django.views import generic
-from datetime import date, timedelta
+from datetime import date, timedelta,datetime
 from django.utils import timezone
 
 # Create your views here.
@@ -74,9 +74,9 @@ def landing_page(request):
     objectList7 = objectList.filter(date_created__range=(current_date-timezone.timedelta(days=6),current_date+timezone.timedelta(days=1)))
     objectList30 = objectList.filter(date_created__range=(current_date-timezone.timedelta(days=29),current_date+timezone.timedelta(days=1)))
     objectList90 = objectList.filter(date_created__range=(current_date-timezone.timedelta(days=89),current_date+timezone.timedelta(days=1)))
-    dataTuple7 = getAllList(objectList7)
-    dataTuple30 = getAllList(objectList30)
-    dataTuple90 = getAllList(objectList90)
+    dataTuple7 = getAllList(objectList7,7)
+    dataTuple30 = getAllList(objectList30,30)
+    dataTuple90 = getAllList(objectList90,90)
     categoryList = {7:dataTuple7[0], 30:dataTuple30[0], 90:dataTuple90[0]}
     expenseList = {7:dataTuple7[1], 30:dataTuple30[1], 90:dataTuple90[1]}
     dateList = {7:dataTuple7[2], 30:dataTuple30[2], 90:dataTuple90[2]}
@@ -106,7 +106,7 @@ def getCategoryAndExpenseList(objectList):
         expenseList.append(tempInt)   
     return categoryList, expenseList
 
-def getDateListAndDailyExpenseList(objectList):
+def getDateListAndDailyExpenseList(objectList,num):
     dateList = []
     dailyExpenseList = []
     for x in objectList.order_by('date_created'): 
@@ -119,8 +119,9 @@ def getDateListAndDailyExpenseList(objectList):
                 dailyExpenseList.pop(x+1)
                 dateList.pop(x+1)
         except IndexError: break
-    start_date = dateList[0]
-    end_date = dateList[-1]
+
+    start_date = date.today()-timezone.timedelta(days=num-1)
+    end_date = date.today()
     current_date = start_date
     while current_date <= end_date:
         if current_date not in dateList:
@@ -128,6 +129,7 @@ def getDateListAndDailyExpenseList(objectList):
             dateList.sort()
             dailyExpenseList.insert(dateList.index(current_date),0)
         current_date += timezone.timedelta(days=1)
+
     return dateList, dailyExpenseList
 
 def getCumulativeExpenseList(objectList,dailyExpenseList):
@@ -138,10 +140,10 @@ def getCumulativeExpenseList(objectList,dailyExpenseList):
         cumulativeExpenseList.append(cumulativeExpense)
     return cumulativeExpenseList
 
-def getAllList(objectList):
+def getAllList(objectList,num):
     first = getCategoryAndExpenseList(objectList)
     cat = first[0]; exp = first[1]
-    second = getDateListAndDailyExpenseList(objectList)
+    second = getDateListAndDailyExpenseList(objectList,num)
     dat = second[0]; dai = second[1]
     cum = getCumulativeExpenseList(objectList,dai)
     return cat, exp, dat, dai, cum

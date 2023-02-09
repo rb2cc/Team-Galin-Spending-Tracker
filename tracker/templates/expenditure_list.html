@@ -3,26 +3,26 @@
 
 <div class='row'>
     <div class="card full-card">
-        <table class="table">
-            <thead>
+        <table class="table mainTable">
+            <thead class="mainThead">
                 <tr>
-                    <th scope="col">Category</th>
-                    <th scope="col">Title</th>
-                    <th scope="col">Expense</th>
-                    <th scope="col">Time</th>
-                    <th scope="col">Description</th>
+                    <th scope="col" width="100px">Category</th>
+                    <th scope="col" width="170px">Title</th>
+                    <th scope="col" width="150px">Expense</th>
+                    <th scope="col" width="200px">Time</th>
+                    <th scope="col" width="300px">Description</th>
                     <th scope="col">Image</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="mainTbody">
                 <div class="Spending">
                     {% for spending in spendings %}
                         <tr>
-                            <td>{{ spending.category }}</td>
-                            <td>{{ spending.title }}</td>
-                            <td>{{ spending.expense }}</td>
-                            <td>{{ spending.date_created }}</td>
-                            <td>{{ spending.description }}</td>
+                            <td width="75px">{{ spending.category }}</td>
+                            <td width="200px">{{ spending.title }}</td>
+                            <td width="100px">{{ spending.expense }}</td>
+                            <td width="200px">{{ spending.date_created }}</td>
+                            <td width="300px">{{ spending.description }}</td>
                             {% if spending.image %}
                                 <td><img src="media/{{ spending.image }} " alt="image"></td>
                             {% endif %}
