@@ -36,22 +36,22 @@ class Command(BaseCommand):
         )
         james.available_categories.add(foodCategory,travelCategory)
 
-        for _ in range(0,25):
+        for _ in range(0,100):
             Expenditure.objects.create(
                 category = foodCategory,
                 title = self.faker.text(max_nb_chars=20),
                 description = self.faker.text(max_nb_chars=200),
                 expense = random.randint(0,10000)/100,
-                date_created = make_aware(self.faker.date_time_this_year()),
+                date_created = make_aware(self.faker.date_time_between(start_date = "-1y", end_date = "now")),
                 user = james,
             )
 
-        for _ in range(0,25):
+        for _ in range(0,100):
             Expenditure.objects.create(
                 category = travelCategory,
                 title = self.faker.text(max_nb_chars=20),
                 description = self.faker.text(max_nb_chars=200),
                 expense = random.randint(0,10000)/100,
-                date_created = make_aware(self.faker.date_time_this_year()),
+                date_created = make_aware(self.faker.date_time_between(start_date = "-1y", end_date = "now")),
                 user = james,
             )

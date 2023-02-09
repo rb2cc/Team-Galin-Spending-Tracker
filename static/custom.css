@@ -44,12 +44,12 @@ p.cover-text {
   margin-right: auto;
   width: 1300px;
   height: 850px;
-  padding-top: 40px;
+  padding-top: 30px;
   padding-left: 50px;
   padding-right: 50px;
   padding-bottom: 30px;
   border-radius: 10px;
-  overflow-y:auto;
+
 }
 
 .main-cardOne {
@@ -62,6 +62,7 @@ p.cover-text {
   padding-left: 20px;
   padding-right: 20px;
   border-radius: 10px;
+  overflow:hidden;
 }
 
 .main-cardTwo {
@@ -98,8 +99,8 @@ p.cover-text {
   margin-bottom: 30px;
   width: 930px;
   height: 800px;
-  padding-top: 40px;
-  padding-left: 50px;
+  padding-top: 10px;
+  padding-left: 10px;
   padding-right: 50px;
   padding-bottom: 30px;
   border-radius: 10px;
@@ -136,6 +137,21 @@ input[type=password] {
   border: none;
   border-bottom: 1px solid #000000;
   border-radius: 0%;
+}
+
+.mainTable {
+  display:block;
+  table-layout:fixed
+}
+
+.mainThead {
+  display:block;
+}
+
+.mainTbody{
+  display:block;
+  height: 700px;
+  overflow-y:auto;
 }
 
 .dropdown-menu {
