@@ -1,7 +1,7 @@
 
 from .forms import SignUpForm, LogInForm, EditUserForm
-from django.contrib.auth.forms import UserChangeForm
-from .models import User
+
+from .models import User, Profile
 
 from .forms import SignUpForm, LogInForm, ExpenditureForm
 from .models import User, Category
@@ -36,7 +36,7 @@ def sign_up(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             user = form.save()
-            global_categories = Category.objects.filter(is_global = True)
+            global_categories = Category.objects.filter(is_global=True)
             user.available_categories.add(*global_categories)
             login(request, user)
             return redirect('landing_page')
@@ -59,7 +59,6 @@ def landing_page(request):
     return render(request, 'landing_page.html')
 
 
-
 def change_password_success(request):
     return render(request, 'change_password_success.html')
 
@@ -80,12 +79,14 @@ class UserEditView(generic.UpdateView):
             return render(request, 'edit_user.html')
         return render(request, 'edit_user.html')
 
+
 def expenditure_list(request):
     return render(request, 'expenditure_list.html')
 
+
 def create_expenditure(request):
     if request.method == 'POST':
-        form=ExpenditureForm(request.POST, request.FILES)
+        form = ExpenditureForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return redirect('expenditure_list')
@@ -94,5 +95,15 @@ def create_expenditure(request):
     else:
         form = ExpenditureForm()
     return render(request, 'create_expenditure.html', {'form': form})
-    
 
+
+def forum_home(request):
+    return render(request, 'forum/forum_home.html')
+
+
+def posts(request):
+    return render(request, 'forum/posts.html')
+
+
+def detail(request):
+    return render(request, 'forum/detail.html')

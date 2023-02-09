@@ -15,7 +15,7 @@ class LogInForm(forms.Form):
     password = forms.CharField(label='Password', widget=forms.PasswordInput())
 
 
-class SignUpForm(UserCreationForm):
+class SignUpForm(forms.ModelForm):
     """Form enabling unregistered users to sign up."""
 
     class Meta:
@@ -58,7 +58,6 @@ class SignUpForm(UserCreationForm):
         return user
 
 
-
 class EditUserForm(UserChangeForm):
 
     email = forms.CharField(
@@ -77,14 +76,13 @@ class EditUserForm(UserChangeForm):
         model = User
         fields = ['email', 'first_name', 'last_name']
 
+
 class ExpenditureForm(forms.ModelForm):
     """Form enabling users to create expenditures"""
     class Meta:
         """Form options"""
         model = Expenditure
-        fields = ['title','expense','description', 'image']
-        
+        fields = ['title', 'expense', 'description', 'image']
+
     # description = forms.CharField(label="Description", widget=forms.CharField(attrs={'size':100}))
     # field_order=['title', 'description', 'expense']
-
-
