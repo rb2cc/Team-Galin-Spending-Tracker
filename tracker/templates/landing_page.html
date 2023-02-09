@@ -4,20 +4,20 @@
     <div class = 'col'>
         <div class="card main-cardOne">
             <b style="font-size:larger; text-align:center; padding-bottom:10px">Recent Spending</b>
-            <table class="table">
-                <thead>
+            <table class="table simpleTable">
+                <thead class="simpleThead">
                     <tr>
-                        <th scope="col">Title</th>
-                        <th scope="col">Expense</th>
+                        <th scope="col" width="120px">Title</th>
+                        <th scope="col" width="120px">Expense</th>
                         <th scope="col">Time</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="simpleTbody">
                     <div class="Spending">
                         {% for spending in spendings %}
                             <tr>
-                                <td>{{ spending.title }}</td>
-                                <td>{{ spending.expense }}</td>
+                                <td style="max-width:120px; min-width:120px">{{ spending.title }}</td>
+                                <td style="max-width:120px; min-width:120px">{{ spending.expense }}</td>
                                 <td>{{ spending.date_created|date:"M" }}.{{ spending.date_created.day }}</td>
                             </tr>
                         {% endfor %}

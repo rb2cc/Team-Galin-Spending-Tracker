@@ -141,7 +141,8 @@ input[type=password] {
 
 .mainTable {
   display:block;
-  table-layout:fixed
+  table-layout:fixed;
+  width:100%;
 }
 
 .mainThead {
@@ -152,6 +153,21 @@ input[type=password] {
   display:block;
   height: 700px;
   overflow-y:auto;
+}
+
+.simpleTable {
+  display:block;
+  table-layout:fixed;
+}
+
+.simpleThead {
+  display:block;
+}
+
+.simpleTbody{
+  display:block;
+  height: 800px;
+  overflow-y:hidden;
 }
 
 .dropdown-menu {

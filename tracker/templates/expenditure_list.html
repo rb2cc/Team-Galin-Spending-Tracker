@@ -6,11 +6,11 @@
         <table class="table mainTable">
             <thead class="mainThead">
                 <tr>
-                    <th scope="col" width="100px">Category</th>
+                    <th scope="col" width="150px">Category</th>
                     <th scope="col" width="170px">Title</th>
-                    <th scope="col" width="150px">Expense</th>
+                    <th scope="col" width="170px">Expense</th>
                     <th scope="col" width="200px">Time</th>
-                    <th scope="col" width="300px">Description</th>
+                    <th scope="col" width="330px">Description</th>
                     <th scope="col">Image</th>
                 </tr>
             </thead>
@@ -19,12 +19,15 @@
                     {% for spending in spendings %}
                         <tr>
                             <td width="75px">{{ spending.category }}</td>
-                            <td width="200px">{{ spending.title }}</td>
-                            <td width="100px">{{ spending.expense }}</td>
+                            <td width="240px">{{ spending.title }}</td>
+                            <td width="130px">{{ spending.expense }}</td>
                             <td width="200px">{{ spending.date_created }}</td>
-                            <td width="300px">{{ spending.description }}</td>
+                            <td width="320px">{{ spending.description }}</td>
                             {% if spending.image %}
-                                <td><img src="media/{{ spending.image }} " alt="image"></td>
+                            <!-- This code can show full images.
+                                <td style="max-width:0px"><img src="media/{{ spending.image }} " alt="image"></td>
+                            -->  
+                                <td><a href="media/{{ spending.image }}">Clike here to view the image</a></td>
                             {% endif %}
                         </tr>
                     {% endfor %}
