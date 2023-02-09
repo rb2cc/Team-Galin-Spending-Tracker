@@ -19,8 +19,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from tracker import views
-
 from tracker.views import UserEditView
+
+
+
+from django.urls.conf import include  
+from django.conf import settings  
+from django.conf.urls.static import static  
+from tracker.forms import UserPasswordResetForm
 
 
 from django.urls.conf import include
@@ -35,13 +41,13 @@ urlpatterns = [
     path('sign_up/', views.sign_up, name='sign_up'),
     path('landing_page/', views.landing_page, name='landing_page'),
 
-
     path('change_password', auth_views.PasswordChangeView.as_view(
         template_name='change_password.html', success_url='change_password_success'),  name='change_password'),
     path('change_password_success', views.change_password_success, name='change_password_success'),
 
     path('reset_password/', auth_views.PasswordResetView.as_view(
-        template_name='password_reset_templates/password_reset.html'), name="reset_password"),
+        template_name='password_reset_templates/password_reset.html', 
+        form_class=UserPasswordResetForm), name="reset_password"),
 
     path('reset_password_sent/', auth_views.PasswordResetDoneView.as_view(
         template_name='password_reset_templates/password_reset_sent.html'),
@@ -56,6 +62,7 @@ urlpatterns = [
         name="password_reset_complete"),
 
     path('edit_user/', UserEditView.as_view(), name='edit_user'),
+
 
     path('expenditure_list', views.expenditure_list, name='expenditure_list'),
     path('create_expenditure/', views.create_expenditure, name='create_expenditure'),
@@ -72,3 +79,12 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+    path('expenditure_list', views.expenditure_list, name='expenditure_list')
+
+
+]
+
+if settings.DEBUG:  
+        urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)  
+
