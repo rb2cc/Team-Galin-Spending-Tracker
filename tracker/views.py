@@ -1,5 +1,5 @@
 
-from .forms import SignUpForm, LogInForm, EditUserForm
+from .forms import SignUpForm, LogInForm, EditUserForm, CreateUserForm
 from django.contrib.auth.forms import UserChangeForm
 from .models import User
 from .forms import SignUpForm, LogInForm, ExpenditureForm
@@ -97,16 +97,19 @@ def expenditure_list(request):
 
 def superuser_dashboard(request):
     if request.method == 'POST':
-        form = SignUpForm(request.POST)
+        form = CreateUserForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # change to admin if checked
+            will_be_admin = request.POST.get('will_be_admin', 0)
+            if (will_be_admin != 0):
+                user.is_staff = True
+                user.save()
             return redirect('superuser_dashboard')
     else:
-        form = SignUpForm()
+        form = CreateUserForm()
 
     user_list = User.objects.all()
-    paginator = Paginator(user_list, 20)
+    paginator = Paginator(user_list, 3)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
 
@@ -123,12 +126,36 @@ def user_delete(request):
         except User.DoesNotExist:
             return redirect('superuser_dashboard')
 
-        # except Exception as e:
-        #     return render(request, 'front.html',{'err':e.message})
+def user_promote(request):
+    if request.method == "POST":
+        try:
+            user_pk = request.POST['user_pk']
+            u = User.objects.get(pk = user_pk)
+            if u.is_staff == True:
+                messages.info(request, 'This is a test')
+            else:
+                u.is_staff = True
+                u.save()
+            return redirect('superuser_dashboard')
 
+        except User.DoesNotExist:
+            return redirect('superuser_dashboard')
 
-        # except Exception as e:
-        #     return render(request, 'front.html',{'err':e.message})
+def user_demote(request):
+    if request.method == "POST":
+        try:
+            user_pk = request.POST['user_pk']
+            u = User.objects.get(pk = user_pk)
+            if u.is_staff == False:
+                messages.info(request, 'This is a test')
+            else:
+                u.is_staff = False
+                u.save()
+            return redirect('superuser_dashboard')
+
+        except User.DoesNotExist:
+            return redirect('superuser_dashboard')
+
 
 # def display_expenditures(request):
 #     expenditures = Expenditure.objects.all()

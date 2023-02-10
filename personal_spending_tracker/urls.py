@@ -57,7 +57,9 @@ urlpatterns = [
     path('edit_user/', UserEditView.as_view(), name='edit_user'),
     path('expenditure_list', views.expenditure_list, name='expenditure_list'),
     path('superuser_dashboard/', views.superuser_dashboard, name='superuser_dashboard'),
-    path('user_delete', views.user_delete,),
+    path('user_delete', views.user_delete, name='user_delete'),
+    path('user_promote', views.user_promote, name ='user_promote'),
+    path('user_demote', views.user_demote, name ='user_demote'),
 
 ]
 
