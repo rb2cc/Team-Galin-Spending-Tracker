@@ -20,11 +20,10 @@ from django.contrib import admin
 from django.urls import path
 from tracker import views
 from tracker.views import UserEditView
-from django.urls.conf import include  
-from django.conf import settings  
-from django.conf.urls.static import static  
+from django.urls.conf import include
+from django.conf import settings
+from django.conf.urls.static import static
 from tracker.forms import UserPasswordResetForm
-
 
 
 urlpatterns = [
@@ -39,7 +38,7 @@ urlpatterns = [
     path('change_password_success', views.change_password_success, name='change_password_success'),
 
     path('reset_password/', auth_views.PasswordResetView.as_view(
-        template_name='password_reset_templates/password_reset.html', 
+        template_name='password_reset_templates/password_reset.html',
         form_class=UserPasswordResetForm), name="reset_password"),
 
     path('reset_password_sent/', auth_views.PasswordResetDoneView.as_view(
@@ -55,10 +54,14 @@ urlpatterns = [
         name="password_reset_complete"),
 
     path('edit_user/', UserEditView.as_view(), name='edit_user'),
-    path('expenditure_list', views.expenditure_list, name='expenditure_list')
+    path('expenditure_list', views.expenditure_list, name='expenditure_list'),
+
+    path('forum_home/', views.forum_home, name='forum_home'),
+    path('posts/', views.posts, name='posts'),
+    path('detail/', views.detail, name='detail'),
 
 
 ]
 
-if settings.DEBUG:  
-        urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)  
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
