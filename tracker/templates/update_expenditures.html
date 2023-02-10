@@ -1,0 +1,10 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<div>
+    <form method="POST" enctype='multipart/form-data'>
+        {% csrf_token %}
+        {% include 'partials/bootstrap_form.html' with form=form %}
+        <input type="submit" value="+  ADD  A  NEW  SPENDING" class='btn btn-primary'>
+    </form>
+</div>
+{% endblock %}
