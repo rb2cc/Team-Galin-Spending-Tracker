@@ -1,0 +1,215 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<div class='row'>
+    <div class = 'col'>
+        <div class="card main-cardOne">
+            <b style="font-size:larger; text-align:center; padding-bottom:10px">Recent Spending</b>
+            <table class="table simpleTable">
+                <thead class="simpleThead">
+                    <tr>
+                        <th scope="col" width="120px">Title</th>
+                        <th scope="col" width="120px">Expense</th>
+                        <th scope="col">Time</th>
+                    </tr>
+                </thead>
+                <tbody class="simpleTbody">
+                    <div class="Spending">
+                        {% for spending in spendings %}
+                            <tr>
+                                <td style="max-width:120px; min-width:120px">{{ spending.title }}</td>
+                                <td style="max-width:120px; min-width:120px">{{ spending.expense }}</td>
+                                <td>{{ spending.date_created|date:"M" }}.{{ spending.date_created.day }}</td>
+                            </tr>
+                        {% endfor %}
+                    </div>
+                </tbody>
+            </table>
+            <h2><a href='{% url 'expenditure_list' %}' class="btn btn-primary">View Full Expenditures</a></h2>
+        </div>
+        <div class="card main-cardFive">
+            <p>More functions</p>
+            <p>to be implemented</p>
+        </div>
+    </div>
+    <div class = 'col'>
+        <div class = 'row'>
+            <div class="card main-cardTwo">
+                <form method="POST" enctype='multipart/form-data'>
+                    {% csrf_token %}
+                    {% include 'partials/bootstrap_form.html' with form=form %}
+                    <input type="submit" value="+  ADD  A  NEW  SPENDING" class='btn btn-primary'>
+                </form>
+            </div>
+            <div class="card main-cardThree">
+                <p>target or gamification stuff</p>
+                <p>to be implemented</p>
+            </div>
+        </div>
+        <div class = 'row'>
+            <div class="card main-cardFour">
+                <div class = 'row'>
+                    <div class="col">
+                        <div clas="row">
+                            <select class="form-select" id="frequency" style="width:138px; display: inline-block;">
+                                <option value = 90>Last 90 days</option>  
+                                <option value = 30>Last 30 days</option>  
+                                <option value = 7>Last 7 days</option>  
+                            </select>
+                            <button type="button" class='btn btn-primary' onclick="showChart()" style="width:133px; margin-left:10px; margin-top:0px">Generate Graph</button>
+                        </div>
+                        <div style="width:220px; margin-top:20px; margin-left:40px">
+                            <canvas id="expensePieChart"></canvas>
+                        </div> 
+                    </div>
+                    <div style="width:610px; margin-top:10px; margin-right:10px">
+                        <canvas id="expenseBarChart"></canvas>
+                    </div>     
+                </div>    
+                <div class = 'row'>
+                    <div style="width:900px; margin-top:10px; margin-left:20px;">
+                        <canvas id="expenseLineChart"></canvas>
+                    </div>  
+                </div>
+
+                <!-- JavaScript to print the chart -->
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>       
+                <script>
+                    const ctx1 = document.getElementById('expensePieChart');
+                    chart1 = new Chart(ctx1, {
+                        type: 'doughnut',
+                        data: {
+                            labels: [{%for data in categoryList.90%}'{{data}}',{%endfor%}],
+                            datasets: [{
+                                label: 'Expense',
+                                data: [{%for data in expenseList.90%}'{{data}}',{%endfor%}],
+                                borderWidth: 1
+                            }]
+                        },
+                    });
+                    const ctx2 = document.getElementById('expenseBarChart');
+                    chart2 = new Chart(ctx2, {
+                        type: 'bar',
+                        data: {
+                            labels: [{%for data in dateList.90%}'{{data}}',{%endfor%}],
+                            datasets: [{
+                                data: [{%for data in dailyExpenseList.90%}'{{data}}',{%endfor%}],
+                                borderWidth: 1
+                            }]
+                        },
+                        options:{
+                            plugins:{
+                                legend:{
+                                    display:false
+                                }
+                            }
+                        }
+                    });
+                    const ctx3 = document.getElementById('expenseLineChart');
+                    chart3 = new Chart(ctx3, {
+                        type: 'line',
+                        data: {
+                            labels: [{%for data in dateList.90%}'{{data}}',{%endfor%}],
+                            datasets: [{
+                                label: 'Expense',
+                                data: [{%for data in cumulativeExpenseList.90%}'{{data}}',{%endfor%}],
+                                borderWidth: 1
+                            }]
+                        },
+                        options:{
+                            plugins:{
+                                legend:{
+                                    display:false
+                                }
+                            }
+                        }
+                    });
+
+                    function showChart(){
+                        if (frequency.value==7){
+                            pieLabel=[{%for data in categoryList.7%}'{{data}}',{%endfor%}];
+                            pieData=[{%for data in expenseList.7%}'{{data}}',{%endfor%}];
+                            barLabel=[{%for data in dateList.7%}'{{data}}',{%endfor%}];
+                            barData=[{%for data in dailyExpenseList.7%}'{{data}}',{%endfor%}];
+                            lineLabel=[{%for data in dateList.7%}'{{data}}',{%endfor%}];
+                            lineData=[{%for data in cumulativeExpenseList.7%}'{{data}}',{%endfor%}];
+                        }else if(frequency.value==30){
+                            pieLabel=[{%for data in categoryList.30%}'{{data}}',{%endfor%}];
+                            pieData=[{%for data in expenseList.30%}'{{data}}',{%endfor%}];
+                            barLabel=[{%for data in dateList.30%}'{{data}}',{%endfor%}];
+                            barData=[{%for data in dailyExpenseList.30%}'{{data}}',{%endfor%}];
+                            lineLabel=[{%for data in dateList.30%}'{{data}}',{%endfor%}];
+                            lineData=[{%for data in cumulativeExpenseList.30%}'{{data}}',{%endfor%}];
+                        }else if(frequency.value==90){
+                            pieLabel=[{%for data in categoryList.90%}'{{data}}',{%endfor%}];
+                            pieData=[{%for data in expenseList.90%}'{{data}}',{%endfor%}];
+                            barLabel=[{%for data in dateList.90%}'{{data}}',{%endfor%}];
+                            barData=[{%for data in dailyExpenseList.90%}'{{data}}',{%endfor%}];
+                            lineLabel=[{%for data in dateList.90%}'{{data}}',{%endfor%}];
+                            lineData=[{%for data in cumulativeExpenseList.90%}'{{data}}',{%endfor%}];
+                        }
+                        if(chart1!=null){
+                            chart1.destroy();
+                        }
+                        if(chart2!=null){
+                            chart2.destroy();
+                        }
+                        if(chart3!=null){
+                            chart3.destroy();
+                        }
+                        chart1 = new Chart(ctx1, {
+                            type: 'doughnut',
+                            data: {
+                                    labels: pieLabel,
+                                    datasets: [{
+                                        label: 'Expense',
+                                        data: pieData,
+                                        borderWidth: 1
+                                    }]
+                                },
+                        });
+                        chart2 = new Chart(ctx2, {
+                        type: 'bar',
+                            data: {
+                                    labels: barLabel,
+                                    datasets: [{
+                                        label: 'Expense',
+                                        data: barData,
+                                        borderWidth: 1
+                                    }]
+                                },
+                            options:{
+                                plugins:{
+                                    legend:{
+                                        display:false
+                                    }
+                                }
+                            }
+                        });
+                        chart3 = new Chart(ctx3, {
+                            type: 'line',
+                            data: {
+                                    labels: lineLabel,
+                                    datasets: [{
+                                        label: 'Expense',
+                                        data: lineData,
+                                        borderWidth: 1
+                                    }]
+                                },
+                            options:{
+                                plugins:{
+                                    legend:{
+                                        display:false
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

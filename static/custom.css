@@ -1,0 +1,177 @@
+/*
+ * Alerts
+ */
+
+.alert {
+  border-radius: 10px;
+}
+
+/*
+ * Cover page
+ */
+
+#cover-image {
+  background: url('images/bg-01.jpg') no-repeat center;
+  background-size: cover;
+  overflow : auto
+}
+
+h1.cover-heading {
+  font-size: 4rem;
+}
+
+p.cover-text {
+  font-size: 1.7rem;
+}
+
+.cover-card {
+  background-color: rgb(255, 255, 255, 0.9);
+  margin-left: auto;
+  margin-right: auto;
+  width: 430px;
+  height: 700px;
+  padding-top: 40px;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-bottom: 30px;
+  border-radius: 10px;
+}
+
+.full-card {
+  background-color: rgb(255, 255, 255, 0.9);
+  margin-top: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 1300px;
+  height: 850px;
+  padding-top: 30px;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-bottom: 30px;
+  border-radius: 10px;
+
+}
+
+.main-cardOne {
+  background-color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 30px;
+  margin-top: 10px;
+  width: 350px;
+  height: 1000px;
+  padding-top: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
+  border-radius: 10px;
+  overflow:hidden;
+}
+
+.main-cardTwo {
+  background-color: rgba(255, 255, 255, 0.9);
+  margin-left: 10px;
+  margin-right: 20px;
+  margin-top: 10px;
+  width: 450px;
+  height: 500px;
+  padding-top: 20px;
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-bottom: 20px;
+  border-radius: 10px;
+}
+
+.main-cardThree {
+  background-color: rgba(255, 255, 255, 0.9);
+  margin-left: 10px;
+  margin-top: 10px;
+  width: 450px;
+  height: 500px;
+  padding-top: 40px;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-bottom: 30px;
+  border-radius: 10px;
+}
+
+.main-cardFour {
+  background-color: rgba(255, 255, 255, 0.9);
+  margin-left: 10px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+  width: 930px;
+  height: 800px;
+  padding-top: 10px;
+  padding-left: 10px;
+
+  padding-bottom: 30px;
+  border-radius: 10px;
+}
+
+.main-cardFive {
+  background-color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 30px;
+  width: 350px;
+  height: 300px;
+  padding-top: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
+  border-radius: 10px;
+}
+
+.btn-primary {
+  background: url('images/btn-p.jpg') no-repeat;
+  margin-top: 20px;
+  width: 100%;
+  border-radius: 50px 50px 50px 50px;
+  color:rgb(255, 255, 255);
+}
+
+input[type=text] {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #000000;
+  border-radius: 0%;
+}
+
+input[type=password] {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #000000;
+  border-radius: 0%;
+}
+
+.mainTable {
+  display:block;
+  table-layout:fixed;
+  width:100%;
+}
+
+.mainThead {
+  display:block;
+}
+
+.mainTbody{
+  display:block;
+  height: 700px;
+  overflow-y:auto;
+}
+
+.simpleTable {
+  display:block;
+  table-layout:fixed;
+}
+
+.simpleThead {
+  display:block;
+}
+
+.simpleTbody{
+  display:block;
+  height: 800px;
+  overflow-y:hidden;
+}
+
+.dropdown-menu {
+  background-color: rgb(255, 255, 255, 0.5);
+}
+
+

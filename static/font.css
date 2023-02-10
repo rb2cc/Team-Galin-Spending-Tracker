@@ -1,0 +1,8 @@
+@font-face {
+  font-family: 'sf';
+  src: url('fonts/SFpro.ttf') format('truetype')
+}
+
+body {
+  font-family: "sf";
+}
