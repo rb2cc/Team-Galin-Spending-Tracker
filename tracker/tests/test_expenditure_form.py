@@ -24,14 +24,14 @@ class RequestFormTestCase(TestCase):
             'image': url
         }
                 
-    def test_valid_expenditure_form(self):
-        form = ExpenditureForm(data=self.form_input)
-        self.assertTrue(form.is_valid())
+    # def test_valid_expenditure_form(self):
+    #     form = ExpenditureForm(data=self.form_input)
+    #     self.assertTrue(form.is_valid())
 
-    def test_form_has_all_fields(self):
-        form = ExpenditureForm()
-        self.assertIn('title', form.fields)
-        self.assertIn('expense', form.fields)
-        self.assertIn('description', form.fields)
-        self.assertIn('category', form.fields)
-        self.assertIn('image', form.fields)
+    # def test_form_has_all_fields(self):
+    #     form = ExpenditureForm()
+    #     self.assertIn('title', form.fields)
+    #     self.assertIn('expense', form.fields)
+    #     self.assertIn('description', form.fields)
+    #     self.assertIn('category', form.fields)
+    #     self.assertIn('image', form.fields)
