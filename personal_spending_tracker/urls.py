@@ -55,10 +55,10 @@ urlpatterns = [
 
     path('edit_user/', UserEditView.as_view(), name='edit_user'),
     path('expenditure_list/', views.expenditure_list, name='expenditure_list'),
-
     path('forum_home/', views.forum_home, name='forum_home'),
     path('posts/', views.posts, name='posts'),
     path('detail/', views.detail, name='detail'),
+    path('update_expenditures/',views.update_expenditures, name='update_expenditures')
 
 
 ]

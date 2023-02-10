@@ -185,7 +185,6 @@ def expenditure_list(request):
     spendingList = Expenditure.objects.filter(user=request.user).order_by('-date_created')
     return render(request, 'expenditure_list.html', {'spendings': spendingList})
 
-
 # def display_expenditures(request):
 #     expenditures = Expenditure.objects.all()
 #     return render(request, 'expenditure_list.html', {'expenditures':expenditures})
@@ -201,3 +200,15 @@ def posts(request):
 
 def detail(request):
     return render(request, 'forum/detail.html')
+
+
+def update_expenditures(request, pk):
+    expenditure = ExpenditureForm.objects.get(id = pk) 
+    form  = ExpenditureForm(instance = expenditure)
+    if request.POST:
+        form = ExpenditureForm(request.POST, instance = expenditure)
+        if form.is_valid():
+            form.save()
+            return redirect('expenditure_list')
+    return render(request, 'update_expenditures.html', {'form' : form,})
+
