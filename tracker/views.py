@@ -2,7 +2,7 @@
 from .forms import SignUpForm, LogInForm, EditUserForm
 from django.contrib.auth.forms import UserChangeForm
 from .models import User
-from .forms import SignUpForm, LogInForm, ExpenditureForm
+from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm
 from .models import User, Category, Expenditure
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -57,14 +57,15 @@ def user_test(user):
 @user_passes_test(user_test, login_url='log_out')
 def landing_page(request):
     if request.method == 'POST':
-        form = ExpenditureForm(request.POST, request.FILES)
+        form=ExpenditureForm(request.POST, request.FILES, r=request)
         if form.is_valid():
             expenditure = form.save(commit=False)
             expenditure.user = request.user
             expenditure.save()
             return redirect('landing_page')
     else:
-        form = ExpenditureForm()
+
+        form = ExpenditureForm(r=request)
     objectList = Expenditure.objects.filter(user=request.user)
 
     '''Data for list display'''
@@ -160,6 +161,7 @@ def getAllList(objectList, num):
     return cat, exp, dat, dai, cum
 
 
+
 def change_password_success(request):
     return render(request, 'change_password_success.html')
 
@@ -186,6 +188,29 @@ def expenditure_list(request):
     return render(request, 'expenditure_list.html', {'spendings': spendingList})
 
 
+def category_list(request):
+    user_id = request.user.id
+    if request.method == 'POST':
+        form=AddCategoryForm(request.POST, request.FILES)
+        if form.is_valid():
+            category = form.save(commit=False)
+            category.save()
+            request.user.available_categories.add(category)
+            return redirect('category_list')
+    else:
+        form = AddCategoryForm()
+    categoryList = Category.objects.filter(users__id=user_id).order_by('is_global')
+    return render(request, 'category_list.html', {'categories':categoryList, 'form':form})
+
+def remove_category(request, id):
+    category = Category.objects.get(id = id)
+    if category.is_global:
+        request.user.available_categories.remove(category)
+    else:
+        category.delete()
+    return redirect('category_list')
+
+    
 # def display_expenditures(request):
 #     expenditures = Expenditure.objects.all()
 #     return render(request, 'expenditure_list.html', {'expenditures':expenditures})
