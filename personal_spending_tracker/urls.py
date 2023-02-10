@@ -72,17 +72,6 @@ urlpatterns = [
     path('detail/', views.detail, name='detail'),
 
 
-
-
-]
-
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-    path('expenditure_list', views.expenditure_list, name='expenditure_list')
-
-
 ]
 
 if settings.DEBUG:  
