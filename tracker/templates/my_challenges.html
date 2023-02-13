@@ -1,0 +1,37 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<div class='container'>
+    <div class='row'>
+        <div class='col-10 offset-1'>
+            <h1>My Challenges</h1>
+            {% if user_challenges %}
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Challenge</th>
+                    <th scope="col">Date entered</th>
+                    <th scope="col">Date completed</th>
+                </tr>
+                </thead>
+                <tbody>
+                    {% for user_challenge in user_challenges %}
+                    <tr>
+                        <td>{{ user_challenge.challenge.name }}</td>
+                        <td>{{ user_challenge.date_entered }}</td>
+                        {% if user_challenge.date_completed %}
+                            <td>{{ user_challenge.date_completed }}</td>
+                        {% else %}
+                            <td>Not completed</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>You haven't entered any challenges yet.</p>
+            <a class="btn btn-primary btn-sm" href="{% url 'challenge_list' %}" role="button">View challenges</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

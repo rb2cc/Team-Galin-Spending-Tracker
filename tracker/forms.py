@@ -61,3 +61,4 @@ class ExpenditureForm(forms.ModelForm):
     # description = forms.CharField(label="Description", widget=forms.CharField(attrs={'size':100}))
     # field_order=['title', 'description', 'expense']
 
+

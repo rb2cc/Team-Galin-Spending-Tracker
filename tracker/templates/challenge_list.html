@@ -1,0 +1,33 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<div class='container'>
+    <div class='row'>
+        <div class='col-10 offset-1'>
+            <h1>Challenges</h1>
+            {% if challenges %}
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Start date</th>
+                    <th scope="col">End date</th>
+                </tr>
+                </thead>
+                <tbody>
+                    {% for challenge in challenges %}
+                    <tr>
+                        <td>{{ challenge.name }}</td>
+                        <td>{{ challenge.start_date }}</td>
+                        <td>{{ challenge.end_date }}</td>
+                        <th scope="col"><a class="btn btn-primary btn-sm" href="{% url 'challenge_details' challenge.id %}" role="button">More info</a></th>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>There are no challenges yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

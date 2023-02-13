@@ -28,7 +28,11 @@ urlpatterns = [
     path('sign_up/', views.sign_up, name='sign_up'),
     path('landing_page/', views.landing_page, name='landing_page'),
     path('expenditure_list', views.expenditure_list, name='expenditure_list'),
-    path('create_expenditure/', views.create_expenditure, name='create_expenditure' )
+    path('create_expenditure/', views.create_expenditure, name='create_expenditure' ),
+    path('challenge_list/', views.challenge_list, name='challenge_list'),
+    path('challenge_details/<int:id>/', views.challenge_details, name='challenge_details'),
+    path('enter_challenge/', views.enter_challenge, name='enter_challenge'),
+    path('my_challenges/', views.my_challenges, name='my_challenges'),
 ]
 
 

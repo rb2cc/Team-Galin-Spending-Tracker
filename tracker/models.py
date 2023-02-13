@@ -76,4 +76,41 @@ class Expenditure(models.Model):
     date_created = models.DateField(auto_now=True)
     # category = models.ForeignKey(Category, on_delete=models.CASCADE) #uncomment when category model is implemented
 
+class Challenge(models.Model):
+    """Challenge model for storing information about challenges."""
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    points = models.IntegerField()
+    start_date = models.DateField()
+    end_date = models.DateField()
+
+class UserChallenge(models.Model):
+    """User challenge model to keep track of which user is participating in which challenge."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE)
+    date_entered = models.DateTimeField(auto_now=True)
+    date_completed = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('user', 'challenge')
+
+class Achievement(models.Model):
+    """Achievement model for storing information about achievements"""
+
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    criteria = models.TextField()
+    date_earned = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+class Level(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    required_points = models.PositiveIntegerField()
+
+class UserLevel(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    level = models.ForeignKey(Level, on_delete=models.CASCADE)
+    points = models.PositiveIntegerField()
+    date_reached = models.DateTimeField(auto_now=True)
 

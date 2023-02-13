@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Expenditure, Category
+from .models import User, Expenditure, Category, Challenge, UserChallenge
 
 
 # Register your models here.
@@ -19,4 +19,14 @@ class CategoryAdmin(admin.ModelAdmin):
 class UserAdmin(admin.ModelAdmin):
     """Configuration of the admin interface for expenditures"""
     list_display = ['id','title', 'expense','description', 'image','date_created']
+
+@admin.register(Challenge)
+class ChallengeAdmin(admin.ModelAdmin):
+    """Configuration of the admin interface for challenges."""
+    list_display = ['id', 'name', 'description', 'points', 'start_date', 'end_date']
+
+@admin.register(UserChallenge)
+class UserChallengeAdmin(admin.ModelAdmin):
+    """Configuration of the admin interface for user challenges."""
+    list_display = ['id', 'user', 'challenge', 'date_entered', 'date_completed']
 
