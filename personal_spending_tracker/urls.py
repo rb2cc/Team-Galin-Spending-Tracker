@@ -60,9 +60,12 @@ urlpatterns = [
     path('posts/', views.posts, name='posts'),
     path('detail/', views.detail, name='detail'),
     path('category_list', views.category_list, name='category_list'),
-    path('remove_category/<int:id>', views.remove_category, name='remove_category')
+    path('remove_category/<int:id>', views.remove_category, name='remove_category'),
 
-
+    path('challenge_list/', views.challenge_list, name='challenge_list'),
+    path('challenge_details/<int:id>/', views.challenge_details, name='challenge_details'),
+    path('enter_challenge/', views.enter_challenge, name='enter_challenge'),
+    path('my_challenges/', views.my_challenges, name='my_challenges')
 ]
 
 if settings.DEBUG:

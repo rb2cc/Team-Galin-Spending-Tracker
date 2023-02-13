@@ -3,15 +3,17 @@ from .forms import SignUpForm, LogInForm, EditUserForm
 from django.contrib.auth.forms import UserChangeForm
 from .models import User
 from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm
-from .models import User, Category, Expenditure
+from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import redirect, render
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import user_passes_test, login_required
 from django.urls import reverse_lazy
 from django.views import generic
 from datetime import date, timedelta, datetime
 from django.utils import timezone
+from django.db import IntegrityError
+
 
 # Create your views here.
 
@@ -226,3 +228,38 @@ def posts(request):
 
 def detail(request):
     return render(request, 'forum/detail.html')
+
+def challenge_list(request):
+    challenges = Challenge.objects.all()
+    context = {
+        'challenges': challenges,
+    }
+    return render(request, 'challenge_list.html', context)
+
+def achievement_list(request):
+    user = request.user
+    achievements = Achievement.objects.filter(user=user)
+    context = {
+        'achievements': achievements,
+    }
+    return render(request, 'achievement_list.html', context)
+
+def challenge_details(request, id):
+    challenge = Challenge.objects.get(id=id)
+    return render(request, 'challenge_details.html', {'challenge': challenge})
+
+def enter_challenge(request):
+    try:
+        if request.method == 'POST':
+            challenge_id = request.POST['challenge_id']
+            user_challenge = UserChallenge(user=request.user, challenge_id=challenge_id)
+            user_challenge.save()
+            return redirect('my_challenges')
+    except IntegrityError:
+        messages.error(request, 'You have already entered this challenge.')
+        return redirect('challenge_list')
+
+@login_required
+def my_challenges(request):
+    user_challenges = UserChallenge.objects.filter(user=request.user)
+    return render(request, 'my_challenges.html', {'user_challenges': user_challenges})
