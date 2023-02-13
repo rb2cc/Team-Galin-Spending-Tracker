@@ -1,8 +1,10 @@
 {% extends 'base_content.html' %}
 {% block content %}
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
 <div class='row'>
     <div class="card full-card">
+        <form id="" method="POST">
+            {% csrf_token %}
         <table class="table mainTable">
             <thead class="mainThead">
                 <tr>
@@ -12,29 +14,74 @@
                     <th scope="col" width="200px">Time</th>
                     <th scope="col" width="330px">Description</th>
                     <th scope="col">Image</th>
+                    <th width="75px" ><button class="btn btn-sm btn-warning" onclick="toggleDelete()">Toggle delete</button></th>
                 </tr>
             </thead>
-            <tbody class="mainTbody">
+            <tbody class="mainTbody" >
                 <div class="Spending">
                     {% for spending in spendings %}
                         <tr>
+                            <!-- <td width="75px" value=spending.id id="checkbox" ><input type="checkbox"></td> -->
+                                
                             <td width="75px">{{ spending.category }}</td>
                             <td width="240px">{{ spending.title }}</td>
-                            <td width="130px">{{ spending.expense }}</td>
+                            <td width="130px">£{{ spending.expense }}</td>
                             <td width="200px">{{ spending.date_created }}</td>
                             <td width="320px">{{ spending.description }}</td>
                             {% if spending.image %}
                             <!-- This code can show full images.
                                 <td style="max-width:0px"><img src="media/{{ spending.image }} " alt="image"></td>
                             -->  
-                                <td><a href="media/{{ spending.image }}">Clike here to view the image</a></td>
+                                <td><a href="media/{{ spending.image }}">Click here to view the image</a></td>
                             {% endif %}
-                            <td width="300px"><a class = "btn btn-sm btn-primary" href=""> Edit</a></td>
+                            <th scope="row"><button class="btn btn-sm btn-info">Edit</button></th>
+
+                            <td class="delete_btn" style="display:none;"> 
+                                <form action="{% url 'remove_expenditure' pk=spending.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button  class="btn btn-sm btn-danger" onclick="persist()">Delete</button>
+                                </form>
+                            </td>
+
+                            <!-- <td width="300px"><a class = "btn btn-sm btn-primary" id="myBtn"> Edit</a></td> -->
                         </tr>
                     {% endfor %}
                 </div>
             </tbody>
         </table>
+    </form>
     </div>
 </div>
+
+<!-- JS for delete buttons -->
+<script type="text/javascript" >
+    function toggleDelete()
+    {
+        var x = document.getElementsByClassName("delete_btn");
+        for(var i = 0; i < x.length; i++) {
+            if (x[i].style.display === "none") {
+                localStorage.setItem('showButtons', true)
+                x[i].style.display = "block";
+
+            } else {
+                localStorage.removeItem('showButtons')
+                x[i].style.display = "none";
+
+            }
+        }
+    }
+
+    function persist()
+    {
+        var x = document.getElementsByClassName("delete_btn");
+        
+        if(localStorage.getItem("showButtons")){
+            for(var i = 0; i < x.length; i++) {
+                    x[i].style.display = "block";
+                }
+            }
+    }
+    window.onload=persist
+</script>
+
 {% endblock %}
