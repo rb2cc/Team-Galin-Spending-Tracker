@@ -60,7 +60,8 @@ urlpatterns = [
     path('detail/', views.detail, name='detail'),
     path('update_expenditures/',views.update_expenditures, name='update_expenditures'),
     path('category_list', views.category_list, name='category_list'),
-    path('remove_category/<int:id>', views.remove_category, name='remove_category')
+    path('remove_category/<int:id>', views.remove_category, name='remove_category'),
+    path('expenditure_list/<int:pk>', views.remove_expenditure, name='remove_expenditure')
 
 
 

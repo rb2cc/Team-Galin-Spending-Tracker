@@ -236,3 +236,10 @@ def update_expenditures(request, pk):
             return redirect('expenditure_list')
     return render(request, 'update_expenditures.html', {'form' : form,})
 
+def remove_expenditure(request, pk):
+
+    expenditure = Expenditure.objects.get(id=pk)
+    if request.POST:
+        expenditure.delete()
+        return redirect('expenditure_list')
+    return render(request, 'expenditure_list.html')
