@@ -210,6 +210,29 @@ def remove_category(request, id):
         category.delete()
     return redirect('category_list')
 
+def edit_category(request, id):
+    current_user = request.user
+    category = Category.objects.get(id = id)
+    if request.method == "POST":
+        form = AddCategoryForm(request.POST, instance = category)
+        if form.is_valid():
+            if category.is_global:
+                current_user.available_categories.remove(category)
+                new_name = form.cleaned_data.get("name")
+                new_week_limit = form.cleaned_data.get("week_limit")
+                new_category = Category.objects.create(name=new_name, week_limit=new_week_limit)
+                new_category.save()
+                current_user.available_categories.add(new_category)
+                return redirect('category_list')
+            else:
+                category.delete()
+                new_category = form.save(commit=False)
+                new_category.save()
+                current_user.available_categories.add(new_category)
+                return redirect('category_list')
+    else:
+        form = AddCategoryForm(instance=category)
+    return render(request, 'edit_category.html', {'form' : form})
     
 # def display_expenditures(request):
 #     expenditures = Expenditure.objects.all()
