@@ -216,7 +216,7 @@ def edit_category(request, id):
     if request.method == "POST":
         form = AddCategoryForm(request.POST, instance = category)
         if form.is_valid():
-            if category.is_global:
+            if category.is_global: #if global, create a new, non-global instance with updated values, leaving the global version unchanged
                 current_user.available_categories.remove(category)
                 new_name = form.cleaned_data.get("name")
                 new_week_limit = form.cleaned_data.get("week_limit")
@@ -224,7 +224,7 @@ def edit_category(request, id):
                 new_category.save()
                 current_user.available_categories.add(new_category)
                 return redirect('category_list')
-            else:
+            else: #if not global,simply save the form
                 category.delete()
                 new_category = form.save(commit=False)
                 new_category.save()
