@@ -262,8 +262,8 @@ def search_expenditure(request):
     query = request.GET.get("q")
 
     if (query == None):
-        expenditures = Expenditure.objects.all()
+        expenditures = Expenditure.objects.filter(user=request.user).order_by('-date_created')
         return render(request, 'expenditure_list.html', {'spendings': expenditures})
     else:
-        expenditures = Expenditure.objects.all().filter(title__icontains=query)
+        expenditures = Expenditure.objects.all().filter(user=request.user, title__icontains=query).order_by('-date_created')
         return render(request, 'expenditure_list.html', {'spendings': expenditures})

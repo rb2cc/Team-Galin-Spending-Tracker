@@ -62,7 +62,7 @@ urlpatterns = [
     path('category_list', views.category_list, name='category_list'),
     path('remove_category/<int:id>', views.remove_category, name='remove_category'),
     path('remove_expenditure/', views.remove_expenditure, name='remove_expenditure'),
-    path('update_expenditure/', views.update_expenditure, name='update_expenditure'),
+    path('update_expenditure', views.update_expenditure, name='update_expenditure'),
     path('search_expenditure/', views.search_expenditure, name='search_expenditure')
 
 
