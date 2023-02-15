@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Expenditure, Category, Challenge, UserChallenge
+from .models import User, Expenditure, Category, Challenge, UserChallenge, Level, UserLevel
 
 
 # Register your models here.
@@ -29,4 +29,14 @@ class ChallengeAdmin(admin.ModelAdmin):
 class UserChallengeAdmin(admin.ModelAdmin):
     """Configuration of the admin interface for user challenges."""
     list_display = ['id', 'user', 'challenge', 'date_entered', 'date_completed']
+
+@admin.register(Level)
+class LevelAdmin(admin.ModelAdmin):
+    """Configuration of the admin interface for levels."""
+    list_display = ['name', 'description', 'required_points']
+
+@admin.register(UserLevel)
+class UserLevelAdmin(admin.ModelAdmin):
+    """Configuration of the admin interface for user levels."""
+    list_display = ['user', 'level', 'points', 'date_reached']
 

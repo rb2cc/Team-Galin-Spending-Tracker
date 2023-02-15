@@ -65,7 +65,8 @@ urlpatterns = [
     path('challenge_list/', views.challenge_list, name='challenge_list'),
     path('challenge_details/<int:id>/', views.challenge_details, name='challenge_details'),
     path('enter_challenge/', views.enter_challenge, name='enter_challenge'),
-    path('my_challenges/', views.my_challenges, name='my_challenges')
+    path('my_challenges/', views.my_challenges, name='my_challenges'),
+    path('share_challenge/<int:id>', views.share_challenge, name='share_challenge')
 ]
 
 if settings.DEBUG:

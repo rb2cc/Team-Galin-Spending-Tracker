@@ -2,10 +2,12 @@
 {% block content %}
 <div class='container'>
     <div class='row'>
-        <div class = 'card main-cardFive' style="margin: 30px">
+        <div class = 'card' style="margin: auto; max-width: 350px; text-align: center; padding: 20px">
             <h1>{{ challenge.name }}</h1>
-            <p>{{ challenge.description }}</p>
+            <p>Description: {{ challenge.description }}</p>
             <p>Points: {{ challenge.points }}</p>
+            <p>Start date: {{ challenge.start_date }}</p>
+            <p>End date: {{ challenge.end_date }}</p>
             <form method='post' action="{% url 'enter_challenge' %}">
                 {% csrf_token %}
                 <input type='hidden' name='challenge_id' value='{{ challenge.id }}'>

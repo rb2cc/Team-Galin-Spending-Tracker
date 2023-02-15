@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin, User
 from django.core.validators import MinValueValidator
+from django.core.exceptions import ValidationError
 from personal_spending_tracker import settings
 from decimal import Decimal
 from django.utils import timezone
@@ -94,7 +95,6 @@ class Expenditure(models.Model):
     date_created = models.DateTimeField(default=timezone.now)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
-
 class Challenge(models.Model):
     """Challenge model for storing information about challenges."""
     name = models.CharField(max_length=255)
@@ -102,6 +102,10 @@ class Challenge(models.Model):
     points = models.IntegerField()
     start_date = models.DateField()
     end_date = models.DateField()
+
+    def clean(self):
+        if self.end_date <= self.start_date:
+            raise ValidationError("End date should be after start date.")
 
 class UserChallenge(models.Model):
     """User challenge model to keep track of which user is participating in which challenge."""

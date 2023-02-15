@@ -2,30 +2,23 @@
 {% block content %}
 <div class='container'>
     <div class='row'>
-        <div class = 'card main-cardFive' style="margin: 30px">
-            <h1>Challenges</h1>
+        <div class = 'card' style="margin: auto; padding: 20px">
+            <h1 style="text-align: center">Challenges</h1>
             {% if challenges %}
-            <table class="table">
-                <thead>
-                <tr>
-                    <th scope="col">Name</th>
-                    <th scope="col">Start date</th>
-                    <th scope="col">End date</th>
-                </tr>
-                </thead>
-                <tbody>
+                <div class="row">
                     {% for challenge in challenges %}
-                    <tr>
-                        <td>{{ challenge.name }}</td>
-                        <td>{{ challenge.start_date }}</td>
-                        <td>{{ challenge.end_date }}</td>
-                        <th scope="col"><a class="btn btn-primary btn-sm" href="{% url 'challenge_details' challenge.id %}" role="button">More info</a></th>
-                    </tr>
+                        <div class="col-md-3" style="display: inline-block">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ challenge.name }}</h5>
+                                <p class="card-text">Start date: {{ challenge.start_date }}</p>
+                                <p class="card-text">End date: {{ challenge.end_date }}</p>
+                                <a class="btn btn-primary btn-sm" href="{% url 'challenge_details' challenge.id %}" role="button">More info</a>
+                            </div>
+                        </div>
                     {% endfor %}
-                </tbody>
-            </table>
+                </div>
             {% else %}
-            <p>There are no challenges yet.</p>
+                <p>There are no challenges yet.</p>
             {% endif %}
         </div>
     </div>
