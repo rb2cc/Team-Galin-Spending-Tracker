@@ -61,6 +61,7 @@ urlpatterns = [
     path('detail/', views.detail, name='detail'),
     path('category_list', views.category_list, name='category_list'),
     path('remove_category/<int:id>', views.remove_category, name='remove_category'),
+    path('edit_category/<int:id>', views.edit_category, name='edit_category'),
 
     path('challenge_list/', views.challenge_list, name='challenge_list'),
     path('challenge_details/<int:id>/', views.challenge_details, name='challenge_details'),
