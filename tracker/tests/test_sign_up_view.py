@@ -61,7 +61,7 @@ class SignUpViewTestCase(TestCase, LogInTester):
     def test_global_categories_assigned_on_signup(self):
         self.client.post(self.url, self.form_input, follow=True)
         user = User.objects.get(email = 'james@example.org')
-        self.assertEqual(Category.objects.all().count(), 3)
+        self.assertEqual(Category.objects.all().count(), 5)
         self.assertEqual(user.available_categories.all().count(), 2)
 
 

@@ -37,7 +37,11 @@ def sign_up(request):
         if form.is_valid():
             user = form.save()
             global_categories = Category.objects.filter(is_global=True)
-            user.available_categories.add(*global_categories)
+            for x in global_categories:
+                tempName = x.name
+                tempLimit = x.week_limit
+                tempCategory = Category.objects.create(name=tempName, week_limit=tempLimit)
+                user.available_categories.add(tempCategory)
             login(request, user)
             return redirect('landing_page')
     else:
@@ -79,9 +83,9 @@ def landing_page(request):
         current_date-timezone.timedelta(days=29), current_date+timezone.timedelta(days=1)))
     objectList90 = objectList.filter(date_created__range=(
         current_date-timezone.timedelta(days=89), current_date+timezone.timedelta(days=1)))
-    dataTuple7 = getAllList(objectList7, 7)
-    dataTuple30 = getAllList(objectList30, 30)
-    dataTuple90 = getAllList(objectList90, 90)
+    dataTuple7 = getAllList(objectList7, 7, request)
+    dataTuple30 = getAllList(objectList30, 30, request)
+    dataTuple90 = getAllList(objectList90, 90, request)
     categoryList = {7: dataTuple7[0], 30: dataTuple30[0], 90: dataTuple90[0]}
     expenseList = {7: dataTuple7[1], 30: dataTuple30[1], 90: dataTuple90[1]}
     dateList = {7: dataTuple7[2], 30: dataTuple30[2], 90: dataTuple90[2]}
@@ -99,10 +103,10 @@ def landing_page(request):
     })
 
 
-def getCategoryAndExpenseList(objectList):
+def getCategoryAndExpenseList(objectList, request):
     categoryList = []
     expenseList = []
-    for x in Category.objects.all():
+    for x in request.user.available_categories.all():
         tempList = objectList.filter(category=x)
         if tempList.exists():
             categoryList.append(x)
@@ -150,8 +154,8 @@ def getCumulativeExpenseList(objectList, dailyExpenseList):
     return cumulativeExpenseList
 
 
-def getAllList(objectList, num):
-    first = getCategoryAndExpenseList(objectList)
+def getAllList(objectList, num, request):
+    first = getCategoryAndExpenseList(objectList, request)
     cat = first[0]
     exp = first[1]
     second = getDateListAndDailyExpenseList(objectList, num)
@@ -199,7 +203,7 @@ def category_list(request):
             return redirect('category_list')
     else:
         form = AddCategoryForm()
-    categoryList = Category.objects.filter(users__id=user_id).order_by('is_global')
+    categoryList = Category.objects.filter(users__id=user_id).order_by('name')
     return render(request, 'category_list.html', {'categories':categoryList, 'form':form})
 
 def remove_category(request, id):
@@ -215,21 +219,10 @@ def edit_category(request, id):
     category = Category.objects.get(id = id)
     if request.method == "POST":
         form = AddCategoryForm(request.POST, instance = category)
-        if form.is_valid():
-            if category.is_global: #if global, create a new, non-global instance with updated values, leaving the global version unchanged
-                current_user.available_categories.remove(category)
-                new_name = form.cleaned_data.get("name")
-                new_week_limit = form.cleaned_data.get("week_limit")
-                new_category = Category.objects.create(name=new_name, week_limit=new_week_limit)
-                new_category.save()
-                current_user.available_categories.add(new_category)
-                return redirect('category_list')
-            else: #if not global,simply save the form
-                category.delete()
-                new_category = form.save(commit=False)
-                new_category.save()
-                current_user.available_categories.add(new_category)
-                return redirect('category_list')
+        if form.is_valid():  
+            category = form.save(commit=False)
+            category.save()    
+            return redirect('category_list')
     else:
         form = AddCategoryForm(instance=category)
     return render(request, 'edit_category.html', {'form' : form})
