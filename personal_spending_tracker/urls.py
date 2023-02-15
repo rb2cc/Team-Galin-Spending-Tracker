@@ -58,11 +58,12 @@ urlpatterns = [
     path('forum_home/', views.forum_home, name='forum_home'),
     path('posts/', views.posts, name='posts'),
     path('detail/', views.detail, name='detail'),
-    path('update_expenditures/',views.update_expenditures, name='update_expenditures'),
+    # path('update_expenditures/',views.update_expenditures, name='update_expenditures'),
     path('category_list', views.category_list, name='category_list'),
     path('remove_category/<int:id>', views.remove_category, name='remove_category'),
-    path('expenditure_list/<int:pk>', views.remove_expenditure, name='remove_expenditure')
-
+    path('remove_expenditure/', views.remove_expenditure, name='remove_expenditure'),
+    path('update_expenditure/', views.update_expenditure, name='update_expenditure'),
+    path('search_expenditure/', views.search_expenditure, name='search_expenditure')
 
 
 ]

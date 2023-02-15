@@ -12,6 +12,8 @@ from django.urls import reverse_lazy
 from django.views import generic
 from datetime import date, timedelta, datetime
 from django.utils import timezone
+from django.utils.datastructures import MultiValueDictKeyError
+from django.db.models import Q
 
 # Create your views here.
 
@@ -225,21 +227,43 @@ def posts(request):
 def detail(request):
     return render(request, 'forum/detail.html')
 
-
-def update_expenditures(request, pk):
-    expenditure = ExpenditureForm.objects.get(id = pk) 
-    form  = ExpenditureForm(instance = expenditure)
-    if request.POST:
-        form = ExpenditureForm(request.POST, instance = expenditure)
-        if form.is_valid():
-            form.save()
+def remove_expenditure(request):
+    if request.method == "POST":
+        try:
+            expenditure_pk = request.POST['expenditure_pk']
+            print(request.POST['expenditure_pk'])
+            # expenditure_pk = request.POST.items()
+            expenditure = Expenditure.objects.get(pk=expenditure_pk)
+            expenditure.delete()
+            # for pk in expenditure_pk:
+            #     pk.delete()
             return redirect('expenditure_list')
-    return render(request, 'update_expenditures.html', {'form' : form,})
 
-def remove_expenditure(request, pk):
+        except Expenditure.DoesNotExist:
+            return redirect('expenditure_list')
+        except MultiValueDictKeyError:
+            return redirect('expenditure_list')
 
-    expenditure = Expenditure.objects.get(id=pk)
-    if request.POST:
-        expenditure.delete()
-        return redirect('expenditure_list')
-    return render(request, 'expenditure_list.html')
+def update_expenditure(request):
+    if request.method == "POST":
+        try:
+            # expenditure_pk_list = request.get('expenditure_pk')
+            expenditure_pk = request.POST['expenditure_pk']
+
+            expenditure = Expenditure.objects.get(pk=expenditure_pk)
+            return redirect('expenditure_list')
+
+        except Expenditure.DoesNotExist:
+            return redirect('expenditure_list')
+        except MultiValueDictKeyError:
+            return redirect('expenditure_list')
+
+def search_expenditure(request):
+    query = request.GET.get("q")
+
+    if (query == None):
+        expenditures = Expenditure.objects.all()
+        return render(request, 'expenditure_list.html', {'spendings': expenditures})
+    else:
+        expenditures = Expenditure.objects.all().filter(title__icontains=query)
+        return render(request, 'expenditure_list.html', {'spendings': expenditures})
