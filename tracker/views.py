@@ -39,16 +39,19 @@ def sign_up(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            global_categories = Category.objects.filter(is_global=True)
-            for x in global_categories:
-                tempName = x.name
-                tempLimit = x.week_limit
-                tempCategory = Category.objects.create(name=tempName, week_limit=tempLimit)
-                user.available_categories.add(tempCategory)
-            login(request, user)
-            user_achievement = UserAchievement.objects.create(user=request.user, achievement = Achievement.objects.get(name="New user"))
-            return redirect('landing_page')
+            if not User.objects.filter(email=form.cleaned_data.get('email')).exists():
+                user = form.save()
+                global_categories = Category.objects.filter(is_global=True)
+                for x in global_categories:
+                    tempName = x.name
+                    tempLimit = x.week_limit
+                    tempCategory = Category.objects.create(name=tempName, week_limit=tempLimit)
+                    user.available_categories.add(tempCategory)
+                login(request, user)
+                user_achievement = UserAchievement.objects.create(user=request.user, achievement = Achievement.objects.get(name="New user"))
+                return redirect('landing_page')
+            else:
+                messages.add_message(request, messages.ERROR, "This email has already been registered")          
     else:
         form = SignUpForm()
     return render(request, 'sign_up.html', {'form': form})
