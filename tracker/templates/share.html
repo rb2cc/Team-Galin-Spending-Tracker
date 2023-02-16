@@ -1,16 +1,17 @@
 {% extends 'base_content.html' %}
 {% load static %}
 {% block content %}
+
 <div class='container'>
     <div class='row'>
         <div class = 'card' style="margin: auto; max-width: 350px; text-align: center; padding: 20px">
-            <h1>Share</h1>
-            <p>Name: {{ user_challenge.challenge.name }}</p>
-            <p>Description: {{ user_challenge.challenge.description }}</p>
+            <h1>Share {{ type }}</h1>
+            <p>Name: {{ name }}</p>
+            <p>Description: {{ description }}</p>
             <div class='share-buttons'>
                 {% for site, share_url in share_urls.items %}
                 <div class='share-link' style="display: inline-block; margin-right: 10px">
-                    <a href='{{ share_url }}' target='_blank'>
+                    <a href="{% url 'handle_share' %}?share_url={{ share_url|urlencode }}" target='_blank'>
                         <img src="{% static 'logos/' %}{{ site }}.png" alt="{{ site }} logo">
                     </a>
                 </div>

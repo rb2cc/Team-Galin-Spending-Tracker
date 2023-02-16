@@ -118,13 +118,20 @@ class UserChallenge(models.Model):
         unique_together = ('user', 'challenge')
 
 class Achievement(models.Model):
-    """Achievement model for storing information about achievements"""
-
+    """Achievement model for storing information about achievements."""
     name = models.CharField(max_length=100)
     description = models.TextField()
     criteria = models.TextField()
-    date_earned = models.DateTimeField(auto_now=True)
+    badge = models.CharField(max_length=255)
+
+class UserAchievement(models.Model):
+    """User achievement model to keep track of which user received which achievement."""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE)
+    date_earned = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'achievement')
 
 class Level(models.Model):
     name = models.CharField(max_length=100)

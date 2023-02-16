@@ -3,7 +3,7 @@ from .forms import SignUpForm, LogInForm, EditUserForm
 from django.contrib.auth.forms import UserChangeForm
 from .models import User
 from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm
-from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, Level, UserLevel
+from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import redirect, render
@@ -14,7 +14,7 @@ from datetime import date, timedelta, datetime
 from django.utils import timezone
 from django.db import IntegrityError
 from math import floor
-from urllib.parse import urlencode
+from urllib.parse import urlencode, unquote
 
 
 # Create your views here.
@@ -43,6 +43,7 @@ def sign_up(request):
             global_categories = Category.objects.filter(is_global=True)
             user.available_categories.add(*global_categories)
             login(request, user)
+            user_achievement = UserAchievement.objects.create(user=request.user, achievement = Achievement.objects.get(name="New user"))
             return redirect('landing_page')
     else:
         form = SignUpForm()
@@ -74,6 +75,12 @@ def landing_page(request):
 
     '''Data for list display'''
     spendingList = objectList.order_by('-date_created')[0:19]
+
+    if spendingList.count() == 1:
+        try:
+            user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="First expenditure"))
+        except IntegrityError:
+            pass
 
     '''Data for chart display'''
     current_date = date.today()
@@ -228,6 +235,11 @@ def category_list(request):
     else:
         form = AddCategoryForm()
     categoryList = Category.objects.filter(users__id=user_id).order_by('is_global')
+    if categoryList.count() == 1:
+        try:
+            user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Budget boss"))
+        except IntegrityError:
+            pass
     return render(request, 'category_list.html', {'categories':categoryList, 'form':form})
 
 def remove_category(request, id):
@@ -280,18 +292,11 @@ def detail(request):
 
 def challenge_list(request):
     challenges = Challenge.objects.all()
-    context = {
-        'challenges': challenges,
-    }
-    return render(request, 'challenge_list.html', context)
+    return render(request, 'challenge_list.html', {'challenges': challenges})
 
 def achievement_list(request):
-    user = request.user
-    achievements = Achievement.objects.filter(user=user)
-    context = {
-        'achievements': achievements,
-    }
-    return render(request, 'achievement_list.html', context)
+    achievements = Achievement.objects.all()
+    return render(request, 'achievement_list.html', {'achievements': achievements})
 
 def challenge_details(request, id):
     challenge = Challenge.objects.get(id=id)
@@ -324,6 +329,12 @@ def complete_challenge(request, challenge_id):
         # Set the date completed to the current time
         user_challenge.date_completed = timezone.now()
         user_challenge.save()
+
+        user_challenges_count = UserChallenge.objects.filter(user=request.user).count()
+        if user_challenges_count == 1:
+            user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Wise spender"))
+        elif user_challenges_count == 10:
+            user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Superstar"))
 
         try:
             user_level = UserLevel.objects.get(user=request.user)
@@ -366,9 +377,21 @@ def update_user_level(user):
 
 def share_challenge(request, id):
     user_challenge = UserChallenge.objects.get(id=id)
-    url = request.build_absolute_uri(reverse('challenge_details', args=[str(user_challenge.challenge.id)]))
     name = user_challenge.challenge.name
+    description = user_challenge.challenge.description
+    url = request.build_absolute_uri(reverse('challenge_details', args=[str(user_challenge.challenge.id)]))
     text = f"I'm doing the \"{name}\" challenge on Galin's Spending Tracker"
+    return share(request, user_challenge, name, description, url, text)
+
+def share_achievement(request, id):
+    user_achievement = UserAchievement.objects.get(id=id)
+    name = user_achievement.achievement.name
+    description = user_achievement.achievement.description
+    url = request.build_absolute_uri(reverse('achievement_list'))
+    text = f"I've earned the \"{name}\" achievement on Galin's Spending Tracker"
+    return share(request, user_achievement, name, description, url, text)
+
+def share(request, user_object, name, description, url, text):
     facebook_params = {
         'app_id': '1437874963685388',
         'display': 'popup',
@@ -382,4 +405,21 @@ def share_challenge(request, id):
         'facebook': 'https://www.facebook.com/dialog/share?' + urlencode(facebook_params),
         'twitter': 'https://twitter.com/share?' + urlencode(twitter_params),
     }
-    return render(request, 'share_challenge.html', {'user_challenge': user_challenge, 'share_urls': share_urls})
+
+    if isinstance(user_object, UserAchievement):
+        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'achievement'})
+    elif isinstance(user_object, UserChallenge):
+        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'challenge'})
+
+def handle_share(request):
+    share_url = unquote(request.GET.get('share_url'))
+    try:
+        user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="First share"))
+    except IntegrityError:
+        pass
+    return redirect(share_url)
+
+@login_required
+def my_achievements(request):
+    user_achievements = UserAchievement.objects.filter(user=request.user)
+    return render(request, 'my_achievements.html', {'user_achievements': user_achievements})

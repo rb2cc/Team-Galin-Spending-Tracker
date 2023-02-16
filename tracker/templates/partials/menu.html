@@ -9,11 +9,16 @@
     <li class="nav-item">
       <a class="nav-link" href="{% url 'category_list' %}">Categories</a>
     </li>
-    <li class="nav-item">
-      <a class="nav-link" href="{% url 'challenge_list' %}">Challenges</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="{% url 'my_challenges' %}">My Challenges</a>
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Rewards
+      </a>
+      <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <li><a class="dropdown-item" href="{% url 'challenge_list' %}">Challenges</a></li>
+        <li><a class="dropdown-item" href="{% url 'my_challenges' %}">My Challenges</a></li>
+        <li><a class="dropdown-item" href="{% url 'achievement_list' %}">Achievements</a></li>
+        <li><a class="dropdown-item" href="{% url 'my_achievements' %}">My Achievements</a></li>
+      </ul>
     </li>
 
   </ul>
