@@ -10,11 +10,11 @@
             <p>Description: {{ description }}</p>
             <div class='share-buttons'>
                 {% for site, share_url in share_urls.items %}
-                <div class='share-link' style="display: inline-block; margin-right: 10px">
-                    <a href="{% url 'handle_share' %}?share_url={{ share_url|urlencode }}" target='_blank'>
-                        <img src="{% static 'logos/' %}{{ site }}.png" alt="{{ site }} logo">
-                    </a>
-                </div>
+                    <div class='share-link' style="display: inline-block; margin-right: 10px">
+                        <a href="{% url 'handle_share' %}?type={{ type }}&name={{ name }}&site={{ site }}&share_url={{ share_url|urlencode }}" target='_blank'>
+                            <img src="{% static 'logos/' %}{{ site }}.png" alt="{{ site }} logo">
+                        </a>
+                    </div>
                 {% endfor %}
             </div>
         </div>

@@ -3,7 +3,7 @@ from .forms import SignUpForm, LogInForm, EditUserForm
 from django.contrib.auth.forms import UserChangeForm
 from .models import User
 from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm
-from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel
+from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel, Activity
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import redirect, render
@@ -49,6 +49,8 @@ def sign_up(request):
                     user.available_categories.add(tempCategory)
                 login(request, user)
                 user_achievement = UserAchievement.objects.create(user=request.user, achievement = Achievement.objects.get(name="New user"))
+                user_activity = Activity.objects.create(user=request.user, image = "images/user.png", name = "You've created an account on Galin's Spending Tracker")
+                user_activity = Activity.objects.create(user=request.user, image = "badges/new_user.png", name = "You've earned \"New user\" achievement")
                 return redirect('landing_page')
             else:
                 messages.add_message(request, messages.ERROR, "This email has already been registered")          
@@ -74,6 +76,9 @@ def landing_page(request):
             expenditure = form.save(commit=False)
             expenditure.user = request.user
             expenditure.save()
+            activity_name = f'You\'ve created a \"{expenditure.title}\" expenditure of \"{expenditure.category.name}\" category with {expenditure.expense} expense'
+            user_activity = Activity.objects.create(user=request.user, image = "images/expenditure.png", name = activity_name, points = 15)
+            activity_points(request, user_activity.points)
             return redirect('landing_page')
     else:
 
@@ -86,6 +91,8 @@ def landing_page(request):
     if spendingList.count() == 1:
         try:
             user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="First expenditure"))
+            user_activity = Activity.objects.create(user=request.user, image = "badges/first_expenditure.png", name = "You've earned \"First expenditure\" achievement", points = 15)
+            activity_points(request, user_activity.points)
         except IntegrityError:
             pass
 
@@ -206,6 +213,7 @@ def getAllList(objectList, num, request):
 
 
 def change_password_success(request):
+    user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = "You've changed your password")
     return render(request, 'change_password_success.html')
 
 
@@ -216,6 +224,28 @@ class UserEditView(generic.UpdateView):
 
     def get_object(self):
         return self.request.user
+
+    def get_initial(self):
+        user = self.get_object()
+        return {'email': user.email, 'first_name': user.first_name, 'last_name': user.last_name}
+
+    def form_valid(self, form):
+        user = self.get_object()
+        old_email = form.initial['email']
+        old_first_name = form.initial['first_name']
+        old_last_name = form.initial['last_name']
+
+        if old_email != user.email:
+            activity_name = f'You\'ve changed your email from {old_email} to {user.email}'
+            user_activity = Activity.objects.create(user=self.request.user, image = "images/edit.png", name = activity_name)
+        if old_first_name != user.first_name:
+            activity_name = f'You\'ve changed your first name from {old_first_name} to {user.first_name}'
+            user_activity = Activity.objects.create(user=self.request.user, image = "images/edit.png", name = activity_name)
+        if old_last_name != user.last_name:
+            activity_name = f'You\'ve changed your last name from {old_last_name} to {user.last_name}'
+            user_activity = Activity.objects.create(user=self.request.user, image = "images/edit.png", name = activity_name)
+
+        return super().form_valid(form)
 
     def update_user(request):
         form = EditUserForm(instance=request.user)
@@ -239,6 +269,9 @@ def category_list(request):
             category = form.save(commit=False)
             category.save()
             request.user.available_categories.add(category)
+            user_activity_name = f'You\'ve added \"{category.name}\" category with {category.week_limit} week limit'
+            user_activity = Activity.objects.create(user=request.user, image = "images/category.png", name = user_activity_name, points = 15)
+            activity_points(request, user_activity.points)
             return redirect('category_list')
     else:
         form = AddCategoryForm()
@@ -246,26 +279,38 @@ def category_list(request):
     if categoryList.count() == 1:
         try:
             user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Budget boss"))
+            user_activity = Activity.objects.create(user=request.user, image = "badges/budget_boss.png", name = "You've earned \"Budget boss\" achievement", points = 15)
+            activity_points(request, user_activity.points)
         except IntegrityError:
             pass
     return render(request, 'category_list.html', {'categories':categoryList, 'form':form})
 
 def remove_category(request, id):
     category = Category.objects.get(id = id)
+    category_name = category.name
     if category.is_global:
         request.user.available_categories.remove(category)
     else:
         category.delete()
+    user_activity = Activity.objects.create(user=request.user, image = "images/delete.png", name = f'You\'ve deleted \"{category_name}\" category')
     return redirect('category_list')
 
 def edit_category(request, id):
     current_user = request.user
     category = Category.objects.get(id = id)
+    category_name = category.name
+    category_week_limit = category.week_limit
     if request.method == "POST":
         form = AddCategoryForm(request.POST, instance = category)
         if form.is_valid():
             category = form.save(commit=False)
             category.save()
+            if (category.name != category_name):
+                activity_name = f'You\'ve changed \"{category_name}\" category name to \"{category.name}\"'
+                user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
+            if (category.week_limit != category_week_limit):
+                activity_name = f'You\'ve changed \"{category.name}\" category week limit from {category_week_limit} to {category.week_limit}'
+                user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
             return redirect('category_list')
     else:
         form = AddCategoryForm(instance=category)
@@ -305,6 +350,8 @@ def enter_challenge(request):
             challenge_id = request.POST['challenge_id']
             user_challenge = UserChallenge(user=request.user, challenge_id=challenge_id)
             user_challenge.save()
+            user_activity = Activity.objects.create(user=request.user, image = "images/start.png", name = f'You\'ve entered \"{user_challenge.challenge.name}\" challenge', points = 15)
+            activity_points(request, user_activity.points)
             complete_challenge(request, challenge_id)
             return redirect('my_challenges')
     except IntegrityError:
@@ -330,8 +377,14 @@ def complete_challenge(request, challenge_id):
         user_challenges_count = UserChallenge.objects.filter(user=request.user).count()
         if user_challenges_count == 1:
             user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Wise spender"))
+            user_activity = Activity.objects.create(user=request.user, image = "badges/wise_spender.png", name = "You've earned \"Wise spender\" achievement", points = 15)
+            activity_points(request, user_activity.points)
         elif user_challenges_count == 10:
             user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Superstar"))
+            user_activity = Activity.objects.create(user=request.user, image = "badges/super_star.png", name = "You've earned \"Superstar\" achievement", points = 150)
+            activity_points(request, user_activity.points)
+
+        user_activity = Activity.objects.create(user=request.user, image = "images/completed.png", name = f'You\'ve completed \"{user_challenge.challenge.name}\" challenge', points = user_challenge.challenge.points)
 
         try:
             user_level = UserLevel.objects.get(user=request.user)
@@ -345,6 +398,12 @@ def complete_challenge(request, challenge_id):
 
     return redirect('challenge_list')
 
+def activity_points(request, points):
+    user_level = UserLevel.objects.get(user=request.user)
+    user_level.points += points
+    user_level.save()
+    update_user_level(request.user)
+
 def update_user_level(user):
     # Get the user's total points
     user_level = UserLevel.objects.get(user=user)
@@ -353,6 +412,8 @@ def update_user_level(user):
     # Calculate the user's current level
     try:
         current_level = Level.objects.get(name = f"Level {floor(total_points / 100) + 1}")
+        if (user_level.level.id < current_level.id):
+            user_activity = Activity.objects.create(user=user, image = "images/level_up.png", name = f'You\'ve leveled up to {current_level.name}')
         user_level.level = current_level
         user_level.save()
     except Level.DoesNotExist:
@@ -366,6 +427,8 @@ def update_user_level(user):
         	description = f'Description of level {last_level_number+i}'
         	required_points = last_level_points + (i * 100)
         	new_level = Level.objects.create(name=name, description=description, required_points=required_points)
+        	if (user_level.level.id < new_level.id):
+        	    user_activity = Activity.objects.create(user=user, image = "images/level_up.png", name = f'You\'ve leveled up to {new_level.name}')
         	new_level.save()
 
         current_level = Level.objects.get(name = f"Level {floor(total_points / 100) + 1}")
@@ -399,8 +462,8 @@ def share(request, user_object, name, description, url, text):
         'text': text
     }
     share_urls = {
-        'facebook': 'https://www.facebook.com/dialog/share?' + urlencode(facebook_params),
-        'twitter': 'https://twitter.com/share?' + urlencode(twitter_params),
+        'Facebook': 'https://www.facebook.com/dialog/share?' + urlencode(facebook_params),
+        'Twitter': 'https://twitter.com/share?' + urlencode(twitter_params),
     }
 
     if isinstance(user_object, UserAchievement):
@@ -409,14 +472,30 @@ def share(request, user_object, name, description, url, text):
         return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'challenge'})
 
 def handle_share(request):
+    type = unquote(request.GET.get('type'))
+    name = unquote(request.GET.get('name'))
+    site = unquote(request.GET.get('site'))
     share_url = unquote(request.GET.get('share_url'))
     try:
         user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="First share"))
+        user_activity = Activity.objects.create(user=request.user, image = "badges/first_share.png", name = "You've earned \"First share\" achievement", points = 15)
+        activity_points(request, user_activity.points)
     except IntegrityError:
         pass
+    user_activity = Activity.objects.create(user=request.user, image = "images/share.png", name = f'You\'ve shared \"{name}\" {type} post on {site}', points = 15)
+    activity_points(request, user_activity.points)
     return redirect(share_url)
 
 @login_required
 def my_achievements(request):
     user_achievements = UserAchievement.objects.filter(user=request.user)
     return render(request, 'my_achievements.html', {'user_achievements': user_achievements})
+
+@login_required
+def my_activity(request):
+    num_items = request.GET.get('num_items')
+    if num_items == 'all':
+        user_activity = Activity.objects.filter(user=request.user).order_by('-time')
+    else:
+        user_activity = Activity.objects.filter(user=request.user).order_by('-time')[:int(num_items)]
+    return render(request, 'my_activity.html', {'user_activity': user_activity})

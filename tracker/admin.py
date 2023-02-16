@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Expenditure, Category, Challenge, UserChallenge, Level, UserLevel, Achievement, UserAchievement
+from .models import User, Expenditure, Category, Challenge, UserChallenge, Level, UserLevel, Achievement, UserAchievement, Activity
 
 
 # Register your models here.
@@ -49,3 +49,8 @@ class AchievementAdmin(admin.ModelAdmin):
 class UserAchievementAdmin(admin.ModelAdmin):
     """Configuration of the admin interface for user achievements."""
     list_display = ['user', 'achievement', 'date_earned']
+
+@admin.register(Activity)
+class ActivityAdmin(admin.ModelAdmin):
+    """Configuration of the admin interface for activity."""
+    list_display = ['user', 'image', 'name', 'time', 'points']

@@ -1,0 +1,53 @@
+{% extends 'base_content.html' %}
+{% load static %}
+{% block content %}
+<div class='container'>
+    <div class='row'>
+        {% if user_activity %}
+            <div class = 'card' style="margin: auto; padding: 20px">
+                <h1 style="text-align: center">My Activity</h1>
+                <div class="dropdown" style="text-align: right;">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Items per page
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" style="text-align: right; --bs-dropdown-min-width: 0rem">
+                        <li><a class="dropdown-item" href="{% url 'my_activity' %}?num_items=10">10</a></li>
+                        <li><a class="dropdown-item" href="{% url 'my_activity' %}?num_items=20">20</a></li>
+                        <li><a class="dropdown-item" href="{% url 'my_activity' %}?num_items=40">40</a></li>
+                        <li><a class="dropdown-item" href="{% url 'my_activity' %}?num_items=all">All</a></li>
+                    </ul>
+                </div>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col"></th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Time</th>
+                        <th scope="col">Points</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for activity in user_activity %}
+                        <tr>
+                            <td><img src="{% static activity.image %}" style = "display: block; margin: 0 auto"></td>
+                            <td style="vertical-align: middle;">{{ activity.name }}</td>
+                            <td style="vertical-align: middle;">{{ activity.time }}</td>
+                            {% if activity.points != 0 %}
+                                <td style="vertical-align: middle;">+{{ activity.points }}</td>
+                            {% else %}
+                                <td style="vertical-align: middle;"></td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class = 'card' style="margin: auto; max-width: 350px; text-align: center; padding: 20px">
+                <h1 style="text-align: center">My Activity</h1>
+                <p>You didn't have any activity yet.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
