@@ -61,9 +61,18 @@ urlpatterns = [
     path('detail/', views.detail, name='detail'),
     path('category_list', views.category_list, name='category_list'),
     path('remove_category/<int:id>', views.remove_category, name='remove_category'),
-    path('edit_category/<int:id>', views.edit_category, name='edit_category')
+    path('edit_category/<int:id>', views.edit_category, name='edit_category'),
 
-
+    path('challenge_list/', views.challenge_list, name='challenge_list'),
+    path('challenge_details/<int:id>/', views.challenge_details, name='challenge_details'),
+    path('enter_challenge/', views.enter_challenge, name='enter_challenge'),
+    path('my_challenges/', views.my_challenges, name='my_challenges'),
+    path('share_challenge/<int:id>', views.share_challenge, name='share_challenge'),
+    path('handle_share/', views.handle_share, name='handle_share'),
+    path('achievement_list/', views.achievement_list, name='achievement_list'),
+    path('my_achievements/', views.my_achievements, name='my_achievements'),
+    path('share_achievement/<int:id>', views.share_achievement, name='share_achievement'),
+    path('share/', views.share, name='share')
 ]
 
 if settings.DEBUG:
