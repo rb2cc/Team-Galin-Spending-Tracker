@@ -3,19 +3,48 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
 <div class='row'>
     <div class="card full-card">
+        <!-- Seach bar -->
         <form action="{% url 'search_expenditure' %}" method="GET">
-            <input id="search" name="q" type="text" onblur="this.form.submit()" placeholder="Search by title">
+            <input id="title" name="q" type="text" onblur="this.form.submit()" placeholder="Search by title">
             <button type="submit" class="btn btn-info btn-md">Go</button>
             <a class="btn btn-md btn-dark" href='{% url 'expenditure_list' %}'>Reset</a>
         </form>
-        <form>
+        <!-- Drop down -->
+        <form action="{% url 'search_category' %}" method="GET">
             <label for="category">Choose a category:</label>
-            <select name="category" onchange="this.form.submit()">
+            <select class="form-select" style="width:138px; display: inline-block;" id = "category" name="q" onchange="this.form.submit()" >
+                <option>All</option>
                 {% for category in categories %}
-                    <option value="category">{{category}}</option>
+                    <option value= {{ category.id }}>{{category}}</option>
                 {% endfor %}
             </select>
         </form>
+
+        <script> 
+        $('#title').on('change', function() {
+                // Save value in localstorage
+                localStorage.setItem("title", $(this).val());
+        });
+        $('#category').on('change', function() {
+                // Save value in localstorage
+                localStorage.setItem("category", $(this).val());
+        });
+        $(document).ready(function() {
+            if (localStorage.getItem("category") ||  localStorage.getItem("title")) {
+                $('#category').val(localStorage.getItem("category"));
+                $('#title').val(localStorage.getItem("title"));
+            }
+            if (performance.navigation.type == 1) {
+                console.info( "This page is reloaded" );
+            } else {
+                localStorage.removeItem("title");
+                localStorage.removeItem("category"); // clear localstorage
+                console.info( "This page is not reloaded");
+            }
+        });
+        </script>
+
+        <!-- table -->
         <form id="expenform" method="POST">
             {% csrf_token %}
         <table class="table mainTable">
