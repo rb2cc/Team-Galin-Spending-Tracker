@@ -6,7 +6,10 @@
             <div class = 'card-body'>
                 <h5 class="card-title">{{ category.name }}</h5>
                 <p class="card-text">Weekly Limit: {{ category.week_limit }}</p>
-                <h6><a href="remove_category/{{ category.id }}">Delete</a></h6>
+                <div class = "row">
+                    <h6><a href="remove_category/{{ category.id }}">Delete</a></h6>
+                    <h6><a href="edit_category/{{ category.id }}">Edit</a></h6>
+                </div>
             </div>
         </div>
     {% endfor %}

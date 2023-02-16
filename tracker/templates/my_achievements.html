@@ -1,0 +1,32 @@
+{% extends 'base_content.html' %}
+{% load static %}
+{% block content %}
+<div class='container'>
+    <div class='row'>
+        {% if user_achievements %}
+            <div class = 'card' style="margin: auto; padding: 20px">
+                <h1 style="text-align: center">My Achievements</h1>
+                <div class="row">
+                    {% for user_achievement in user_achievements %}
+                        <div class="col-md-3" style="display: inline-block">
+                            <div class="card-body" style="text-align: center">
+                                <img src="{% static user_achievement.achievement.badge %}">
+                                <h5 class="card-title">{{ user_achievement.achievement.name }}</h5>
+                                <p class="card-text">Description: {{ user_achievement.achievement.description }}</p>
+                                <p class="card-text">Date earned: {{ user_achievement.date_earned }}</p>
+                                <a class="btn btn-primary btn-sm" href="{% url 'share_achievement' user_achievement.id %}">Share</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <div class = 'card' style="margin: auto; max-width: 350px; text-align: center; padding: 20px">
+                <h1 style="text-align: center">My Achievements</h1>
+                <p>You haven't earned any achievements yet.</p>
+                <a class="btn btn-primary btn-sm" href="{% url 'achievement_list' %}" role="button">View achievements</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

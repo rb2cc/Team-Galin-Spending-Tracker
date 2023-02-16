@@ -41,8 +41,12 @@
                 </form>
             </div>
             <div class="card main-cardThree">
-                <p>target or gamification stuff</p>
-                <p>to be implemented</p>
+                <p>{{ current_level_name }}</p>
+                <p>Points: {{ current_points }}</p>
+                <p>Your progress: </p>
+                <div class="progress" style="height: 20px; border-radius: 10px; background-color: #f2f2f2; overflow: hidden">
+                    <div class="progress-bar" style="width: {{ progress_percentage }}%; height: 20px; background-color: #4CAF50"></div>
+                </div>
             </div>
         </div>
         <div class = 'row'>

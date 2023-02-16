@@ -1,0 +1,16 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<div class="row">
+    <div class="my-auto">
+        <div class="card cover-card">
+            <p></p><p></p>
+            <p class="cover-text" style="font-weight:bold; text-align:center">Edit Category</p>
+            <form method="post" enctype='multipart/form-data'>
+                {% csrf_token %}
+                {% include 'partials/bootstrap_form.html' with form=form %}
+                <input type="submit" value="Update" class='btn btn-primary'>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

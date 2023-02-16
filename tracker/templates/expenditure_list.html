@@ -21,10 +21,10 @@
         </form>
 
         <script> 
-        $('#title').on('change', function() {
-                // Save value in localstorage
-                localStorage.setItem("title", $(this).val());
-        });
+        // $('#title').on('change', function() {
+        //         // Save value in localstorage
+        //         localStorage.setItem("title", $(this).val());
+        // });
         $('#category').on('change', function() {
                 // Save value in localstorage
                 localStorage.setItem("category", $(this).val());
@@ -32,13 +32,13 @@
         $(document).ready(function() {
             if (localStorage.getItem("category") ||  localStorage.getItem("title")) {
                 $('#category').val(localStorage.getItem("category"));
-                $('#title').val(localStorage.getItem("title"));
+                // $('#title').val(localStorage.getItem("title"));
             }
             if (performance.navigation.type == 1) {
                 console.info( "This page is reloaded" );
             } else {
                 localStorage.removeItem("title");
-                localStorage.removeItem("category"); // clear localstorage
+                // localStorage.removeItem("category"); // clear localstorage
                 console.info( "This page is not reloaded");
             }
         });
