@@ -4,9 +4,17 @@
 <div class='row'>
     <div class="card full-card">
         <form action="{% url 'search_expenditure' %}" method="GET">
-            <input name="q" type="text" placeholder="Search">
-            <button type="submit" class="btn btn-info btn-md">Search</button>
-            <a class="btn btn-sm btn-dark" href='{% url 'expenditure_list' %}'>Reset list</a>
+            <input id="search" name="q" type="text" onblur="this.form.submit()" placeholder="Search by title">
+            <button type="submit" class="btn btn-info btn-md">Go</button>
+            <a class="btn btn-md btn-dark" href='{% url 'expenditure_list' %}'>Reset</a>
+        </form>
+        <form>
+            <label for="category">Choose a category:</label>
+            <select name="category" onchange="this.form.submit()">
+                {% for category in categories %}
+                    <option value="category">{{category}}</option>
+                {% endfor %}
+            </select>
         </form>
         <form id="expenform" method="POST">
             {% csrf_token %}
@@ -52,6 +60,8 @@
                                 <td style="max-width:0px"><img src="media/{{ spending.image }} " alt="image"></td>
                             -->  
                                 <td><a href="{{ spending.image.url }}">Click here to view the image</a></td>
+                            {% else %}
+                                <td><a> None </a></td>
                             {% endif %}
                             <!-- <th scope="row"><button class="btn btn-sm btn-info">Edit</button></th> -->
                         </tr>

@@ -187,7 +187,8 @@ class UserEditView(generic.UpdateView):
 
 def expenditure_list(request):
     spendingList = Expenditure.objects.filter(user=request.user).order_by('-date_created')
-    return render(request, 'expenditure_list.html', {'spendings': spendingList})
+    categories = Category.objects.filter(users__id=request.user.id)
+    return render(request, 'expenditure_list.html', {'spendings': spendingList, 'categories': categories})
 
 def category_list(request):
     user_id = request.user.id
