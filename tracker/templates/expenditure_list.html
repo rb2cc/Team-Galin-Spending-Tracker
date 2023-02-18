@@ -1,62 +1,72 @@
 {% extends 'base_content.html' %}
 {% block content %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
-<div class='row'>
+<!-- <div class='row'> -->
     <div class="card full-card">
-        <!-- Seach bar -->
-        <form action="{% url 'search_expenditure' %}" method="GET">
-            <input id="title" name="q" type="text" onblur="this.form.submit()" placeholder="Search by title">
-            <button type="submit" class="btn btn-info btn-md">Go</button>
-            <a class="btn btn-md btn-dark" href='{% url 'expenditure_list' %}'>Reset</a>
-        </form>
-        <!-- Drop down -->
-        <form action="{% url 'search_category' %}" method="GET">
-            <label for="category">Choose a category:</label>
-            <select class="form-select" style="width:138px; display: inline-block;" id = "category" name="q" onchange="this.form.submit()" >
-                <option>All</option>
-                {% for category in categories %}
-                    <option value= {{ category.id }}>{{category}}</option>
-                {% endfor %}
-            </select>
-        </form>
-
+        <span>
+            <!-- Search bar for title filter -->
+            <form action="{% url 'search_expenditure' %}" method="GET">
+                <input id="inputted_title" name="q" type="text" onblur="this.form.submit()" placeholder="Search by title">
+                <button type="submit" class="btn btn-info btn-md">Go</button>
+                <a id="refresh_table_button" class="btn btn-md btn-dark" href='{% url 'expenditure_list' %}'>↺</a>
+            </form>
+            <!-- Drop down for category filter -->
+            <form action="{% url 'search_category' %}" method="GET">
+                <label for="selected_category">Show only:</label>
+                <select class="form-select" style="width:138px; display: inline-block;" id = "selected_category" name="q" onchange="this.form.submit()" >
+                    <option>All</option>
+                    {% for category in categories %}
+                        <option value= {{ category.id }}>{{category}}</option>
+                    {% endfor %}
+                </select>
+            </form>
+            <!-- Drop down for general filter -->
+            <form action="" method="GET">
+                <label for="selected_filter">Filter by:</label>
+                <select class="form-select" style="width:138px; display: inline-block;" id = "selected_filter" name="q" onchange="">
+                    <option value="Descending">Descending</option>
+                    <option value="Ascending">Ascending</option>
+                    <option value="Oldest">Oldest</option>
+                    <option value="Latest">Latest</option>
+                </select>
+            </form>
+        </span>
+        <!-- javascript for persisting drop down selection after onchange function occurs -->
         <script> 
-        // $('#title').on('change', function() {
-        //         // Save value in localstorage
-        //         localStorage.setItem("title", $(this).val());
-        // });
-        $('#category').on('change', function() {
-                // Save value in localstorage
-                localStorage.setItem("category", $(this).val());
+        $('#selected_category').on('change', function() {
+            localStorage.setItem("selected_category", $(this).val());
         });
+        // $('#selected_filter').on('change', function() {
+        //     localStorage.setItem("selected_filter", $(this).val());
+        // });
         $(document).ready(function() {
-            if (localStorage.getItem("category") ||  localStorage.getItem("title")) {
-                $('#category').val(localStorage.getItem("category"));
-                // $('#title').val(localStorage.getItem("title"));
-            }
-            if (performance.navigation.type == 1) {
-                console.info( "This page is reloaded" );
-            } else {
-                localStorage.removeItem("title");
-                // localStorage.removeItem("category"); // clear localstorage
-                console.info( "This page is not reloaded");
-            }
+            if (localStorage.getItem("selected_category")){//&&!(localStorage.getItem("selected_filter"))) {
+                $('#selected_category').val(localStorage.getItem("selected_category"));
+                // find way to reset table
+            } //else if (localStorage.getItem("selected_filter")&&!(localStorage.getItem("selected_category"))){
+            //     $('#selected_filter').val(localStorage.getItem("selected_filter"));
+            // }else if(localStorage.getItem("selected_category")&&localStorage.getItem("selected_filter")) {
+            //     $('#selected_filter').val(localStorage.getItem("selected_filter"));
+            //     $('#selected_category').val(localStorage.getItem("selected_category"));
+            // }
+            // if (!(performance.navigation.type == 1)) {
+            //     localStorage.clear();
+            // } 
         });
         </script>
-
         <!-- table -->
-        <form id="expenform" method="POST">
+        <form id="expenditure_form" method="POST">
             {% csrf_token %}
         <table class="table mainTable">
             <div class="row">
                 <div class="col-4">
                   <div class="d-grid gap-2 d-md-block">
-                    <button type="button" name="delete" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</button>
+                    <button type="button" name="delete" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#delete_modal">Delete</button>
                   </div>
                 </div>
                 <div class="col-4">
                     <div class="d-grid gap-2 d-md-block">
-                      <button type="button" name="edit" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal">Edit</button>
+                      <button type="button" name="edit" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit_modal">Edit</button>
                     </div>
                 </div>
             </div>
@@ -71,13 +81,10 @@
                     <th scope="col">Image</th>
                 </tr>
             </thead>
-            
-          </div>
-            <tbody class="mainTbody" >
-                <div class="Spending">
+            <tbody class="mainTbody">
+                <div class="scroll">
                     {% for spending in spendings %}
                         <tr>
-                            <!-- <td width="75px" value=spending.id id="checkbox" ><input type="checkbox"></td> -->
                             <th scope="row"> <input class = "form-check-input" type = "radio" name = "expenditure_pk" value = {{ spending.id }}></input> </th>
                             <td width="75px">{{ spending.category }}</td>
                             <td width="240px">{{ spending.title }}</td>
@@ -88,11 +95,10 @@
                             <!-- This code can show full images.
                                 <td style="max-width:0px"><img src="media/{{ spending.image }} " alt="image"></td>
                             -->  
-                                <td><a href="{{ spending.image.url }}">Click here to view the image</a></td>
+                                <td><a href="{{ spending.image.url }}">View image</a></td>
                             {% else %}
                                 <td><a> None </a></td>
                             {% endif %}
-                            <!-- <th scope="row"><button class="btn btn-sm btn-info">Edit</button></th> -->
                         </tr>
                     {% endfor %}
                 </div>
@@ -100,14 +106,14 @@
         </table>
     </form>
     </div>
-</div>
+<!-- </div> -->
 
 <!-- delete modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+<div class="modal fade" id="delete_modal" tabindex="-1" aria-labelledby="delete_modal_label" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="deleteModalLabel">Delete Expenditure</h1>
+          <h1 class="modal-title fs-5" id="delete_modal_label">Delete Expenditure</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -115,18 +121,18 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-danger"  form="expenform" formaction = "../remove_expenditure" method="POST">Delete</button>
+          <button type="submit" class="btn btn-danger"  form="expenditure_form" formaction = "../remove_expenditure" method="POST">Delete</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- edit modal -->
-  <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal fade" id="edit_modal" tabindex="-1" aria-labelledby="edit_modal_label" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="editModalLabel">Edit Expenditure</h1>
+          <h1 class="modal-title fs-5" id="edit_modal_label">Edit Expenditure</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -134,10 +140,12 @@
             {% csrf_token %}
             {{ form.as_p }} 
           <p>Are you sure you want to edit this expenditure?</p>
+          <p>TO BE IMPLEMENTED</p>
+
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-success"  form="expenform" formaction = "../update_expenditure" method="POST">Confirm</button>
+          <button type="submit" class="btn btn-success"  form="expenditure_form" formaction = "../update_expenditure" method="POST">Confirm</button>
         </div>
     </form>
       </div>

@@ -201,11 +201,8 @@ def getAllList(objectList, num, request):
     cum = getCumulativeExpenseList(objectList, dai)
     return cat, exp, dat, dai, cum
 
-
-
 def change_password_success(request):
     return render(request, 'change_password_success.html')
-
 
 class UserEditView(generic.UpdateView):
     form_class = EditUserForm
@@ -313,8 +310,8 @@ def update_expenditure(request):
 
         except Expenditure.DoesNotExist:
             return redirect('expenditure_list')
-        except MultiValueDictKeyError:
-            return redirect('expenditure_list')
+        # except MultiValueDictKeyError:
+        #     return redirect('expenditure_list')
 
 def search_expenditure(request):
     query = request.GET.get("q")

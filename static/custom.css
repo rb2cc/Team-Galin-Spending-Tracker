@@ -151,7 +151,7 @@ input[type=password] {
 
 .mainTbody{
   display:block;
-  height: 700px;
+  max-height: 625px;
   overflow-y:auto;
 }
 
@@ -173,5 +173,6 @@ input[type=password] {
 .dropdown-menu {
   background-color: rgb(255, 255, 255, 0.5);
 }
+
 
 
