@@ -151,7 +151,7 @@ input[type=password] {
 
 .mainTbody{
   display:block;
-  max-height: 625px;
+  max-height: 600px;
   overflow-y:auto;
 }
 

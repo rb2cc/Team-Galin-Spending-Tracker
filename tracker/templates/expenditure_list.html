@@ -31,29 +31,7 @@
                 </select>
             </form>
         </span>
-        <!-- javascript for persisting drop down selection after onchange function occurs -->
-        <script> 
-        $('#selected_category').on('change', function() {
-            localStorage.setItem("selected_category", $(this).val());
-        });
-        // $('#selected_filter').on('change', function() {
-        //     localStorage.setItem("selected_filter", $(this).val());
-        // });
-        $(document).ready(function() {
-            if (localStorage.getItem("selected_category")){//&&!(localStorage.getItem("selected_filter"))) {
-                $('#selected_category').val(localStorage.getItem("selected_category"));
-                // find way to reset table
-            } //else if (localStorage.getItem("selected_filter")&&!(localStorage.getItem("selected_category"))){
-            //     $('#selected_filter').val(localStorage.getItem("selected_filter"));
-            // }else if(localStorage.getItem("selected_category")&&localStorage.getItem("selected_filter")) {
-            //     $('#selected_filter').val(localStorage.getItem("selected_filter"));
-            //     $('#selected_category').val(localStorage.getItem("selected_category"));
-            // }
-            // if (!(performance.navigation.type == 1)) {
-            //     localStorage.clear();
-            // } 
-        });
-        </script>
+        
         <!-- table -->
         <form id="expenditure_form" method="POST">
             {% csrf_token %}
@@ -66,7 +44,6 @@
                 </div>
                 <div class="col-4">
                     <div class="d-grid gap-2 d-md-block">
-                      <button type="button" name="edit" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit_modal">Edit</button>
                     </div>
                 </div>
             </div>
@@ -85,7 +62,7 @@
                 <div class="scroll">
                     {% for spending in spendings %}
                         <tr>
-                            <th scope="row"> <input class = "form-check-input" type = "radio" name = "expenditure_pk" value = {{ spending.id }}></input> </th>
+                            <th scope="row"> <input id="radio" class = "form-check-input" type = "radio" name = "expenditure_pk" value = {{ spending.id }}></input> </th>
                             <td width="75px">{{ spending.category }}</td>
                             <td width="240px">{{ spending.title }}</td>
                             <td width="130px">£{{ spending.expense }}</td>
@@ -99,6 +76,7 @@
                             {% else %}
                                 <td><a> None </a></td>
                             {% endif %}
+                            <td><a class = "btn btn-sm btn-dark" href="{% url 'update_expenditure' spending.id %}"> ⚙️ </a></td>
                         </tr>
                     {% endfor %}
                 </div>
@@ -127,29 +105,33 @@
     </div>
   </div>
 
-  <!-- edit modal -->
-  <div class="modal fade" id="edit_modal" tabindex="-1" aria-labelledby="edit_modal_label" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="edit_modal_label">Edit Expenditure</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-        <form action="" method ="POST">
-            {% csrf_token %}
-            {{ form.as_p }} 
-          <p>Are you sure you want to edit this expenditure?</p>
-          <p>TO BE IMPLEMENTED</p>
+  <!-- javascript for persisting drop down selection after onchange function occurs -->
+  <script> 
+    $('#selected_category').on('change', function() {
+        localStorage.setItem("selected_category", $(this).val());
+    });
+    // $('#selected_filter').on('change', function() {
+    //     localStorage.setItem("selected_filter", $(this).val());
+    // });
+    $(document).ready(function() {
+        if (localStorage.getItem("selected_category")){//&&!(localStorage.getItem("selected_filter"))) {
+            $('#selected_category').val(localStorage.getItem("selected_category"));
+            // find way to reset table
+        } //else if (localStorage.getItem("selected_filter")&&!(localStorage.getItem("selected_category"))){
+        //     $('#selected_filter').val(localStorage.getItem("selected_filter"));
+        // }else if(localStorage.getItem("selected_category")&&localStorage.getItem("selected_filter")) {
+        //     $('#selected_filter').val(localStorage.getItem("selected_filter"));
+        //     $('#selected_category').val(localStorage.getItem("selected_category"));
+        // }
+        // if (!(performance.navigation.type == 1)) {
+        //     localStorage.clear();
+        // } 
+    });
 
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-success"  form="expenditure_form" formaction = "../update_expenditure" method="POST">Confirm</button>
-        </div>
-    </form>
-      </div>
-    </div>
-  </div>
+    function get_expenditure_id() {
+        document.getElementById("radio").value;
+    }
+    </script>
+    
 
 {% endblock %}

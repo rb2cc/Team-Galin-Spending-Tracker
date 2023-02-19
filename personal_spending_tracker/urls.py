@@ -1,6 +1,5 @@
 from django.contrib.auth import views as auth_views
 
-
 """personal_spending_tracker URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -18,7 +17,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from tracker import views
+from tracker import views, expenditure_views
 from tracker.views import UserEditView
 from django.urls.conf import include
 from django.conf import settings
@@ -54,15 +53,15 @@ urlpatterns = [
         name="password_reset_complete"),
 
     path('edit_user/', UserEditView.as_view(), name='edit_user'),
-    path('expenditure_list/', views.expenditure_list, name='expenditure_list'),
+    path('expenditure_list/', expenditure_views.expenditure_list, name='expenditure_list'),
     path('forum_home/', views.forum_home, name='forum_home'),
     path('posts/', views.posts, name='posts'),
     path('detail/', views.detail, name='detail'),
     path('category_list', views.category_list, name='category_list'),
     path('remove_category/<int:id>', views.remove_category, name='remove_category'),
-    path('remove_expenditure', views.remove_expenditure, name='remove_expenditure'),
-    path('update_expenditure', views.update_expenditure, name='update_expenditure'),
-    path('search_expenditure/', views.search_expenditure, name='search_expenditure'),
+    path('remove_expenditure', expenditure_views.remove_expenditure, name='remove_expenditure'),
+    path('update_expenditure/<int:id>', expenditure_views.update_expenditure, name='update_expenditure'),
+    path('search_expenditure/', expenditure_views.search_expenditure, name='search_expenditure'),
     path('search_category/', views.search_category, name='search_category'),
     path('edit_category/<int:id>', views.edit_category, name='edit_category'),
     path('challenge_list/', views.challenge_list, name='challenge_list'),

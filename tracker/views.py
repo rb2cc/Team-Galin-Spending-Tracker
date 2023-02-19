@@ -220,12 +220,6 @@ class UserEditView(generic.UpdateView):
             return render(request, 'edit_user.html')
         return render(request, 'edit_user.html')
 
-
-def expenditure_list(request):
-    spendingList = Expenditure.objects.filter(user=request.user).order_by('-date_created')
-    categories = Category.objects.filter(users__id=request.user.id)
-    return render(request, 'expenditure_list.html', {'spendings': spendingList, 'categories': categories})
-
 def category_list(request):
     user_id = request.user.id
     if request.method == 'POST':
@@ -266,11 +260,6 @@ def edit_category(request, id):
         form = AddCategoryForm(instance=category)
     return render(request, 'edit_category.html', {'form' : form})
     
-# def display_expenditures(request):
-#     expenditures = Expenditure.objects.all()
-#     return render(request, 'expenditure_list.html', {'expenditures':expenditures})
-
-
 def forum_home(request):
     return render(request, 'forum/forum_home.html')
 
@@ -281,48 +270,6 @@ def posts(request):
 
 def detail(request):
     return render(request, 'forum/detail.html')
-
-def remove_expenditure(request):
-    if request.method == "POST":
-        try:
-            expenditure_pk = request.POST['expenditure_pk']
-            print(request.POST['expenditure_pk'])
-            # expenditure_pk = request.POST.items()
-            expenditure = Expenditure.objects.get(pk=expenditure_pk)
-            expenditure.delete()
-            # for pk in expenditure_pk:
-            #     pk.delete()
-            return redirect('expenditure_list')
-
-        except Expenditure.DoesNotExist:
-            return redirect('expenditure_list')
-        except MultiValueDictKeyError:
-            return redirect('expenditure_list')
-
-def update_expenditure(request):
-    if request.method == "POST":
-        try:
-            # expenditure_pk_list = request.get('expenditure_pk')
-            expenditure_pk = request.POST['expenditure_pk']
-
-            expenditure = Expenditure.objects.get(pk=expenditure_pk)
-            return redirect('expenditure_list')
-
-        except Expenditure.DoesNotExist:
-            return redirect('expenditure_list')
-        # except MultiValueDictKeyError:
-        #     return redirect('expenditure_list')
-
-def search_expenditure(request):
-    query = request.GET.get("q")
-    categories = Category.objects.filter(users__id=request.user.id)
-
-    if (query == None):
-        expenditures = Expenditure.objects.filter(user=request.user).order_by('-date_created')
-        return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
-    else:
-        expenditures = Expenditure.objects.all().filter(user=request.user, title__icontains=query).order_by('-date_created')
-        return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
 
 def search_category(request):
     query = request.GET.get("q")
