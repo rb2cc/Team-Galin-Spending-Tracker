@@ -1,73 +1,67 @@
 {% extends 'base_content.html' %}
 {% block content %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
-<!-- <div class='row'> -->
     <div class="card full-card">
-        <span>
+        <!-- filter tools html -->
+        <div>
             <!-- Search bar for title filter -->
-            <form action="{% url 'search_expenditure' %}" method="GET">
-                <input id="inputted_title" name="q" type="text" onblur="this.form.submit()" placeholder="Search by title">
-                <button type="submit" class="btn btn-info btn-md">Go</button>
-                <a id="refresh_table_button" class="btn btn-md btn-dark" href='{% url 'expenditure_list' %}'>↺</a>
-            </form>
-            <!-- Drop down for category filter -->
-            <form action="{% url 'search_category' %}" method="GET">
-                <label for="selected_category">Show only:</label>
-                <select class="form-select" style="width:138px; display: inline-block;" id = "selected_category" name="q" onchange="this.form.submit()" >
-                    <option>All</option>
-                    {% for category in categories %}
-                        <option value= {{ category.id }}>{{category}}</option>
-                    {% endfor %}
-                </select>
-            </form>
-            <!-- Drop down for general filter -->
-            <form action="" method="GET">
-                <label for="selected_filter">Filter by:</label>
-                <select class="form-select" style="width:138px; display: inline-block;" id = "selected_filter" name="q" onchange="">
-                    <option value="Descending">Descending</option>
-                    <option value="Ascending">Ascending</option>
-                    <option value="Oldest">Oldest</option>
-                    <option value="Latest">Latest</option>
-                </select>
-            </form>
-        </span>
-        
-        <!-- table -->
-        <form id="expenditure_form" method="POST">
-            {% csrf_token %}
-        <table class="table mainTable">
-            <div class="row">
-                <div class="col-4">
-                  <div class="d-grid gap-2 d-md-block">
-                    <button type="button" name="delete" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#delete_modal">Delete</button>
-                  </div>
-                </div>
-                <div class="col-4">
-                    <div class="d-grid gap-2 d-md-block">
-                    </div>
-                </div>
+            <div class="filter_search">
+                <form action="{% url 'search_expenditure' %}" method="GET">
+                    <input id="inputted_title" name="q" type="text" onblur="this.form.submit()" placeholder="Search by title">
+                    <button type="submit" class="btn btn-info btn-md">Go</button>
+                    <a id="refresh_table_button" class="btn btn-md btn-dark" href='{% url 'expenditure_list' %}'>↺</a>
+                </form>
             </div>
-    </div>
+            <!-- Drop down for category filter -->
+            <div class="filter_dropdown">
+                <form action="{% url 'search_category' %}" method="GET">
+                    <label for="selected_category">Show:</label>
+                    <select class="form-select" style="width:138px; display: inline-block;" id = "selected_category" name="q" onchange="this.form.submit()" >
+                        <option>All</option>
+                        {% for category in categories %}
+                            <option value= {{ category.id }}>{{category}}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+            <!-- Drop down for general filter -->
+            <div class="filter_dropdown">
+                <form action="" method="GET">
+                    <label for="selected_filter">Filter by:</label>
+                    <select class="form-select" style="width:138px; display: inline-block;" id = "selected_filter" name="q" onchange="">
+                        <option value="Descending">Descending</option>
+                        <option value="Ascending">Ascending</option>
+                        <option value="Oldest">Oldest</option>
+                        <option value="Latest">Latest</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+    <!-- table html -->
+    <form id="expenditure_form" method="POST">
+                {% csrf_token %}
+            <table class="table mainTable">
+        </div>
             <thead class="mainThead">
                 <tr>
-                    <th scope="col" width="150px">Category</th>
-                    <th scope="col" width="170px">Title</th>
-                    <th scope="col" width="170px">Expense</th>
-                    <th scope="col" width="200px">Time</th>
-                    <th scope="col" width="330px">Description</th>
+                    <th width="" scope="col" >Category</th>
+                    <th width="110px" scope="col" >Title</th>
+                    <th scope="col">Expense</th>
+                    <th width="115px" scope="col">Time</th>
+                    <th width="600px" scope="col" >Description</th>
                     <th scope="col">Image</th>
+                    <th scope="col">Actions</th>
                 </tr>
             </thead>
             <tbody class="mainTbody">
                 <div class="scroll">
                     {% for spending in spendings %}
                         <tr>
-                            <th scope="row"> <input id="radio" class = "form-check-input" type = "radio" name = "expenditure_pk" value = {{ spending.id }}></input> </th>
-                            <td width="75px">{{ spending.category }}</td>
-                            <td width="240px">{{ spending.title }}</td>
-                            <td width="130px">£{{ spending.expense }}</td>
-                            <td width="200px">{{ spending.date_created }}</td>
-                            <td width="320px">{{ spending.description }}</td>
+                            <td>{{ spending.category }}</td>
+                            <td>{{ spending.title }}</td>
+                            <td>£{{ spending.expense }}</td>
+                            <td>{{ spending.date_created }}</td>
+                            <td>{{ spending.description }}</td>
                             {% if spending.image %}
                             <!-- This code can show full images.
                                 <td style="max-width:0px"><img src="media/{{ spending.image }} " alt="image"></td>
@@ -76,17 +70,21 @@
                             {% else %}
                                 <td><a> None </a></td>
                             {% endif %}
-                            <td><a class = "btn btn-sm btn-dark" href="{% url 'update_expenditure' spending.id %}"> ⚙️ </a></td>
+                            <td><a class = "btn btn-sm clear" href="{% url 'update_expenditure' spending.id %}"> ⚙️ </a></td>
+                            <td>
+                                <div class="delete_button" >
+                                    <input class="delete_button" type="radio" name="radio_pk" data-bs-toggle="modal" data-bs-target="#delete_modal" value = {{ spending.id }} > 🗑 
+                                </div>
+                            </td>
                         </tr>
                     {% endfor %}
                 </div>
             </tbody>
         </table>
     </form>
-    </div>
-<!-- </div> -->
-
+</div>
 <!-- delete modal -->
+<!-- modal used as delete confirmation -->
 <div class="modal fade" id="delete_modal" tabindex="-1" aria-labelledby="delete_modal_label" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -103,16 +101,15 @@
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- javascript for persisting drop down selection after onchange function occurs -->
-  <script> 
+</div>
+<!-- javascript for persisting drop down selection after onchange function occurs -->
+<script> 
     $('#selected_category').on('change', function() {
         localStorage.setItem("selected_category", $(this).val());
     });
-    // $('#selected_filter').on('change', function() {
-    //     localStorage.setItem("selected_filter", $(this).val());
-    // });
+// $('#selected_filter').on('change', function() {
+//     localStorage.setItem("selected_filter", $(this).val());
+// });
     $(document).ready(function() {
         if (localStorage.getItem("selected_category")){//&&!(localStorage.getItem("selected_filter"))) {
             $('#selected_category').val(localStorage.getItem("selected_category"));
@@ -123,15 +120,10 @@
         //     $('#selected_filter').val(localStorage.getItem("selected_filter"));
         //     $('#selected_category').val(localStorage.getItem("selected_category"));
         // }
-        // if (!(performance.navigation.type == 1)) {
-        //     localStorage.clear();
-        // } 
-    });
-
-    function get_expenditure_id() {
-        document.getElementById("radio").value;
+        if (!(performance.navigation.type == 1)) {
+            localStorage.clear();
+        } 
     }
-    </script>
-    
-
+);
+</script>
 {% endblock %}

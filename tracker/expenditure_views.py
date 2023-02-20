@@ -25,11 +25,10 @@ def expenditure_list(request):
 def remove_expenditure(request):
     if request.method == "POST":
         try:
-            expenditure_pk = request.POST['expenditure_pk']
+            expenditure_pk = request.POST['radio_pk']
             expenditure = Expenditure.objects.get(pk=expenditure_pk)
             expenditure.delete()
             return redirect('expenditure_list')
-
         except Expenditure.DoesNotExist:
             return redirect('expenditure_list')
         except MultiValueDictKeyError:
@@ -41,17 +40,15 @@ def update_expenditure(request, id):
     if request.POST:
         form = ExpenditureForm(request.POST, instance = expenditure, r=request)
         if form.is_valid():
-            exp = form.save(commit=False)
-            exp.save() #save the updated form inputs
+            expenditure = form.save(commit=False)
+            expenditure.save() #save the updated form inputs
             return redirect('expenditure_list')
-
     categories = Category.objects.filter(users__id=request.user.id)
     return render(request, 'update_expenditure.html', {'form' : form, 'categories':categories} )
 
 def search_expenditure(request):
     query = request.GET.get("q")
     categories = Category.objects.filter(users__id=request.user.id)
-
     if (query == None):
         expenditures = Expenditure.objects.filter(user=request.user).order_by('-date_created')
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})

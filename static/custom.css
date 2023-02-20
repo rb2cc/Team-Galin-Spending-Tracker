@@ -101,7 +101,6 @@ p.cover-text {
   height: 800px;
   padding-top: 10px;
   padding-left: 10px;
-
   padding-bottom: 30px;
   border-radius: 10px;
 }
@@ -143,6 +142,7 @@ input[type=password] {
   display:block;
   table-layout:fixed;
   width:100%;
+  overflow-y:auto;
 }
 
 .mainThead {
@@ -151,7 +151,7 @@ input[type=password] {
 
 .mainTbody{
   display:block;
-  max-height: 600px;
+  max-height: 715px;
   overflow-y:auto;
 }
 
@@ -174,5 +174,47 @@ input[type=password] {
   background-color: rgb(255, 255, 255, 0.5);
 }
 
+.delete_button {
+  margin: 0 5px 0 0;
+  width: 100px;
+  height: 10px;
+  position: relative;
+  cursor: pointer;
+}
 
+.delete_button label,
+.delete_button input {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.delete_button input[type="radio"] {
+  opacity: 0.011;
+  z-index: 100;
+}
+
+.delete_button input[type="radio"]:checked + label {
+  background: #20b8be;
+  border-radius: 4px;
+}
+
+.delete_button label {
+  z-index: 90;
+  line-height: 1.8em;
+}
+
+.filter_dropdown {
+  float:left;
+  margin-right: 15px;
+  /* display:inline-block; */
+}
+.filter_search {
+  float:left;
+  margin-right: 125px;
+  margin-bottom: 15px;
+}
 
