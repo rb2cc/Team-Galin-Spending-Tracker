@@ -55,3 +55,14 @@ def search_expenditure(request):
     else:
         expenditures = Expenditure.objects.all().filter(user=request.user, title__icontains=query).order_by('-date_created')
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
+
+def search_category(request):
+    query = request.GET.get("q")
+    categories = Category.objects.filter(users__id=request.user.id)
+
+    if (query == None or query == "All"):
+        expenditures = Expenditure.objects.filter(user=request.user).order_by('-date_created')
+        return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
+    else:
+        expenditures = Expenditure.objects.all().filter(user=request.user, category=query).order_by('-date_created')
+        return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
