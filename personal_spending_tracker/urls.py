@@ -73,7 +73,8 @@ urlpatterns = [
     path('my_achievements/', views.my_achievements, name='my_achievements'),
     path('share_achievement/<int:id>', views.share_achievement, name='share_achievement'),
     path('share/', views.share, name='share'),
-    re_path(r'^my_activity/$', views.my_activity, name='my_activity')
+    re_path(r'^my_activity/$', views.my_activity, name='my_activity'),
+    re_path(r'^my_avatar/$', views.my_avatar, name='my_avatar')
 ]
 
 if settings.DEBUG:

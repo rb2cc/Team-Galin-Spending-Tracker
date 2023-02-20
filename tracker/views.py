@@ -15,6 +15,9 @@ from django.utils import timezone
 from django.db import IntegrityError
 from math import floor
 from urllib.parse import urlencode, unquote
+import os
+from django.conf import settings
+import re
 
 
 # Create your views here.
@@ -499,3 +502,39 @@ def my_activity(request):
     else:
         user_activity = Activity.objects.filter(user=request.user).order_by('-time')[:int(num_items)]
     return render(request, 'my_activity.html', {'user_activity': user_activity})
+
+def my_avatar(request):
+    avatar = create_avatar(request)
+    components = {}
+
+    for category in ['accessories', 'body', 'face', 'facial-hair', 'head']:
+        components[category] = []
+
+        category_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', category)
+        for file_name in os.listdir(category_path):
+            if file_name.endswith('.svg'):
+                components[category].append(file_name)
+
+    return render(request, 'my_avatar.html', {'components': components})
+
+def create_avatar(request):
+    template_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', 'template.svg')
+    svg = open(template_path, 'r').read()
+
+    for category, item in request.GET.items():
+        if item:
+            svg_paths = get_svg_paths_for_component(item, category)
+            category_g_block = re.search(fr'<g id="{category}"[^>]*>', svg)
+            if category_g_block:
+                start_index = category_g_block.end()
+                end_index = svg.find('</g>', start_index)
+                svg = svg[:start_index] + svg_paths + svg[end_index:]
+
+    open(template_path, 'w').write(svg)
+
+def get_svg_paths_for_component(item, category):
+    filename = item + '.svg'
+    item_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', category, filename)
+    svg = open(item_path, 'r').read()
+    path_tags = re.findall(r'<path.*?/>', svg)
+    return ''.join(path_tags)

@@ -1,0 +1,38 @@
+{% extends 'base_content.html' %}
+{% load static %}
+{% block content %}
+<div class='container'>
+    <div class='row'>
+        <div class = 'card' style="margin: auto; padding: 20px">
+            <h1 style="text-align: center">My Avatar</h1>
+            <div class="row">
+                <div class="col-md-6">
+                    {% for category, file_names in components.items %}
+                        <div class="card" style="margin: 20px 0;">
+                            <h3 class="card-header">{{ category|title }}</h3>
+                            <div class="card-body row">
+                                {% for file_name in file_names %}
+                                    <div class="col-md-2">
+                                        <div class="card" style="margin: 10px;">
+                                            <a href="{% url 'my_avatar' %}?{{ category }}={{ file_name|cut:".svg" }}">
+                                                <img src="{% static 'avatar/' %}{{ category }}/{{ file_name }}" alt="{{ file_name }}" style="width: 100%;" />
+                                            </a>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-6">
+                    <div class="card" style="margin: 20px 0;">
+                        <div class="card-body">
+                            <img src="{% static 'avatar/template.svg' %}" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

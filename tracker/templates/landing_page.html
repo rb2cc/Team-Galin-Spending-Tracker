@@ -1,4 +1,5 @@
 {% extends 'base_content.html' %}
+{% load static %}
 {% block content %}
 <div class='row'>
     <div class = 'col'>
@@ -41,6 +42,10 @@
                 </form>
             </div>
             <div class="card main-cardThree">
+                <div style="padding-bottom: 20px">
+                    <img src="{% static 'avatar/template.svg' %}" style="width: auto; height: 200px;"/>
+                </div>
+                <p>{{ request.user.first_name }} {{ request.user.last_name }}</p>
                 <p>{{ current_level_name }}</p>
                 <p>Points: {{ current_points }}</p>
                 <p>Your progress: </p>
