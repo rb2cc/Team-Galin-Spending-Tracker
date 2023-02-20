@@ -66,3 +66,21 @@ def filter_by_category(request):
     else:
         expenditures = Expenditure.objects.all().filter(user=request.user, category=query).order_by('-date_created')
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
+
+def filter_by_miscellaneous(request):
+    query = request.GET.get("q")
+    categories = Category.objects.filter(users__id=request.user.id)
+
+    if (query == "desc"):
+        expenditures = Expenditure.objects.order_by('-expense')
+        return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
+    elif (query == "asc"):
+        expenditures = Expenditure.objects.order_by('expense')
+        return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
+    elif (query == "old"):
+        expenditures = Expenditure.objects.order_by('date_created')
+        return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
+    elif (query == "new"):
+        expenditures = Expenditure.objects.order_by('-date_created')
+        return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
+
