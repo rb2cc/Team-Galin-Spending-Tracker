@@ -505,6 +505,7 @@ def my_activity(request):
 
 def my_avatar(request):
     avatar = create_avatar(request)
+    colours = get_avatar_colours()
     components = {}
 
     for category in ['accessories', 'body', 'face', 'facial-hair', 'head']:
@@ -515,15 +516,25 @@ def my_avatar(request):
             if file_name.endswith('.svg'):
                 components[category].append(file_name)
 
-    return render(request, 'my_avatar.html', {'components': components})
+    return render(request, 'my_avatar.html', {'components': components, 'colours': colours})
 
 def create_avatar(request):
     template_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', 'template.svg')
     svg = open(template_path, 'r').read()
 
-    for category, item in request.GET.items():
-        if item:
-            svg_paths = get_svg_paths_for_component(item, category)
+    for category, component in request.GET.items():
+        if category in ['skin', 'shirt', 'hair', 'background']:
+            if category == "background":
+                colour_blocks = re.findall(r'<rect\s+id="background".*?>', svg)
+            else:
+                colour_blocks = re.findall(fr'<path id="{category}"[^>]*>', svg)
+            for colour_block in colour_blocks:
+                fill_param = re.search(r'fill="([^"]+)"', colour_block)
+                new_fill_param = f'fill="{component}"'
+                block_with_new_fill_param = colour_block.replace(fill_param.group(0), new_fill_param)
+                svg = svg.replace(colour_block, block_with_new_fill_param)
+        else:
+            svg_paths = get_svg_paths_for_component(category, component)
             category_g_block = re.search(fr'<g id="{category}"[^>]*>', svg)
             if category_g_block:
                 start_index = category_g_block.end()
@@ -532,9 +543,16 @@ def create_avatar(request):
 
     open(template_path, 'w').write(svg)
 
-def get_svg_paths_for_component(item, category):
-    filename = item + '.svg'
-    item_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', category, filename)
+def get_svg_paths_for_component(category, component):
+    file_name = component + '.svg'
+    item_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', category, file_name)
     svg = open(item_path, 'r').read()
     path_tags = re.findall(r'<path.*?/>', svg)
     return ''.join(path_tags)
+
+def get_avatar_colours():
+    colours = {'skin': ['#694d3d', '#ae5d29', '#d08b5b', '#edb98a', '#ffdbb4'],
+     'shirt': ['#78e185', '#8fa7df', '#9ddadb', '#e279c7', '#e78276', '#fdea6b', '#ffcf77'],
+     'hair': ['#aa8866', '#debe99', '#241c11', '#4f1a00', '#9a3300'],
+     'background': ['#b6e3f4', '#c0aede', '#d1d4f9', '#ffd5dc', '#ffdfbf']}
+    return colours

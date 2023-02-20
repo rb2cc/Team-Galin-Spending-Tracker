@@ -15,7 +15,7 @@
                                     <div class="col-md-2">
                                         <div class="card" style="margin: 10px;">
                                             <a href="{% url 'my_avatar' %}?{{ category }}={{ file_name|cut:".svg" }}">
-                                                <img src="{% static 'avatar/' %}{{ category }}/{{ file_name }}" alt="{{ file_name }}" style="width: 100%;" />
+                                                <img src="{% static 'avatar/' %}{{ category }}/{{ file_name }}" style="width: 100%;" />
                                             </a>
                                         </div>
                                     </div>
@@ -27,9 +27,23 @@
                 <div class="col-md-6">
                     <div class="card" style="margin: 20px 0;">
                         <div class="card-body">
-                            <img src="{% static 'avatar/template.svg' %}" />
+                            <img src="{% static 'avatar/template.svg' %}" style="max-width: 100%; height: auto;"/>
                         </div>
                     </div>
+                    {% for category, category_colours in colours.items %}
+                        <div class="card" style="margin: 20px 0;">
+                            <h3 class="card-header">{{ category|title }}</h3>
+                            <div class="card-body row" style="padding: 10px;">
+                                {% for colour in category_colours %}
+                                    <div class="col-md-2">
+                                        <a href="{% url 'my_avatar' %}?{{ category }}={{ colour|urlencode }}">
+                                            <div class="card" style="margin: 10px; background-color: {{ colour }}; height: 50px; width: 50px; border: 1px solid black"></div>
+                                        </a>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
