@@ -199,3 +199,20 @@ input[type=password] {
   display: inline-block;
 }
 
+.refresh {
+  border-radius: 25px;
+  border-color: darkorchid;
+}
+
+.go {
+  background-color: #8765f0;
+  color:white;
+  border-color: #f109fd;
+  border-radius: 25px;
+}
+
+.go:hover {
+  background-color:#2cb6e5;
+  transition: 0.5s;
+}
+

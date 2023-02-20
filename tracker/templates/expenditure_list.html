@@ -8,8 +8,8 @@
             <div class="filter_search">
                 <form action="{% url 'filter_title' %}" method="GET">
                     <input id="inputted_title" name="q" type="text" onblur="this.form.submit()" placeholder="Search by title">
-                    <button type="submit" class="btn btn-info btn-md">Go</button>
-                    <a id="refresh_table_button" class="btn btn-md btn-dark" href='{% url 'expenditure_list' %}'>↺</a>
+                    <button type="submit" class="btn btn-md go">Go</button>
+                    <a id="refresh_table_button" class="btn btn-md btn-dark refresh" href='{% url 'expenditure_list' %}'>↺</a>
                 </form>
             </div>
             <!-- Drop down for category filter -->
@@ -45,10 +45,10 @@
             <thead class="mainThead">
                 <tr>
                     <th width="" scope="col" >Category</th>
-                    <th width="110px" scope="col" >Title</th>
+                    <th width="120px" scope="col" >Title</th>
                     <th scope="col">Expense</th>
                     <th width="115px" scope="col">Time</th>
-                    <th width="685px" scope="col" >Description</th>
+                    <th width="680px" scope="col" >Description</th>
                     <th scope="col">Image</th>
                     <th scope="col">Actions</th>
                 </tr>
@@ -70,8 +70,8 @@
                             {% else %}
                                 <td><a> None </a></td>
                             {% endif %}
-                            <td><a class = "btn btn-sm clear" href="{% url 'update_expenditure' spending.id %}"> ⚙️ </a></td>
-                            <td>
+                            <td style="background-color: #efe8fa;"><a class = "btn btn-sm clear" href="{% url 'update_expenditure' spending.id %}"> ⚙️ </a></td>
+                            <td style="background-color: #efe8fa;">
                                 <div class="delete_button" >
                                     <label>
                                         <input class="delete_button" type="radio" name="radio_pk" data-bs-toggle="modal" data-bs-target="#delete_modal" value = {{ spending.id }} > 🗑 
