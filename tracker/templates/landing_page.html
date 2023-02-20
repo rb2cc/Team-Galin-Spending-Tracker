@@ -69,62 +69,69 @@
                 </div>    
                 <div class = 'row'>
                     <div style="width:900px; margin-top:10px; margin-left:20px;">
-                        <canvas id="expenseLineChart"></canvas>
+                        <canvas id="expenseLineChart" width="900px"></canvas>
                     </div>  
                 </div>
 
                 <!-- JavaScript to print the chart -->
                 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>       
                 <script>
+                    recentCategory = [{%for data in categoryList.90%}'{{data}}',{%endfor%}];
                     const ctx1 = document.getElementById('expensePieChart');
-                    chart1 = new Chart(ctx1, {
-                        type: 'doughnut',
-                        data: {
-                            labels: [{%for data in categoryList.90%}'{{data}}',{%endfor%}],
-                            datasets: [{
-                                label: 'Expense',
-                                data: [{%for data in expenseList.90%}'{{data}}',{%endfor%}],
-                                borderWidth: 1
-                            }]
-                        },
-                    });
                     const ctx2 = document.getElementById('expenseBarChart');
-                    chart2 = new Chart(ctx2, {
-                        type: 'bar',
-                        data: {
-                            labels: [{%for data in dateList.90%}'{{data}}',{%endfor%}],
-                            datasets: [{
-                                data: [{%for data in dailyExpenseList.90%}'{{data}}',{%endfor%}],
-                                borderWidth: 1
-                            }]
-                        },
-                        options:{
-                            plugins:{
-                                legend:{
-                                    display:false
-                                }
-                            }
-                        }
-                    });
                     const ctx3 = document.getElementById('expenseLineChart');
-                    chart3 = new Chart(ctx3, {
-                        type: 'line',
-                        data: {
-                            labels: [{%for data in dateList.90%}'{{data}}',{%endfor%}],
-                            datasets: [{
-                                label: 'Expense',
-                                data: [{%for data in cumulativeExpenseList.90%}'{{data}}',{%endfor%}],
-                                borderWidth: 1
-                            }]
-                        },
-                        options:{
-                            plugins:{
-                                legend:{
-                                    display:false
+                    if(recentCategory.length!=0){  
+                        chart1 = new Chart(ctx1, {
+                            type: 'doughnut',
+                            data: {
+                                labels: [{%for data in categoryList.90%}'{{data}}',{%endfor%}],
+                                datasets: [{
+                                    label: 'Expense',
+                                    data: [{%for data in expenseList.90%}'{{data}}',{%endfor%}],
+                                    borderWidth: 1
+                                }]
+                            },
+                        });    
+                        chart2 = new Chart(ctx2, {
+                            type: 'bar',
+                            data: {
+                                labels: [{%for data in dateList.90%}'{{data}}',{%endfor%}],
+                                datasets: [{
+                                    data: [{%for data in dailyExpenseList.90%}'{{data}}',{%endfor%}],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options:{
+                                plugins:{
+                                    legend:{
+                                        display:false
+                                    }
                                 }
                             }
-                        }
-                    });
+                        });       
+                        chart3 = new Chart(ctx3, {
+                            type: 'line',
+                            data: {
+                                labels: [{%for data in dateList.90%}'{{data}}',{%endfor%}],
+                                datasets: [{
+                                    label: 'Expense',
+                                    data: [{%for data in cumulativeExpenseList.90%}'{{data}}',{%endfor%}],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options:{
+                                plugins:{
+                                    legend:{
+                                        display:false
+                                    }
+                                }
+                            }
+                        });
+                    }else{
+                        text = ctx3.getContext("2d");
+                        text.font="30px Arial";
+                        text.fillText("No data available. Add a new spending to show statistic charts", 20, 100);
+                    }
 
                     function showChart(){
                         if (frequency.value==7){
