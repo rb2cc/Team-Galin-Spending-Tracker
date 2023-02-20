@@ -48,7 +48,7 @@
                     <th width="110px" scope="col" >Title</th>
                     <th scope="col">Expense</th>
                     <th width="115px" scope="col">Time</th>
-                    <th width="600px" scope="col" >Description</th>
+                    <th width="685px" scope="col" >Description</th>
                     <th scope="col">Image</th>
                     <th scope="col">Actions</th>
                 </tr>
@@ -66,14 +66,16 @@
                             <!-- This code can show full images.
                                 <td style="max-width:0px"><img src="media/{{ spending.image }} " alt="image"></td>
                             -->  
-                                <td><a href="{{ spending.image.url }}">View image</a></td>
+                                <td><a href="{{ spending.image.url }}">View</a></td>
                             {% else %}
                                 <td><a> None </a></td>
                             {% endif %}
                             <td><a class = "btn btn-sm clear" href="{% url 'update_expenditure' spending.id %}"> ⚙️ </a></td>
                             <td>
                                 <div class="delete_button" >
-                                    <input class="delete_button" type="radio" name="radio_pk" data-bs-toggle="modal" data-bs-target="#delete_modal" value = {{ spending.id }} > 🗑 
+                                    <label>
+                                        <input class="delete_button" type="radio" name="radio_pk" data-bs-toggle="modal" data-bs-target="#delete_modal" value = {{ spending.id }} > 🗑 
+                                    </label>
                                 </div>
                             </td>
                         </tr>
