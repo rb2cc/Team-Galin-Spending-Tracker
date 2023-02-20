@@ -46,7 +46,7 @@ def update_expenditure(request, id):
     categories = Category.objects.filter(users__id=request.user.id)
     return render(request, 'update_expenditure.html', {'form' : form, 'categories':categories} )
 
-def search_expenditure(request):
+def filter_by_title(request):
     query = request.GET.get("q")
     categories = Category.objects.filter(users__id=request.user.id)
     if (query == None):
@@ -56,7 +56,7 @@ def search_expenditure(request):
         expenditures = Expenditure.objects.all().filter(user=request.user, title__icontains=query).order_by('-date_created')
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
 
-def search_category(request):
+def filter_by_category(request):
     query = request.GET.get("q")
     categories = Category.objects.filter(users__id=request.user.id)
 
