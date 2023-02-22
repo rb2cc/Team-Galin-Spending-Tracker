@@ -519,7 +519,7 @@ def my_avatar(request):
     return render(request, 'my_avatar.html', {'components': components, 'colours': colours})
 
 def create_avatar(request):
-    template_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', 'template.svg')
+    template_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', 'template', 'template.svg')
     svg = open(template_path, 'r').read()
 
     for category, component in request.GET.items():
@@ -541,6 +541,8 @@ def create_avatar(request):
                 end_index = svg.find('</g>', start_index)
                 svg = svg[:start_index] + svg_paths + svg[end_index:]
 
+        create_avatar_activity(request)
+
     open(template_path, 'w').write(svg)
 
 def get_svg_paths_for_component(category, component):
@@ -556,3 +558,11 @@ def get_avatar_colours():
      'hair': ['#aa8866', '#debe99', '#241c11', '#4f1a00', '#9a3300'],
      'background': ['#b6e3f4', '#c0aede', '#d1d4f9', '#ffd5dc', '#ffdfbf']}
     return colours
+
+def create_avatar_activity(request):
+    if Activity.objects.filter(user=request.user, name="You've created an avatar").exists():
+        user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = "You've edited your avatar", points = 15)
+        activity_points(request, user_activity.points)
+    else:
+        user_activity = Activity.objects.create(user=request.user, image = "images/avatar.png", name="You've created an avatar", points = 15)
+        activity_points(request, user_activity.points)
