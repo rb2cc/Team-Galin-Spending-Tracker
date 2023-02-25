@@ -1,0 +1,76 @@
+{% extends 'base_content.html' %}
+{% block content %}
+  <div class="container vh-100">
+    <div class="row h-50">
+      <div class="col-9">
+
+
+      <h1>{{ table_header }}</h1>
+      <table class="table">
+        <tbody>
+            {% include table %}
+        </tbody>
+      </table>
+      <nav aria-label="Page navigation example">
+        <ul class="pagination pagination-sm">
+          {% if page.has_previous %}
+          <li class="page-item" ><a class="page-link" href="?page={{ page.previous_page_number }}" style="color: #525252;">&larr;</a></li>
+              <li class="page-item"><a class="page-link" href="?page=1" style="color: #525252;">1</a></li>
+          {% endif %}
+
+          <li class="page-item disabled"><a href='#' class="page-link" style="color: #9c9a9a;">
+            Page {{ page.number }} of {{ page.paginator.num_pages }}
+          </a></li>
+
+          {% if page.has_next %}
+              <li class="page-item"><a class="page-link" href="?page={{ page.paginator.num_pages }}" style="color: #525252;">{{ page.paginator.num_pages }}</a></li>
+              <li class="page-item"><a class="page-link" href="?page={{ page.next_page_number }}" style="color: #525252;d">&rarr;</a></li></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+    <div class="col-3">
+      <div class="card main-cardFive h-50">
+        <form id="userform" method="post">
+          {% csrf_token %}
+        <select class="form-select" name="view_select">
+          <option selected>Select group to view</option>
+          <option value="Users">Users</option>
+          <option value="Categories">Categories</option>
+        </select>
+        <input type="submit" class="btn btn-primary" value="Update Table" name='table_update'></input>
+        </form>
+        <span>test</span>
+      </div>
+
+    </div>
+  </div>
+
+
+    <div class="row h-50">
+        <div class="col-4">
+          <div class="card main-cardOne">
+            <form action="{% url 'admin_dashboard' %}" method="post">
+              {% csrf_token %}
+              {% include 'partials/bootstrap_form.html' with form=user_form %}
+              <button type="submit" class="btn btn-primary" name="create_user" method="post">Create</button>
+            </form>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="card main-cardOne">
+            <form action="{% url 'admin_dashboard' %}" method="post">
+              {% csrf_token %}
+              {% include 'partials/bootstrap_form.html' with form=category_form %}
+              <button type="submit" class="btn btn-primary" name="create_category" method="post">Create</button>
+            </form>
+          </div>
+        </div>
+        <div class="col-4">
+          <span>test3</span>
+        </div>
+    </div>
+  </div>
+
+
+{% endblock %}

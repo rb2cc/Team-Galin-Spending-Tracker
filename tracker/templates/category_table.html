@@ -1,0 +1,17 @@
+
+<thead>
+  <tr>
+    <th scope="col">Select</th>
+    <th scope="col">Name</th>
+    <th scope="col">Weekly Limit</th>
+  </tr>
+</thead>
+<tbody>
+  {% for category in page %}
+  <tr>
+    <th scope="row"> <input class = "form-check-input" type = "radio" name = "category_pk" value = {{category.pk}}></input> </th>
+    <td> {{category.name}}</td>
+    <td> {{category.week_limit}} </td>
+  </tr>
+</tbody>
+{% endfor %}
