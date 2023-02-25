@@ -81,10 +81,10 @@ def filter_by_title(request):
     query = request.GET.get("q")
     categories = Category.objects.filter(users__id=request.user.id)
     if (query == None):
-        expenditures = Expenditure.objects.filter(user=request.user).order_by('-date_created')
+        expenditures = Expenditure.objects.filter(user=request.user, is_binned=False).order_by('-date_created')
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
     else:
-        expenditures = Expenditure.objects.all().filter(user=request.user, title__icontains=query).order_by('-date_created')
+        expenditures = Expenditure.objects.all().filter(user=request.user, title__icontains=query, is_binned=False).order_by('-date_created')
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
 
 def filter_by_category(request):
@@ -92,10 +92,10 @@ def filter_by_category(request):
     categories = Category.objects.filter(users__id=request.user.id)
 
     if (query == None or query == "All"):
-        expenditures = Expenditure.objects.filter(user=request.user).order_by('-date_created')
+        expenditures = Expenditure.objects.filter(user=request.user, is_binned=False).order_by('-date_created')
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
     else:
-        expenditures = Expenditure.objects.all().filter(user=request.user, category=query).order_by('-date_created')
+        expenditures = Expenditure.objects.all().filter(user=request.user, category=query, is_binned=False).order_by('-date_created')
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
 
 def filter_by_miscellaneous(request):
@@ -103,15 +103,15 @@ def filter_by_miscellaneous(request):
     categories = Category.objects.filter(users__id=request.user.id)
 
     if (query == "desc"):
-        expenditures = Expenditure.objects.order_by('-expense')
+        expenditures = Expenditure.objects.filter(is_binned=False).order_by('-expense')
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
     elif (query == "asc"):
-        expenditures = Expenditure.objects.order_by('expense')
+        expenditures = Expenditure.objects.filter(is_binned=False).order_by('expense')
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
     elif (query == "old"):
-        expenditures = Expenditure.objects.order_by('date_created')
+        expenditures = Expenditure.objects.filter(is_binned=False).order_by('date_created')
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
     elif (query == "new"):
-        expenditures = Expenditure.objects.order_by('-date_created')
+        expenditures = Expenditure.objects.filter(is_binned=False).order_by('-date_created')
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
 
