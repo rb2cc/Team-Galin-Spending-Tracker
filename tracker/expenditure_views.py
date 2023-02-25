@@ -18,21 +18,52 @@ from math import floor
 from urllib.parse import urlencode, unquote
 
 def expenditure_list(request):
-    spendingList = Expenditure.objects.filter(user=request.user).order_by('-date_created')
+    spending_list = Expenditure.objects.filter(user=request.user, is_binned=False).order_by('-date_created')
     categories = Category.objects.filter(users__id=request.user.id)
-    return render(request, 'expenditure_list.html', {'spendings': spendingList, 'categories': categories})
+    return render(request, 'expenditure_list.html', {'spendings': spending_list, 'categories': categories})
 
-def remove_expenditure(request):
+def binned_expenditure_list(request):
+    binned_list = Expenditure.objects.filter(user=request.user, is_binned=True).order_by('-date_created')
+    categories = Category.objects.filter(users__id=request.user.id)
+    return render(request, 'expenditure_bin.html', {'binned_spendings': binned_list, 'categories': categories})
+
+def bin_expenditure(request):
     if request.method == "POST":
         try:
             expenditure_pk = request.POST['radio_pk']
             expenditure = Expenditure.objects.get(pk=expenditure_pk)
-            expenditure.delete()
+            expenditure.is_binned = True
+            expenditure.save()
             return redirect('expenditure_list')
         except Expenditure.DoesNotExist:
             return redirect('expenditure_list')
         except MultiValueDictKeyError:
             return redirect('expenditure_list')
+        
+def recover_expenditure(request):
+    if request.method == "POST":
+        try:
+            expenditure_pk = request.POST['radio_pk']
+            expenditure = Expenditure.objects.get(pk=expenditure_pk)
+            expenditure.is_binned = False
+            expenditure.save()
+            return redirect('expenditure_bin')
+        except Expenditure.DoesNotExist:
+            return redirect('expenditure_bin')
+        except MultiValueDictKeyError:
+            return redirect('expenditure_bin')
+        
+def delete_expenditure(request):
+    if request.method == "POST":
+        try:
+            expenditure_pk = request.POST['radio_pk']
+            expenditure = Expenditure.objects.get(pk=expenditure_pk)
+            expenditure.delete()
+            return redirect('expenditure_bin')
+        except Expenditure.DoesNotExist:
+            return redirect('expenditure_bin')
+        except MultiValueDictKeyError:
+            return redirect('expenditure_bin')
 
 def update_expenditure(request, id):
     expenditure = Expenditure.objects.get(id = id) 

@@ -1,0 +1,99 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+<div class="card full-card">
+    <!-- table html -->
+    <form id="expenditure_form" method="POST">
+                {% csrf_token %}
+            <table class="table mainTable">
+        </div>
+            <thead class="mainThead">
+                <tr>
+                    <th width="" scope="col" >Category</th>
+                    <th width="120px" scope="col" >Title</th>
+                    <th scope="col">Expense</th>
+                    <th width="115px" scope="col">Time</th>
+                    <th width="680px" scope="col" >Description</th>
+                    <th scope="col">Image</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="mainTbody">
+                <div class="scroll">
+                    {% for binned in binned_spendings %}
+                        <tr>
+                            <td>{{ binned.category }}</td>
+                            <td>{{ binned.title }}</td>
+                            <td>£{{ binned.expense }}</td>
+                            <td>{{ binned.date_created }}</td>
+                            <td>{{ binned.description }}</td>
+                            {% if binned.image %}
+                            <!-- This code can show full images.
+                                <td style="max-width:0px"><img src="media/{{ spending.image }} " alt="image"></td>
+                            -->  
+                                <td><a href="{{ binned.image.url }}">View</a></td>
+                            {% else %}
+                                <td><a> None </a></td>
+                            {% endif %}
+                            <td style="background-color: #efe8fa;">
+                                <div class="action_button" >
+                                    <label>
+                                        <input class="action_button" type="radio" name="radio_pk" data-bs-toggle="modal" data-bs-target="#recover_modal" value = {{ binned.id }} > Recover 
+                                    </label>
+                                </div>
+                            </td>
+                            <td style="background-color: #efe8fa;">
+                                <div class="action_button" >
+                                    <label>
+                                        <input class="action_button" type="radio" name="radio_pk" data-bs-toggle="modal" data-bs-target="#delete_modal" value = {{ binned.id }} > 🗑 
+                                    </label>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </div>
+            </tbody>
+        </table>
+    </form>
+</div>
+<!-- delete modal -->
+<!-- modal used as delete confirmation -->
+<div class="modal fade" id="delete_modal" tabindex="-1" aria-labelledby="delete_modal_label" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="delete_modal_label">Delete Expenditure</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete this expenditure?</p>
+          <p>You will not be able to recover this expenditure after deletion.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger"  form="expenditure_form" formaction = "../delete_expenditure" method="POST">Delete</button>
+        </div>
+      </div>
+    </div>
+</div>
+<!-- recover modal -->
+<!-- modal used as delete confirmation -->
+<div class="modal fade" id="recover_modal" tabindex="-1" aria-labelledby="recover_modal_label" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="recover_modal_label">Recover Expenditure</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to recover this expenditure?</p> 
+          <p>This expenditure will be moved back into your main expenditure list</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success"  form="expenditure_form" formaction = "../recover_expenditure" method="POST">Recover</button>
+        </div>
+      </div>
+    </div>
+</div>
+{% endblock %}

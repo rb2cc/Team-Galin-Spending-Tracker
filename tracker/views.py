@@ -78,7 +78,7 @@ def landing_page(request):
     else:
 
         form = ExpenditureForm(r=request)
-    objectList = Expenditure.objects.filter(user=request.user)
+    objectList = Expenditure.objects.filter(user=request.user, is_binned=False)
 
     '''Data for list display'''
     spendingList = objectList.order_by('-date_created')[0:19]
@@ -144,7 +144,7 @@ def getCategoryAndExpenseList(objectList, request):
     categoryList = []
     expenseList = []
     for x in request.user.available_categories.all():
-        tempList = objectList.filter(category=x)
+        tempList = objectList.filter(category=x, is_binned=False)
         if tempList.exists():
             categoryList.append(x)
         tempInt = 0
@@ -157,7 +157,7 @@ def getCategoryAndExpenseList(objectList, request):
 def getDateListAndDailyExpenseList(objectList, num):
     dateList = []
     dailyExpenseList = []
-    for x in objectList.order_by('date_created'):
+    for x in objectList.filter(is_binned=False).order_by('date_created'):
         dateList.append(x.date_created.date())
         dailyExpenseList.append(x.expense)
     for x in range(0, len(dateList)):
