@@ -11,7 +11,7 @@ class RequestFormTestCase(TestCase):
     def setUp(self): 
 
         self.factory = RequestFactory()
-        url = 'images/fortlobby.png'
+        url = 'test_image/fortlobby.png'
 
         self.category = Category.objects.create(
             name = 'Test',

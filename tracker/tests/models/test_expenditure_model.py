@@ -8,7 +8,7 @@ class ExpenditureModelTestCase(TestCase):
 
     def setUp(self):
 
-        url = 'images/fortlobby.png'
+        url = 'test_image/fortlobby.png'
 
         self.user = User.objects.create_user(
             email = 'james@example.org',

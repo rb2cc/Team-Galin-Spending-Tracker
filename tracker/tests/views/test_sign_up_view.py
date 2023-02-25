@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 from tracker.forms import SignUpForm
 from tracker.models import User, Category
-from .helpers import LogInTester, CategoryFunctions
+from tracker.tests.helpers import LogInTester, CategoryFunctions
 
 
 class SignUpViewTestCase(TestCase, LogInTester):
