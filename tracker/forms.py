@@ -6,7 +6,7 @@ from .models import User
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm, PasswordResetForm
 
 
-from .models import User, Expenditure
+from .models import User, Expenditure, Category
 
 
 class LogInForm(forms.Form):
@@ -104,6 +104,14 @@ class CreateUserForm(forms.ModelForm):
         )
         return user
 
+class CategoryForm(forms.ModelForm):
+
+    class Meta:
+        model = Category
+        fields = ['name','week_limit']
+
+    name = forms.CharField(label='', widget=forms.TextInput(attrs={'placeholder': 'Category Name'}))
+    week_limit = forms.CharField(label='', widget=forms.TextInput(attrs={'placeholder': 'Weekly Limit'}))
 
 
 class EditUserForm(UserChangeForm):

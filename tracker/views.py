@@ -2,7 +2,7 @@
 from .forms import SignUpForm, LogInForm, EditUserForm, CreateUserForm
 from django.contrib.auth.forms import UserChangeForm
 from .models import User
-from .forms import SignUpForm, LogInForm, ExpenditureForm
+from .forms import SignUpForm, LogInForm, ExpenditureForm, CategoryForm
 from .models import User, Category, Expenditure
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -114,6 +114,73 @@ def superuser_dashboard(request):
     page = paginator.get_page(page_number)
 
     return render(request, 'superuser_dashboard.html', {'form': form, 'page': page})
+
+def admin_dashboard(request):
+
+    #DEFAULT PARAMETERS
+    table_view = 'Users'
+    table = 'user_table.html'
+    user_list = User.objects.all()
+    user_paginator = Paginator(user_list, 5)
+    user_page_number = request.GET.get('page')
+    page = user_paginator.get_page(user_page_number)
+    user_form = CreateUserForm()
+    category_form = CategoryForm()
+
+    if request.method == 'POST':
+        # IF CREATE USER BUTTON PRESSED
+        if 'create_user' in request.POST:
+            user_create_helper(request) #HELPER FUNCTION TO CLEAN UP
+
+        if 'create_category' in request.POST:
+            form = CategoryForm(request.POST)
+            if form.is_valid():
+                category = form.save()
+                category.is_global = True
+                category.save()
+                return redirect('admin_dashboard')
+
+
+        # IF UPDATE TABLE BUTTON PRESSED
+        if 'table_update' in request.POST:
+            table_view = request.POST['view_select']
+            if table_view == "Users": #IF USERS SELECTED
+                table = 'user_table.html'
+                user_list = User.objects.all()
+                user_paginator = Paginator(user_list, 5)
+                user_page_number = request.GET.get('page')
+                page = user_paginator.get_page(user_page_number)
+
+            elif table_view == "Categories": #IF CATEGORIES SELECTED
+                table = 'category_table.html'
+                category_list = Category.objects.all()
+                category_paginator = Paginator(category_list, 5)
+                category_page_number = request.GET.get('page')
+                page = category_paginator.get_page(category_page_number)
+
+            else: #DEFAULT TO USERS
+                table_view = 'Users'
+                table = 'user_table.html'
+                user_list = User.objects.all()
+                user_paginator = Paginator(user_list, 5)
+                user_page_number = request.GET.get('page')
+                page = user_paginator.get_page(user_page_number)
+
+
+
+
+    else: #DEFAULT TO USERS
+        pass
+
+    return render(request, 'admin_dashboard.html', {'page': page,'table': table,
+    'table_header': table_view, 'user_form': user_form, 'category_form': category_form})
+
+def user_create_helper(request):
+    form = CreateUserForm(request.POST)
+    if form.is_valid():
+        user = form.save()
+        return redirect('admin_dashboard')
+
 
 def user_delete(request):
     if request.method == "POST":

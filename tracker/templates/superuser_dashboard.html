@@ -1,6 +1,9 @@
 {% extends 'base_content.html' %}
 {% block content %}
   <div class="container vh-100">
+
+
+
     <div class="row h-50">
       <div class="col-10">
       <div class="row">
@@ -17,7 +20,7 @@
               <th scope="col">Is Admin?</th>
             </tr>
           </thead>
-          <tbody style="overflow-y: scroll;">
+          <tbody>
             {% for user in page %}
             <tr>
               <th scope="row"> <input class = "form-check-input" type = "radio" name = "user_pk" value = {{user.pk}}></input> </th>
@@ -32,6 +35,7 @@
         </form>
 
         </div>
+
         <div class="row">
 
           {# PAGINATION #}
@@ -55,6 +59,7 @@
 
         </div>
       </div>
+
       {# PROMOTE DEMOTE BUTTONS #}
       <div class="col-2 pt-4">
         <div class="container">
