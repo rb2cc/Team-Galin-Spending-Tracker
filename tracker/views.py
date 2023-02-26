@@ -3,10 +3,10 @@ from .forms import SignUpForm, LogInForm, EditUserForm
 from django.contrib.auth.forms import UserChangeForm
 from .models import User
 from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm
-from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel
+from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel, Post, Forum_Category
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.urls import reverse, reverse_lazy
 from django.views import generic
@@ -17,6 +17,7 @@ from django.db.models import Q
 from django.db import IntegrityError
 from math import floor
 from urllib.parse import urlencode, unquote
+from .utils import update_views
 
 # Create your views here.
 
@@ -261,15 +262,33 @@ def edit_category(request, id):
     return render(request, 'edit_category.html', {'form' : form})
     
 def forum_home(request):
-    return render(request, 'forum/forum_home.html')
+    all_forum_categories = Forum_Category.objects.all()
+    context = {
+        "all_forum_categories": all_forum_categories,
+    }
+    return render(request, 'forum/forum_home.html', context)
 
 
-def posts(request):
-    return render(request, 'forum/posts.html')
+def posts(request, slug):
+    category = get_object_or_404(Forum_Category, slug=slug)
+    posts = Post.objects.filter(approved=True, forum_categories=category)
+
+    context = {
+        "posts":posts,
+        "forum": category,
+
+    }
+  
+    return render(request, 'forum/posts.html', context)
 
 
-def detail(request):
-    return render(request, 'forum/detail.html')
+def detail(request, slug):
+    post = get_object_or_404(Post, slug=slug)
+    context = {
+        "post":post
+    }
+    update_views(request, post)
+    return render(request, 'forum/detail.html', context)
 
 def challenge_list(request):
     challenges = Challenge.objects.all()

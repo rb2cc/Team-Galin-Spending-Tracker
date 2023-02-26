@@ -1,75 +1,35 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'forum/forum_base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"
-    <title></title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
-    <link rel="stylesheet" href={% static "forum_static/style.css" %}/>
-    <link rel="stylesheet"href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital@1&display=swap"/>
-</head>
-    <body>
-
-        <header>
-            <!--- Navbar --->
-            <div class="navbar">
-                <nav class="navigation hide" id="navigation">
-                    <ul class="nav-list">
-                        <span class="close-icon" onclick="showIconBar()"><i class="fa fa-close"></i></span>
-                        <li class="nav-item">
-                            <a href="../detail/"> Detail </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="../posts/"> Posts </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="../forum_home/"> Forum </a>
-                        </li>
-                    </ul>
-                </nav>
-                <a href="#" class="bar-icon" id="iconBar" onclick="hideIconBar()"><i class="fa fa-bars"></i></a>
-                <div class="brand"> My Forum </div>
-            </div>
-            <!---Search Box--->
-            <div>
-                <div class="search-box">
-                    <div>
-                        <select name="" id="">
-                            <option value="everything"> Everything </option>
-                            <option value="titles"> Titles </option>
-                            <option value="description"> Description </option>
-                        </select>
-                        <input type="text" name="q" id="" placeholder"search ..."></input>
-                        <button><i class="fa fa-search"></i></button>
-                    </div>
-            </div>
-        </header>
+{% block content %}
 
         <div class="container">
             <div class="subforum">
                 <div class="subforum-title">
                     <h1> General Information </h1>
                     </div>
+
+                    {% for category in all_forum_categories %}
                     <div class="subforum-row">
                         <div class="subforum-icon subforum-column center">
                             <i class="fa fa-car"></i>
                         </div>
                         <div class="subforum-description subforum-column subforum-description">
-                            <h1><a href=""> Description Title: </a></h1>
-                            <p> Description Content: Random Description </p>
+                            <h1><a href="{{category.get_url}}"> {{category.title}} : </a></h1>
+                            <p> Description: {{category.description}} </p>
                         </div>
-                        <div class="subforum-stats subforum column center">
-                            <span> 24 Posts | 15 Topics </span>
+                        <div class="subforum-stats subforum-column center">
+                            <span> {{category.num_posts}} Posts </span>
                         </div>
-                        <div class="subforum-info subforum column">
-                            <b><a href=""> Last Post  </a></b>  by  <a href=""> JustAUser </a>
+                        <div class="subforum-info subforum-column">
+                            <b><a href="{{category.last_post.get_url}}"> Last Post </a></b>  by  <a href=""> {{category.last_post.user.fullname|title}} </a>
                             <br>
-                            on <small> 22 Dec 2021 </small>
+                            on <small> {{category.last_post.date|date}} </small>
                         </div>
                     </div>
+                    {% endfor %}
         </div>
+
+
     </div>
 
 <!--- Forum Info -->
@@ -84,11 +44,7 @@
 
     </div>
 
-    <footer>
-
-        <span>&copy; &nbsp; Open Source | Selmi Abderrahim | Extended Implementation By Team Galin | All Rights Reserved </span>
-
-    </footer>
-        <script src={% static "forum_static/main.js" %}></script>
     </body>
 </html>
+
+{% endblock content %}
