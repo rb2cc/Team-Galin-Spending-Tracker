@@ -142,6 +142,14 @@ class ExpenditureForm(forms.ModelForm):
     description = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
     expense = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
     title = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
+        
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("r")
+        super(ExpenditureForm, self).__init__(*args, **kwargs)
+
+        #initialises the category queryset so it only shows categories the user is subscribed to (fixes glitch)
+        self.fields['category'].queryset = Category.objects.filter(users__id=self.request.user.id)
+        
 
     # description = forms.CharField(label="Description", widget=forms.CharField(attrs={'size':100}))
     # field_order=['title', 'description', 'expense']
@@ -150,3 +158,16 @@ class UserPasswordResetForm(PasswordResetForm):
     def __init__(self, *args, **kwargs):
         super(UserPasswordResetForm, self).__init__(*args, **kwargs)
     email = forms.EmailField(label='', widget=forms.EmailInput(attrs={'placeholder': 'Email',}))
+
+
+class AddCategoryForm(forms.ModelForm):
+    """Form enabling users to create custom categories"""
+    class Meta:
+        """Form options."""
+        model = Category
+        fields = ['name', 'week_limit']
+
+    name = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
+    week_limit = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
+
+

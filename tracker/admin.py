@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Expenditure, Category
+from .models import User, Expenditure, Category, Challenge, UserChallenge, Level, UserLevel, Achievement, UserAchievement
 
 admin.site.site_header = 'Admin Dashboard'
 # Register your models here.
@@ -19,4 +19,36 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(Expenditure)
 class ExpenditureAdmin(admin.ModelAdmin):
     """Configuration of the admin interface for expenditures"""
-    list_display = ['id','title', 'expense','description', 'category','image','date_created']
+
+    list_display = ['id','user','title', 'expense','description', 'category','image','date_created', 'is_binned']
+
+@admin.register(Challenge)
+class ChallengeAdmin(admin.ModelAdmin):
+    """Configuration of the admin interface for challenges."""
+    list_display = ['id', 'name', 'description', 'points', 'start_date', 'end_date']
+
+@admin.register(UserChallenge)
+class UserChallengeAdmin(admin.ModelAdmin):
+    """Configuration of the admin interface for user challenges."""
+    list_display = ['id', 'user', 'challenge', 'date_entered', 'date_completed']
+
+@admin.register(Level)
+class LevelAdmin(admin.ModelAdmin):
+    """Configuration of the admin interface for levels."""
+    list_display = ['name', 'description', 'required_points']
+
+@admin.register(UserLevel)
+class UserLevelAdmin(admin.ModelAdmin):
+    """Configuration of the admin interface for user levels."""
+    list_display = ['user', 'level', 'points', 'date_reached']
+
+@admin.register(Achievement)
+class AchievementAdmin(admin.ModelAdmin):
+    """Configuration of the admin interface for achievements."""
+    list_display = ['name', 'description', 'criteria', 'badge']
+
+@admin.register(UserAchievement)
+class UserAchievementAdmin(admin.ModelAdmin):
+    """Configuration of the admin interface for user achievements."""
+    list_display = ['user', 'achievement', 'date_earned']
+

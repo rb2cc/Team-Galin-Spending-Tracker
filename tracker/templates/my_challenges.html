@@ -1,0 +1,34 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<div class='container'>
+    <div class='row'>
+        {% if user_challenges %}
+            <div class = 'card' style="margin: auto; padding: 20px">
+                <h1 style="text-align: center">My Challenges</h1>
+                <div class="row">
+                    {% for user_challenge in user_challenges %}
+                        <div class="col-md-3" style="display: inline-block">
+                            <div class="card-body" style="text-align: center">
+                                <h5 class="card-title">{{ user_challenge.challenge.name }}</h5>
+                                <p class="card-text">Date entered: {{ user_challenge.date_entered }}</p>
+                                {% if user_challenge.date_completed %}
+                                    <p class="card-text">Date completed: {{ user_challenge.date_completed }}</p>
+                                {% else %}
+                                    <p class="card-text">Not completed</p>
+                                {% endif %}
+                                <a class="btn btn-primary btn-sm" href="{% url 'share_challenge' user_challenge.id %}">Share</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <div class = 'card' style="margin: auto; max-width: 350px; text-align: center; padding: 20px">
+                <h1 style="text-align: center">My Challenges</h1>
+                <p>You haven't entered any challenges yet.</p>
+                <a class="btn btn-primary btn-sm" href="{% url 'challenge_list' %}" role="button">View challenges</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<div class='container'>
+    <div class='row'>
+        <div class = 'card' style="margin: auto; padding: 20px">
+            <h1 style="text-align: center">Challenges</h1>
+            {% if challenges %}
+                <div class="row">
+                    {% for challenge in challenges %}
+                        <div class="col-md-3" style="display: inline-block">
+                            <div class="card-body" style="text-align: center">
+                                <h5 class="card-title">{{ challenge.name }}</h5>
+                                <p class="card-text">Start date: {{ challenge.start_date }}</p>
+                                <p class="card-text">End date: {{ challenge.end_date }}</p>
+                                <a class="btn btn-primary btn-sm" href="{% url 'challenge_details' challenge.id %}" role="button">More info</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>There are no challenges yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

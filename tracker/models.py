@@ -1,7 +1,11 @@
 from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin, User
+from django.core.validators import MinValueValidator
+from django.core.exceptions import ValidationError
 from personal_spending_tracker import settings
+from decimal import Decimal
+from django.utils import timezone
 
 # Create your models here.
 
@@ -83,13 +87,61 @@ class Category(models.Model):
 class Expenditure(models.Model):
     """Expenditure model for user spending"""
 
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True) #uncomment when category model is implemented
-    title = models.CharField(max_length=25, blank=False)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, default=1)
+    title = models.CharField(max_length=20, blank=False)
     description = models.TextField(max_length=280, blank=False)
-    image = models.ImageField(editable=True, upload_to='images')
-    expense = models.DecimalField(max_digits=20,decimal_places=2, null=False)
-    date_created = models.DateField(auto_now=True)
+    image = models.ImageField(editable=True, upload_to='images', blank=True)
+    expense = models.DecimalField(max_digits=20, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))], null=False)
+    date_created = models.DateTimeField(default=timezone.now)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    is_binned = models.BooleanField(default=False);
 
+class Challenge(models.Model):
+    """Challenge model for storing information about challenges."""
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    points = models.IntegerField()
+    start_date = models.DateField()
+    end_date = models.DateField()
 
+    def clean(self):
+        if self.end_date <= self.start_date:
+            raise ValidationError("End date should be after start date.")
+
+class UserChallenge(models.Model):
+    """User challenge model to keep track of which user is participating in which challenge."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE)
+    date_entered = models.DateTimeField(auto_now=True)
+    date_completed = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('user', 'challenge')
+
+class Achievement(models.Model):
+    """Achievement model for storing information about achievements."""
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    criteria = models.TextField()
+    badge = models.CharField(max_length=255)
+
+class UserAchievement(models.Model):
+    """User achievement model to keep track of which user received which achievement."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE)
+    date_earned = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'achievement')
+
+class Level(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    required_points = models.PositiveIntegerField()
+
+class UserLevel(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    level = models.ForeignKey(Level, on_delete=models.CASCADE)
+    points = models.PositiveIntegerField()
+    date_reached = models.DateTimeField(auto_now=True)
 
