@@ -78,7 +78,8 @@ urlpatterns = [
     path('my_achievements/', views.my_achievements, name='my_achievements'),
     path('share_achievement/<int:id>', views.share_achievement, name='share_achievement'),
     path('share/', views.share, name='share')
-]
+
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+        urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
+

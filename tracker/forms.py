@@ -59,6 +59,59 @@ class SignUpForm(forms.ModelForm):
         )
         return user
 
+class CreateUserForm(forms.ModelForm):
+    """Form enabling superuser to create user."""
+
+    class Meta:
+        """Form options."""
+
+        model = User
+        fields = ['first_name', 'last_name']
+
+    first_name = forms.CharField(label='', widget=forms.TextInput(attrs={'placeholder': 'First Name'}))
+    last_name = forms.CharField(label='', widget=forms.TextInput(attrs={'placeholder': 'Last Name'}))
+    email = forms.CharField(label='', validators=[validate_email] , widget=forms.TextInput(attrs={'placeholder': 'Email'}))
+    new_password = forms.CharField(
+        label='',
+        widget=forms.PasswordInput(attrs={'placeholder': 'Password'}),
+        validators=[RegexValidator(
+            regex=r'^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).*$',
+            message='Password must contain an uppercase character, a lowercase character, a number.'
+        )]
+    )
+    password_confirmation = forms.CharField(
+        label='', widget=forms.PasswordInput(attrs={'placeholder': 'Password Comfirmation'}))
+    # will_be_admin = forms.BooleanField(label='Create user as admin?', widget=forms.CheckboxInput(choices='yes'), required=False)
+
+    def clean(self):
+        """Clean the data and generate messages for any errors."""
+
+        super().clean()
+        new_password = self.cleaned_data.get('new_password')
+        password_confirmation = self.cleaned_data.get('password_confirmation')
+        if new_password != password_confirmation:
+            self.add_error('password_confirmation', 'Confirmation does not match password.')
+
+    def save(self):
+        """Create a new user."""
+
+        super().save(commit=False)
+        user = User.objects.create_user(
+            self.cleaned_data.get('email'),
+            first_name=self.cleaned_data.get('first_name'),
+            last_name=self.cleaned_data.get('last_name'),
+            password=self.cleaned_data.get('new_password'),
+        )
+        return user
+
+class CategoryForm(forms.ModelForm):
+
+    class Meta:
+        model = Category
+        fields = ['name','week_limit']
+
+    name = forms.CharField(label='', widget=forms.TextInput(attrs={'placeholder': 'Category Name'}))
+    week_limit = forms.CharField(label='', widget=forms.TextInput(attrs={'placeholder': 'Weekly Limit'}))
 
 
 class EditUserForm(UserChangeForm):
@@ -97,6 +150,7 @@ class ExpenditureForm(forms.ModelForm):
         #initialises the category queryset so it only shows categories the user is subscribed to (fixes glitch)
         self.fields['category'].queryset = Category.objects.filter(users__id=self.request.user.id)
         
+
     # description = forms.CharField(label="Description", widget=forms.CharField(attrs={'size':100}))
     # field_order=['title', 'description', 'expense']
 
@@ -104,6 +158,7 @@ class UserPasswordResetForm(PasswordResetForm):
     def __init__(self, *args, **kwargs):
         super(UserPasswordResetForm, self).__init__(*args, **kwargs)
     email = forms.EmailField(label='', widget=forms.EmailInput(attrs={'placeholder': 'Email',}))
+
 
 class AddCategoryForm(forms.ModelForm):
     """Form enabling users to create custom categories"""

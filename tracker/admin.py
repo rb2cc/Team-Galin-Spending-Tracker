@@ -1,12 +1,13 @@
 from django.contrib import admin
 from .models import User, Expenditure, Category, Challenge, UserChallenge, Level, UserLevel, Achievement, UserAchievement
 
-
+admin.site.site_header = 'Admin Dashboard'
 # Register your models here.
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     """Configuration fo the admin interface for users."""
     list_display = ('email', 'first_name', 'last_name', 'is_staff', 'is_superuser', 'is_active')
+    list_filter = ('is_staff',)
     fields = ('email', 'first_name', 'last_name', 'is_staff', 'is_superuser', 'is_active')
 
 @admin.register(Category)
@@ -16,8 +17,9 @@ class CategoryAdmin(admin.ModelAdmin):
     fields = ('name', 'week_limit', 'is_global')
 
 @admin.register(Expenditure)
-class UserAdmin(admin.ModelAdmin):
+class ExpenditureAdmin(admin.ModelAdmin):
     """Configuration of the admin interface for expenditures"""
+
     list_display = ['id','user','title', 'expense','description', 'category','image','date_created', 'is_binned']
 
 @admin.register(Challenge)
@@ -49,3 +51,4 @@ class AchievementAdmin(admin.ModelAdmin):
 class UserAchievementAdmin(admin.ModelAdmin):
     """Configuration of the admin interface for user achievements."""
     list_display = ['user', 'achievement', 'date_earned']
+

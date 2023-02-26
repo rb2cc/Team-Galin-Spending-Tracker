@@ -1,0 +1,16 @@
+<thead>
+  <tr>
+    <th scope="col">Select</th>
+    <th scope="col">Name</th>
+    <th scope="col">Email</th>
+  </tr>
+</thead>
+<tbody>
+  {% for user in page %}
+  <tr>
+    <th scope="row"> <input class = "form-check-input" type = "radio" name = "user_pk" value = {{user.pk}}></input> </th>
+    <td> {{user.first_name}}</td>
+    <td> {{user.email}} </td>
+  </tr>
+</tbody>
+{% endfor %}
