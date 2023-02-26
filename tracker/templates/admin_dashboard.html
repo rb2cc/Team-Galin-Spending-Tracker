@@ -8,7 +8,10 @@
       <h1>{{ table_header }}</h1>
       <table class="table">
         <tbody>
+          <form id="tableform" method="post">
+            {% csrf_token %}
             {% include table %}
+            </form>
         </tbody>
       </table>
       <nav aria-label="Page navigation example">
@@ -40,7 +43,8 @@
         </select>
         <input type="submit" class="btn btn-primary" value="Update Table" name='table_update'></input>
         </form>
-        <span>test</span>
+        <span> </span>
+        <button type="button" id="delete" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</button>
       </div>
 
     </div>
@@ -71,6 +75,25 @@
         </div>
     </div>
   </div>
+
+  {# DELETE MODAL #}
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="deleteModalLabel">Delete Existing Object</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure you want to delete?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary"  form="tableform" formaction = "../delete" method="post">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
 
 {% endblock %}

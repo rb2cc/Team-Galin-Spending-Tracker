@@ -120,7 +120,7 @@ def admin_dashboard(request):
     #DEFAULT PARAMETERS
     table_view = 'Users'
     table = 'user_table.html'
-    user_list = User.objects.all()
+    user_list = User.objects.filter(is_superuser=False, is_staff=False)
     user_paginator = Paginator(user_list, 5)
     user_page_number = request.GET.get('page')
     page = user_paginator.get_page(user_page_number)
@@ -133,20 +133,14 @@ def admin_dashboard(request):
             user_create_helper(request) #HELPER FUNCTION TO CLEAN UP
 
         if 'create_category' in request.POST:
-            form = CategoryForm(request.POST)
-            if form.is_valid():
-                category = form.save()
-                category.is_global = True
-                category.save()
-                return redirect('admin_dashboard')
-
+            category_create_helper(request)
 
         # IF UPDATE TABLE BUTTON PRESSED
         if 'table_update' in request.POST:
             table_view = request.POST['view_select']
             if table_view == "Users": #IF USERS SELECTED
                 table = 'user_table.html'
-                user_list = User.objects.all()
+                user_list = User.objects.filter(is_superuser=False, is_staff=False)
                 user_paginator = Paginator(user_list, 5)
                 user_page_number = request.GET.get('page')
                 page = user_paginator.get_page(user_page_number)
@@ -161,7 +155,7 @@ def admin_dashboard(request):
             else: #DEFAULT TO USERS
                 table_view = 'Users'
                 table = 'user_table.html'
-                user_list = User.objects.all()
+                user_list = User.objects.filter(is_superuser=False, is_staff=False)
                 user_paginator = Paginator(user_list, 5)
                 user_page_number = request.GET.get('page')
                 page = user_paginator.get_page(user_page_number)
@@ -181,6 +175,14 @@ def user_create_helper(request):
         user = form.save()
         return redirect('admin_dashboard')
 
+def category_create_helper(request):
+    form = CategoryForm(request.POST)
+    if form.is_valid():
+        category = form.save()
+        category.is_global = True
+        category.save()
+        return redirect('admin_dashboard')
+
 
 def user_delete(request):
     if request.method == "POST":
@@ -192,6 +194,30 @@ def user_delete(request):
 
         except User.DoesNotExist:
             return redirect('superuser_dashboard')
+
+def delete(request):
+    if request.method == "POST":
+        if 'user_pk' in request.POST:
+            try:
+                user_pk = request.POST['user_pk']
+                u = User.objects.get(pk = user_pk)
+                u.delete()
+                return redirect('admin_dashboard')
+            except User.DoesNotExist:
+                return redirect('admin_dashboard')
+
+        elif 'category_pk' in request.POST:
+            try:
+                category_pk = request.POST['category_pk']
+                c = Category.objects.get(pk = category_pk)
+                c.delete()
+                return redirect('admin_dashboard')
+            except Category.DoesNotExist:
+                return redirect('admin_dashboard')
+
+        else:
+            return redirect('admin_dashboard')
+
 
 def user_promote(request):
     if request.method == "POST":
