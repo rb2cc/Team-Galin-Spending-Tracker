@@ -42,6 +42,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'tracker',
     'widget_tweaks',
+    'tinymce',
+    'hitcount',
+    'taggit',
+    'crispy_forms',
 ]
 
 MIDDLEWARE = [
@@ -155,3 +159,5 @@ MEDIA_URL = '/media/'
   
 # Path where media is stored  
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+CRISPY_TEMPLATE_PACK = ('bootstrap4')

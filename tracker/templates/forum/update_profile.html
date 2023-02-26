@@ -1,0 +1,17 @@
+{% extends 'forum/forum_base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<h1 style="text-align:center; margin-block:50px; color:darkred"> Hey {{user}} Become an Author </h1>
+
+<form method="POST" action="." enctype="multipart/form-data" style="margin-left:150px;">
+
+{% csrf_token %}
+
+{{form}}
+
+    <input type="submit" value="Update" style="margin-block:50px">
+</form>
+
+
+{% endblock %}
