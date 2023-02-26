@@ -1,5 +1,5 @@
 
-from .forms import SignUpForm, LogInForm, EditUserForm
+from .forms import SignUpForm, LogInForm, EditUserForm, ReportForm
 from django.contrib.auth.forms import UserChangeForm
 from .models import User
 from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm
@@ -10,6 +10,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.urls import reverse, reverse_lazy
 from django.views import generic
+from django.views.generic import TemplateView
 from datetime import date, timedelta, datetime
 from django.utils import timezone
 from django.utils.datastructures import MultiValueDictKeyError
@@ -17,7 +18,7 @@ from django.db.models import Q
 from django.db import IntegrityError
 from math import floor
 from urllib.parse import urlencode, unquote
-
+import math
 # Create your views here.
 
 def home(request):
@@ -404,4 +405,53 @@ def handle_share(request):
 def my_achievements(request):
     user_achievements = UserAchievement.objects.filter(user=request.user)
     return render(request, 'my_achievements.html', {'user_achievements': user_achievements})
+
+def report(request):
+    user = request.user
+    if request.method == 'POST':
+        form = ReportForm(request.POST)
+        if form.is_valid():
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data['end_date']
+        else:
+            start_date = None
+            end_date = None
+    else:
+        today = timezone.now().date()
+        start_date = today - timedelta(days=30)
+        end_date = today
+        form = ReportForm(initial={'start_date': start_date, 'end_date': end_date})
+    
+    expenditures = Expenditure.objects.filter(user=user,  is_binned=False, date_created__gte=start_date, date_created__lte=end_date)
+    
+    week_numbers = math.ceil((end_date - start_date).days / 7)
+    category_counts = {}
+    category_sums = {}
+    category_limits = {}
+    total_expense = 0
+    for expenditure in expenditures:
+        total_expense += expenditure.expense
+        category = expenditure.category.name
+        limit = expenditure.category.week_limit
+        if category in category_counts:
+            category_counts[category] += 1
+            category_sums[category] += expenditure.expense
+            category_limits[category] = limit*week_numbers
+        else:
+            category_counts[category] = 1
+            category_sums[category] = expenditure.expense
+            category_limits[category] = limit*week_numbers
+
+    context = {
+        'expenditures': expenditures,
+        'form': form,
+        'category_counts': category_counts,
+        'category_sums': category_sums,
+        'category_limits': category_limits,
+        'week_numbers': week_numbers,
+        'total_expense': total_expense,
+        'start_date': start_date,
+        'end_date': end_date,
+    }
+    return render(request, 'report.html', context)
 

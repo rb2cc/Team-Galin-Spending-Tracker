@@ -1,0 +1,48 @@
+{% extends 'base_content.html' %}
+{% block content %}
+
+<div class="card full-card">
+    <form method="POST">
+        {% csrf_token %}
+        {{ form }}
+        <button type="submit" class="btn btn-primary" style="width:180px; height:35px; margin-left:10px; margin-top:0px; line-height: 10px; ">Generate Report</button>
+    </form>
+    <p></p><p></p>
+
+    <h2>Expenditure Report</h2>
+    <div>From {{start_date|date:'Y-m-d'}} To {{end_date|date:'Y-m-d'}}</div>
+    <p></p><p></p>
+
+    {% if expenditures %}
+
+        <div>Total Expense</div>
+        <ul>
+            <li>{{ total_expense }}</li>
+        </ul>
+        <div>Category Counts</div>
+        <ul>
+            {% for category, count in category_counts.items %}
+                <li>{{ category }}: {{ count }}</li>
+            {% endfor %}
+        </ul>
+        <div>Category Expense</div>
+        <ul>
+            {% for category, sum in category_sums.items %}
+                <li>{{ category }}: {{ sum }}</li>
+            {% endfor %}
+        </ul>
+
+        <div>You have been through {{week_numbers}} weeks</div>
+        <div>Total Category Limit</div>
+        <ul>
+            {% for category, limit in category_limits.items %}
+                <li>{{ category }}: {{ limit }}</li>
+            {% endfor %}
+        </ul>
+
+    {% else %}
+        <p>No expenditures found for this time period.</p>
+    {% endif %}
+</div>
+
+{% endblock %}
