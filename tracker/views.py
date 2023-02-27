@@ -268,7 +268,6 @@ def forum_home(request):
     }
     return render(request, 'forum/forum_home.html', context)
 
-
 def posts(request, slug):
     category = get_object_or_404(Forum_Category, slug=slug)
     posts = Post.objects.filter(approved=True, forum_categories=category)
@@ -280,7 +279,6 @@ def posts(request, slug):
     }
   
     return render(request, 'forum/posts.html', context)
-
 
 def detail(request, slug):
     post = get_object_or_404(Post, slug=slug)

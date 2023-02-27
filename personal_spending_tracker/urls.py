@@ -78,16 +78,11 @@ urlpatterns = [
     path('my_achievements/', views.my_achievements, name='my_achievements'),
     path('share_achievement/<int:id>', views.share_achievement, name='share_achievement'),
     path('share/', views.share, name='share'),
-
     path('forum_home/', views.forum_home, name='forum_home'),
     path('posts/<slug>/', views.posts, name='posts'),
     path('detail/<slug>/', views.detail, name='detail'),
-
     path('tinymce/', include('tinymce.urls')),
-
     path('hitcount/', include('hitcount.urls', namespace='hitcount')),
-
-
 
 ]
 
