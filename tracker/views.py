@@ -263,10 +263,8 @@ def edit_category(request, id):
 def forum_home(request):
     return render(request, 'forum/forum_home.html')
 
-
 def posts(request):
     return render(request, 'forum/posts.html')
-
 
 def detail(request):
     return render(request, 'forum/detail.html')

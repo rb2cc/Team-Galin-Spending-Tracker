@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'tracker',
     'widget_tweaks',
+    'django_crontab',
 ]
 
 MIDDLEWARE = [
@@ -139,8 +140,6 @@ MESSAGE_TAGS = {
     message_constants.ERROR: 'danger'
 }
 
-
-
 # SMTP Configuration
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -155,3 +154,9 @@ MEDIA_URL = '/media/'
   
 # Path where media is stored  
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+# Automated cron job directory
+# Job will delete expenditures with is_binned=True after 10 minutes
+CRONJOBS = [
+    ('*/10 * * * *', 'tracker.cron.delete_old_expenditure_cron_job')
+]

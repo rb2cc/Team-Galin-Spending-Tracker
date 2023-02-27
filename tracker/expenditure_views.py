@@ -1,21 +1,8 @@
-from .forms import SignUpForm, LogInForm, EditUserForm
-from django.contrib.auth.forms import UserChangeForm
-from .models import User
-from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm
-from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel
-from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
+from .forms import ExpenditureForm
+from .models import Category, Expenditure
 from django.shortcuts import redirect, render
-from django.contrib.auth.decorators import user_passes_test, login_required
-from django.urls import reverse, reverse_lazy
-from django.views import generic
-from datetime import date, timedelta, datetime
-from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 from django.utils.datastructures import MultiValueDictKeyError
-from django.db.models import Q
-from django.db import IntegrityError
-from math import floor
-from urllib.parse import urlencode, unquote
 
 def expenditure_list(request):
     spending_list = Expenditure.objects.filter(user=request.user, is_binned=False).order_by('-date_created')
