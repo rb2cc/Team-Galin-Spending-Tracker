@@ -4,16 +4,20 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.utils.datastructures import MultiValueDictKeyError
 
+#Gets all expenditures under the filters of belonging to the current user, is not binned and ordered by latest date
+#Returns both expenditure data and category data which is filtered by what user the category belongs to
 def expenditure_list(request):
     spending_list = Expenditure.objects.filter(user=request.user, is_binned=False).order_by('-date_created')
     categories = Category.objects.filter(users__id=request.user.id)
     return render(request, 'expenditure_list.html', {'spendings': spending_list, 'categories': categories})
 
+#Gets all expenditures under the filter of being binned
 def binned_expenditure_list(request):
     binned_list = Expenditure.objects.filter(user=request.user, is_binned=True).order_by('-date_created')
     categories = Category.objects.filter(users__id=request.user.id)
     return render(request, 'expenditure_bin.html', {'binned_spendings': binned_list, 'categories': categories})
 
+#Gets id field of the selected expenditure radio button and changes the is_binned field from false to true
 def bin_expenditure(request):
     if request.method == "POST":
         try:
@@ -26,7 +30,8 @@ def bin_expenditure(request):
             return redirect('expenditure_list')
         except MultiValueDictKeyError:
             return redirect('expenditure_list')
-        
+
+#Gets id field of the selected expenditure recover button and changes the is_binned field from true to false
 def recover_expenditure(request):
     if request.method == "POST":
         try:
@@ -40,6 +45,7 @@ def recover_expenditure(request):
         except MultiValueDictKeyError:
             return redirect('expenditure_bin')
         
+#Gets id field of the selected expenditure delete button and deletes the object from the database
 def delete_expenditure(request):
     if request.method == "POST":
         try:
@@ -52,6 +58,7 @@ def delete_expenditure(request):
         except MultiValueDictKeyError:
             return redirect('expenditure_bin')
 
+#Gets selected expenditure object and returns its form allowing changing of its fields and saves the changes
 def update_expenditure(request, id):
     expenditure = Expenditure.objects.get(id = id) 
     form  = ExpenditureForm(instance = expenditure, r=request)
@@ -64,6 +71,7 @@ def update_expenditure(request, id):
     categories = Category.objects.filter(users__id=request.user.id)
     return render(request, 'update_expenditure.html', {'form' : form, 'categories':categories} )
 
+#Reloads page to display expenditures that contain the text input from the search bar in their title field
 def filter_by_title(request):
     query = request.GET.get("q")
     categories = Category.objects.filter(users__id=request.user.id)
@@ -74,6 +82,7 @@ def filter_by_title(request):
         expenditures = Expenditure.objects.all().filter(user=request.user, title__icontains=query, is_binned=False).order_by('-date_created')
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
 
+#Reloads page to display expenditures that are of the category the user selected from the dropdown box
 def filter_by_category(request):
     query = request.GET.get("q")
     categories = Category.objects.filter(users__id=request.user.id)
@@ -85,6 +94,7 @@ def filter_by_category(request):
         expenditures = Expenditure.objects.all().filter(user=request.user, category=query, is_binned=False).order_by('-date_created')
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
 
+#Reloads page to display expenditures after filtering them with a miscellaneous characteristic
 def filter_by_miscellaneous(request):
     query = request.GET.get("q")
     categories = Category.objects.filter(users__id=request.user.id)
