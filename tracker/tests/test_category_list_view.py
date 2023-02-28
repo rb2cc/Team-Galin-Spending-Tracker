@@ -3,6 +3,7 @@ from django.urls import reverse
 from tracker.models import User, Category
 from tracker.forms import AddCategoryForm
 
+"""Unit tests for the category_list view"""
 class CategoryListViewTestCase(TestCase):
 
     def setUp(self):
