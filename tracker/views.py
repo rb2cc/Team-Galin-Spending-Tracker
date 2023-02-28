@@ -419,16 +419,21 @@ def report(request):
     else:
         today = timezone.now().date()
         start_date = today - timedelta(days=30)
-        end_date = today
+        end_date = today + timedelta(days=1)
         form = ReportForm(initial={'start_date': start_date, 'end_date': end_date})
     
     expenditures = Expenditure.objects.filter(user=user,  is_binned=False, date_created__gte=start_date, date_created__lte=end_date)
     
     week_numbers = math.ceil((end_date - start_date).days / 7)
+    day_number = (end_date - start_date).days
     category_counts = {}
     category_sums = {}
     category_limits = {}
+    limit_sum_pair = {}
+    over_list = []
     total_expense = 0
+    most_expense = 0
+    most_category = ''
     for expenditure in expenditures:
         total_expense += expenditure.expense
         category = expenditure.category.name
@@ -442,6 +447,19 @@ def report(request):
             category_sums[category] = expenditure.expense
             category_limits[category] = limit*week_numbers
 
+    for category in category_limits.keys():
+        if category_sums.get(category)/total_expense*100 > most_expense:
+            most_expense = round(category_sums.get(category)/total_expense*100, 2)
+            most_category = category
+        limit_sum_pair[category_limits.get(category)] = category_sums.get(category)
+        if category_limits.get(category)<category_sums.get(category):
+            over_list.append(category)
+
+
+    limit_sum=0
+    for value in category_limits.values():
+        limit_sum+=value
+
     context = {
         'expenditures': expenditures,
         'form': form,
@@ -449,9 +467,15 @@ def report(request):
         'category_sums': category_sums,
         'category_limits': category_limits,
         'week_numbers': week_numbers,
+        'day_number': day_number,
         'total_expense': total_expense,
         'start_date': start_date,
         'end_date': end_date,
+        'limit_sum':limit_sum,
+        'limit_sum_pair':limit_sum_pair,
+        'over_list':over_list,
+        'most_expense':most_expense,
+        'most_category':most_category,
     }
     return render(request, 'report.html', context)
 
