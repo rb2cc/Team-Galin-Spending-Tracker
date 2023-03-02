@@ -434,6 +434,20 @@ def report(request):
     total_expense = 0
     most_expense = 0
     most_category = ''
+    average_daily = 0
+    most_daily = 0
+    most_date = ''
+    previous_total = 0
+    previous_average = 0
+    previous_total_difference = 0
+    previous_average_difference = 0
+    previous_start_date = start_date - timedelta(days=day_number)
+
+    previous_expenditures = Expenditure.objects.filter(user=user,  is_binned=False, date_created__gte=previous_start_date, date_created__lte=start_date)
+    for item in previous_expenditures:
+        previous_total+=item.expense
+    previous_average = round(previous_total/day_number,2)
+
     for expenditure in expenditures:
         total_expense += expenditure.expense
         category = expenditure.category.name
@@ -460,6 +474,45 @@ def report(request):
     for value in category_limits.values():
         limit_sum+=value
 
+    dateList = []
+    dailyExpenseList = []
+    for x in expenditures.order_by('date_created'):
+        dateList.append(x.date_created.date())
+        dailyExpenseList.append(x.expense)
+    for x in range(0, len(dateList)):
+        try:
+            while dateList[x] == dateList[x+1]:
+                dailyExpenseList[x] += dailyExpenseList[x+1]
+                dailyExpenseList.pop(x+1)
+                dateList.pop(x+1)
+        except IndexError:
+            break
+    current_date = start_date
+    while current_date <= end_date:
+        if current_date not in dateList:
+            dateList.append(current_date)
+            dateList.sort()
+            dailyExpenseList.insert(dateList.index(current_date), 0)
+        current_date += timezone.timedelta(days=1)
+
+    temp_sum  = 0
+    for item in dailyExpenseList:
+        if item>most_daily:
+            most_daily = item
+            most_date = dateList[dailyExpenseList.index(item)]
+        temp_sum+=item
+    average_daily = round(temp_sum/day_number, 2)
+
+    if total_expense>previous_total:
+        previous_total_difference = total_expense-previous_total
+    else:
+        previous_total_difference = previous_total-total_expense
+
+    if average_daily>previous_average:
+        previous_average_difference = average_daily-previous_average
+    else:
+        previous_average_difference = previous_average-average_daily
+        
     context = {
         'expenditures': expenditures,
         'form': form,
@@ -476,6 +529,17 @@ def report(request):
         'over_list':over_list,
         'most_expense':most_expense,
         'most_category':most_category,
+        'dateList':dateList,
+        'dailyExpenseList':dailyExpenseList,
+        'average_daily':average_daily,
+        'most_daily':most_daily,
+        'most_date':most_date,
+        'previous_total':previous_total,
+        'previous_average':previous_average,
+        'previous_total_difference':previous_total_difference,
+        'previous_average_difference':previous_average_difference,
     }
     return render(request, 'report.html', context)
+
+
 
