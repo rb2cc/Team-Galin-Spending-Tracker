@@ -25,9 +25,7 @@ class RequestFormTestCase(TestCase):
             'category': self.category,
             'image': url
         }
-
-
-                
+      
     def test_valid_expenditure_form(self):
         form = ExpenditureForm(data=self.form_input, r=request)
         self.assertTrue(form.is_valid())
@@ -40,3 +38,6 @@ class RequestFormTestCase(TestCase):
         self.assertIn('description', form.fields)
         self.assertIn('category', form.fields)
         self.assertIn('image', form.fields)
+        
+    def test_form_must_save_correctly(self):
+        pass
