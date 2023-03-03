@@ -1,5 +1,5 @@
 
-from .forms import SignUpForm, LogInForm, EditUserForm
+from .forms import SignUpForm, LogInForm, EditUserForm, ReportForm
 from django.contrib.auth.forms import UserChangeForm
 from .models import User
 from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm
@@ -10,6 +10,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.urls import reverse, reverse_lazy
 from django.views import generic
+from django.views.generic import TemplateView
 from datetime import date, timedelta, datetime
 from django.utils import timezone
 from django.utils.datastructures import MultiValueDictKeyError
@@ -17,6 +18,8 @@ from django.db.models import Q
 from django.db import IntegrityError
 from math import floor
 from urllib.parse import urlencode, unquote
+import math
+
 from .utils import update_views
 
 # Create your views here.
@@ -421,4 +424,141 @@ def handle_share(request):
 def my_achievements(request):
     user_achievements = UserAchievement.objects.filter(user=request.user)
     return render(request, 'my_achievements.html', {'user_achievements': user_achievements})
+
+def report(request):
+    user = request.user
+    if request.method == 'POST':
+        form = ReportForm(request.POST)
+        if form.is_valid():
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data['end_date']
+        else:
+            start_date = None
+            end_date = None
+    else:
+        today = timezone.now().date()
+        start_date = today - timedelta(days=30)
+        end_date = today + timedelta(days=1)
+        form = ReportForm(initial={'start_date': start_date, 'end_date': end_date})
+    
+    expenditures = Expenditure.objects.filter(user=user,  is_binned=False, date_created__gte=start_date, date_created__lte=end_date)
+    
+    week_numbers = math.ceil((end_date - start_date).days / 7)
+    day_number = (end_date - start_date).days
+    category_counts = {}
+    category_sums = {}
+    category_limits = {}
+    limit_sum_pair = {}
+    over_list = []
+    total_expense = 0
+    most_expense = 0
+    most_category = ''
+    average_daily = 0
+    most_daily = 0
+    most_date = ''
+    previous_total = 0
+    previous_average = 0
+    previous_total_difference = 0
+    previous_average_difference = 0
+    previous_start_date = start_date - timedelta(days=day_number)
+
+    previous_expenditures = Expenditure.objects.filter(user=user,  is_binned=False, date_created__gte=previous_start_date, date_created__lte=start_date)
+    for item in previous_expenditures:
+        previous_total+=item.expense
+    previous_average = round(previous_total/day_number,2)
+
+    for expenditure in expenditures:
+        total_expense += expenditure.expense
+        category = expenditure.category.name
+        limit = expenditure.category.week_limit
+        if category in category_counts:
+            category_counts[category] += 1
+            category_sums[category] += expenditure.expense
+            category_limits[category] = limit*week_numbers
+        else:
+            category_counts[category] = 1
+            category_sums[category] = expenditure.expense
+            category_limits[category] = limit*week_numbers
+
+    for category in category_limits.keys():
+        if category_sums.get(category)/total_expense*100 > most_expense:
+            most_expense = round(category_sums.get(category)/total_expense*100, 2)
+            most_category = category
+        limit_sum_pair[category_limits.get(category)] = category_sums.get(category)
+        if category_limits.get(category)<category_sums.get(category):
+            over_list.append(category)
+
+
+    limit_sum=0
+    for value in category_limits.values():
+        limit_sum+=value
+
+    dateList = []
+    dailyExpenseList = []
+    for x in expenditures.order_by('date_created'):
+        dateList.append(x.date_created.date())
+        dailyExpenseList.append(x.expense)
+    for x in range(0, len(dateList)):
+        try:
+            while dateList[x] == dateList[x+1]:
+                dailyExpenseList[x] += dailyExpenseList[x+1]
+                dailyExpenseList.pop(x+1)
+                dateList.pop(x+1)
+        except IndexError:
+            break
+    current_date = start_date
+    while current_date <= end_date:
+        if current_date not in dateList:
+            dateList.append(current_date)
+            dateList.sort()
+            dailyExpenseList.insert(dateList.index(current_date), 0)
+        current_date += timezone.timedelta(days=1)
+
+    temp_sum  = 0
+    for item in dailyExpenseList:
+        if item>most_daily:
+            most_daily = item
+            most_date = dateList[dailyExpenseList.index(item)]
+        temp_sum+=item
+    average_daily = round(temp_sum/day_number, 2)
+
+    if total_expense>previous_total:
+        previous_total_difference = total_expense-previous_total
+    else:
+        previous_total_difference = previous_total-total_expense
+
+    if average_daily>previous_average:
+        previous_average_difference = average_daily-previous_average
+    else:
+        previous_average_difference = previous_average-average_daily
+        
+    context = {
+        'expenditures': expenditures,
+        'form': form,
+        'category_counts': category_counts,
+        'category_sums': category_sums,
+        'category_limits': category_limits,
+        'week_numbers': week_numbers,
+        'day_number': day_number,
+        'total_expense': total_expense,
+        'start_date': start_date,
+        'end_date': end_date,
+        'limit_sum':limit_sum,
+        'limit_sum_pair':limit_sum_pair,
+        'over_list':over_list,
+        'most_expense':most_expense,
+        'most_category':most_category,
+        'dateList':dateList,
+        'dailyExpenseList':dailyExpenseList,
+        'average_daily':average_daily,
+        'most_daily':most_daily,
+        'most_date':most_date,
+        'previous_total':previous_total,
+        'previous_average':previous_average,
+        'previous_total_difference':previous_total_difference,
+        'previous_average_difference':previous_average_difference,
+    }
+    return render(request, 'report.html', context)
+
+
 

@@ -115,4 +115,8 @@ class AddCategoryForm(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
     week_limit = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
 
+class ReportForm(forms.Form):
+    start_date = forms.DateField(label='Start Date', widget=forms.TextInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(label='End Date', widget=forms.TextInput(attrs={'type': 'date'}))
+
 
