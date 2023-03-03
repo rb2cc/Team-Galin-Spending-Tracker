@@ -2,7 +2,7 @@ from django.contrib.auth.hashers import check_password
 from django.test import TestCase
 from django.urls import reverse
 from tracker.forms import SignUpForm
-from tracker.models import User, Category
+from tracker.models import User, Category, Achievement
 from tracker.tests.helpers import LogInTester, CategoryFunctions
 
 
@@ -18,6 +18,7 @@ class SignUpViewTestCase(TestCase, LogInTester):
             'password_confirmation' : 'Lu123'
         }
         CategoryFunctions._make_categories(self)
+        self.achievement = Achievement.objects.create(name = "New user", description = "Test", criteria = "Test", badge = "Test")
 
     def test_sign_up_url(self):
         self.assertEqual(self.url, '/sign_up/')

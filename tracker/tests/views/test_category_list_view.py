@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
-from tracker.models import User, Category
+from tracker.models import User, Category, Achievement
 from tracker.forms import AddCategoryForm
 
 """Unit tests for the category_list view"""
@@ -18,6 +18,7 @@ class CategoryListViewTestCase(TestCase):
             'name':'New',
             'week_limit':50
         }
+        self.achievement = Achievement.objects.create(name = "Budget boss", description = "Test", criteria = "Test", badge = "Test")
 
     def test_category_list_url(self):
         self.assertEqual(self.url, '/category_list')
