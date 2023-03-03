@@ -162,7 +162,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 CRISPY_TEMPLATE_PACK = ('bootstrap4')
 
 # Automated cron job directory
-# Job will delete expenditures with is_binned=True after 10 minutes
+# cron job runs function that deletes expenditures with is_binned=True every 10 minutes
 CRONJOBS = [
     ('*/10 * * * *', 'tracker.cron.delete_old_expenditure_cron_job')
 ]
