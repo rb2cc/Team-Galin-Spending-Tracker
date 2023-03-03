@@ -43,10 +43,16 @@
             </div>
             <div class="card main-cardThree">
                 <div style="padding-bottom: 20px">
-                    <img src="{% static 'avatar/template/template.svg' %}" style="width: auto; height: 200px; border: 1px solid black"/>
+                    <a href="{% url 'my_avatar' %}">
+                        <img src="/create_avatar" style="width: auto; height: 200px; border: 5px solid {{ user_tier_colour }}"/>
+                    </a>
                 </div>
                 <p>{{ request.user.first_name }} {{ request.user.last_name }}</p>
-                <p>{{ current_level_name }}</p>
+                <p>{{ current_level_name }}
+                    {% if user_tier_name != "" %}
+                        ({{ user_tier_name|title }} tier)
+                    {% endif %}
+                </p>
                 <p>Points: {{ current_points }}</p>
                 <p>Your progress: </p>
                 <div class="progress" style="height: 20px; border-radius: 10px; background-color: #f2f2f2; overflow: hidden">

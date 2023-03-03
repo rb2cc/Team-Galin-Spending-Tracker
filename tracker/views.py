@@ -18,6 +18,9 @@ from urllib.parse import urlencode, unquote
 import os
 from django.conf import settings
 import re
+from django.template.defaulttags import register
+from django.views.decorators.cache import cache_control
+from django.http import HttpResponse
 
 
 # Create your views here.
@@ -138,6 +141,13 @@ def landing_page(request):
     else:
         progress_percentage = int(100+(current_points-next_level_points))
 
+    user_tier_colour = get_user_tier_colour(request)
+    reached_tiers = get_reached_tiers(UserLevel.objects.get(user=request.user).points)
+    if reached_tiers:
+        user_tier_name, tier_data = reached_tiers.popitem()
+    else:
+        user_tier_name = ""
+
     return render(request, 'landing_page.html', {
         'form': form,
         'spendings': spendingList,
@@ -149,6 +159,8 @@ def landing_page(request):
         'current_level_name': current_level_name,
         'current_points': current_points,
         'progress_percentage': progress_percentage,
+        'user_tier_colour': user_tier_colour,
+        'user_tier_name': user_tier_name
     })
 
 
@@ -370,10 +382,8 @@ def complete_challenge(request, challenge_id):
     user_challenge = UserChallenge.objects.get(user=request.user, challenge_id=challenge_id)
     if user_challenge is not None:
         if user_challenge.date_completed is not None:
-            # Challenge already completed, do nothing
             return
 
-        # Set the date completed to the current time
         user_challenge.date_completed = timezone.now()
         user_challenge.save()
 
@@ -408,11 +418,9 @@ def activity_points(request, points):
     update_user_level(request.user)
 
 def update_user_level(user):
-    # Get the user's total points
     user_level = UserLevel.objects.get(user=user)
     total_points = user_level.points
 
-    # Calculate the user's current level
     try:
         current_level = Level.objects.get(name = f"Level {floor(total_points / 100) + 1}")
         if (user_level.level.id < current_level.id):
@@ -503,12 +511,16 @@ def my_activity(request):
         user_activity = Activity.objects.filter(user=request.user).order_by('-time')[:int(num_items)]
     return render(request, 'my_activity.html', {'user_activity': user_activity})
 
+@cache_control(no_store=True)
 def my_avatar(request):
-    avatar = create_avatar(request)
+    locked_items = get_locked_items(request)
+    user_tier_colour = get_user_tier_colour(request)
+    tier_info = get_tier_info()
+    create_avatar(request)
     colours = get_avatar_colours()
     components = {}
 
-    for category in ['accessories', 'body', 'face', 'facial-hair', 'head']:
+    for category in ['eyewear', 'body', 'face', 'facial-hair', 'head']:
         components[category] = []
 
         category_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', category)
@@ -516,14 +528,15 @@ def my_avatar(request):
             if file_name.endswith('.svg'):
                 components[category].append(file_name)
 
-    return render(request, 'my_avatar.html', {'components': components, 'colours': colours})
+    return render(request, 'my_avatar.html', {'components': components, 'colours': colours, 'locked_items': locked_items, 'tier_info': tier_info, 'user_tier_colour': user_tier_colour})
 
+@cache_control(no_store=True)
 def create_avatar(request):
-    template_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', 'template', 'template.svg')
+    template_path = os.path.join(settings.STATICFILES_DIRS[1], 'template.svg')
     svg = open(template_path, 'r').read()
 
     for category, component in request.GET.items():
-        if category in ['skin', 'shirt', 'hair', 'background']:
+        if category in ['skin', 'accessories', 'shirt', 'hair', 'background']:
             if category == "background":
                 colour_blocks = re.findall(r'<rect\s+id="background".*?>', svg)
             else:
@@ -544,6 +557,7 @@ def create_avatar(request):
         create_avatar_activity(request)
 
     open(template_path, 'w').write(svg)
+    return HttpResponse(svg, content_type='image/svg+xml')
 
 def get_svg_paths_for_component(category, component):
     file_name = component + '.svg'
@@ -554,15 +568,80 @@ def get_svg_paths_for_component(category, component):
 
 def get_avatar_colours():
     colours = {'skin': ['#694d3d', '#ae5d29', '#d08b5b', '#edb98a', '#ffdbb4'],
-     'shirt': ['#78e185', '#8fa7df', '#9ddadb', '#e279c7', '#e78276', '#fdea6b', '#ffcf77'],
-     'hair': ['#aa8866', '#debe99', '#241c11', '#4f1a00', '#9a3300'],
-     'background': ['#b6e3f4', '#c0aede', '#d1d4f9', '#ffd5dc', '#ffdfbf']}
+        'accessories': ['#78e185', '#8fa7df', '#9ddadb', '#e279c7', '#e78276', '#fdea6b', '#ffcf77'],
+        'shirt': ['#78e185', '#8fa7df', '#9ddadb', '#e279c7', '#e78276', '#fdea6b', '#ffcf77'],
+        'hair': ['#aa8866', '#debe99', '#241c11', '#4f1a00', '#9a3300'],
+        'background': ['#b6e3f4', '#c0aede', '#d1d4f9', '#ffd5dc', '#ffdfbf']}
     return colours
 
 def create_avatar_activity(request):
     if Activity.objects.filter(user=request.user, name="You've created an avatar").exists():
+        try:
+            user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Avatar master"))
+        except IntegrityError:
+            pass
         user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = "You've edited your avatar", points = 15)
         activity_points(request, user_activity.points)
     else:
         user_activity = Activity.objects.create(user=request.user, image = "images/avatar.png", name="You've created an avatar", points = 15)
         activity_points(request, user_activity.points)
+
+def unlock_avatar(request):
+    tier = request.GET.get('tier')
+    for key, value in request.GET.items():
+        if key in ['eyewear', 'body', 'face', 'facial-hair', 'head']:
+            category = key
+            file_name = request.GET.get(key) + '.svg'
+    return render(request, 'unlock_avatar.html', {'category': category, 'file_name': file_name, 'tier': tier})
+
+def get_tier_info():
+    tier_info = {'bronze': ['400', '#f5922a'],
+        'silver': ['900', '#c1cad1'],
+        'gold': ['1900', '#ffb70a'],
+        'platinum': ['3900', '#a9b1c8'],
+        'diamond': ['9900', '#5e9bba']}
+    return tier_info
+
+def get_reached_tiers(points):
+    tiers = get_tier_info()
+    reached_tiers = {}
+    for tier_name, tier_data in tiers.items():
+        if points >= int(tier_data[0]):
+            reached_tiers[tier_name] = tier_data
+    return reached_tiers
+
+def get_user_tier_colour(request):
+    reached_tiers = get_reached_tiers(UserLevel.objects.get(user=request.user).points)
+    if reached_tiers:
+        tier_name, tier_data = reached_tiers.popitem()
+        tier_colour = tier_data[1]
+    else:
+        tier_colour = '#ffffff'
+    return tier_colour
+
+def get_locked_items(request):
+    tier_info = get_tier_info()
+    locked_items = { 'eyepatch.svg': ['bronze', tier_info.get('bronze')[1]], 'sunglasses.svg': ['silver', tier_info.get('silver')[1]],
+        'sunglasses_2.svg': ['silver', tier_info.get('silver')[1]], 'monster.svg': ['bronze', tier_info.get('bronze')[1]],
+        'cyclops.svg': ['silver', tier_info.get('silver')[1]], 'full_3.svg': ['gold', tier_info.get('gold')[1]],
+        'moustache_2.svg': ['bronze', tier_info.get('bronze')[1]], 'moustache_3.svg': ['bronze', tier_info.get('bronze')[1]],
+        'mohawk.svg': ['silver', tier_info.get('silver')[1]], 'mohawk_2.svg': ['gold', tier_info.get('gold')[1]],
+        'bear.svg': ['platinum', tier_info.get('platinum')[1]], 'hat_hip.svg': ['silver', tier_info.get('silver')[1]]}
+    locked_items = update_locked_items(request, locked_items)
+    return locked_items
+
+def update_locked_items(request, locked_items):
+    reached_tiers = get_reached_tiers(UserLevel.objects.get(user=request.user).points)
+    for file_name, item_data in list(locked_items.items()):
+        for tier_name, tier_data in reached_tiers.items():
+            if tier_name == item_data[0]:
+                del locked_items[file_name]
+    return locked_items
+
+@register.filter
+def get_tier_name(locked_items, file_name):
+    return locked_items.get(file_name)[0]
+
+@register.filter
+def get_tier_colour(locked_items, file_name):
+    return locked_items.get(file_name)[1]

@@ -13,10 +13,19 @@
                             <div class="card-body row">
                                 {% for file_name in file_names %}
                                     <div class="col-md-2">
-                                        <div class="card" style="margin: 10px;">
-                                            <a href="{% url 'my_avatar' %}?{{ category }}={{ file_name|cut:".svg" }}">
-                                                <img src="{% static 'avatar/' %}{{ category }}/{{ file_name }}" style="width: 100%;" />
-                                            </a>
+                                        <div class="card" style="margin: 10px; overflow: hidden">
+                                            {% if file_name in locked_items %}
+                                                <a href="{% url 'unlock_avatar' %}?{{ category }}={{ file_name|cut:'.svg' }}&tier={{ locked_items|get_tier_name:file_name }}">
+                                                    <div class="overlay" style="position: absolute; width: 100%; height: 100%; background-color: {{ locked_items|get_tier_colour:file_name }}90">
+                                                        <img src="{% static 'images/' %}lock.svg" style="width: 100%; height: 100%; padding: 3px;" />
+                                                    </div>
+                                                    <img src="{% static 'avatar/' %}{{ category }}/{{ file_name }}" style="width: 100%;" />
+                                                </a>
+                                            {% else %}
+                                                <a href="{% url 'my_avatar' %}?{{ category }}={{ file_name|cut:'.svg' }}">
+                                                    <img src="{% static 'avatar/' %}{{ category }}/{{ file_name }}" style="width: 100%;" />
+                                                </a>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 {% endfor %}
@@ -27,7 +36,7 @@
                 <div class="col-md-6">
                     <div class="card" style="margin: 20px 0;">
                         <div class="card-body">
-                            <img src="{% static 'avatar/template/template.svg' %}" style="max-width: 100%; height: auto; border: 1px solid black"/>
+                            <img src="{% url 'create_avatar' %}" style="max-width: 100%; height: auto; border: 5px solid {{ user_tier_colour }}"/>
                         </div>
                     </div>
                     {% for category, category_colours in colours.items %}
