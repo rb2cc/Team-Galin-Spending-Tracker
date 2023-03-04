@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 from tracker.forms import LogInForm
 from tracker.models import User
-from .helpers import LogInTester
+from tracker.tests.helpers import LogInTester
 
 class LogInViewTestCase(TestCase, LogInTester):
 

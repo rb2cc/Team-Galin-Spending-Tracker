@@ -6,6 +6,9 @@ import django.core.validators
 from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
+import django_resized.forms
+import taggit.managers
+import tinymce.models
 import tracker.models
 
 
@@ -15,6 +18,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('auth', '0012_alter_user_first_name_max_length'),
+        ('taggit', '0005_auto_20220424_2025'),
     ]
 
     operations = [
@@ -49,6 +53,18 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
+            name='Author',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('fullname', models.CharField(blank=True, max_length=40)),
+                ('slug', models.SlugField(blank=True, max_length=400, unique=True)),
+                ('bio', tinymce.models.HTMLField()),
+                ('points', models.IntegerField(default=0)),
+                ('profile_pic', django_resized.forms.ResizedImageField(blank=True, crop=None, default=None, force_format=None, keep_meta=True, null=True, quality=100, scale=None, size=[50, 80], upload_to='authors')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+            ],
+        ),
+        migrations.CreateModel(
             name='Category',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -73,6 +89,26 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
+            name='Comment',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('content', models.TextField()),
+                ('date', models.DateTimeField(auto_now_add=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Forum_Category',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('title', models.CharField(max_length=50)),
+                ('slug', models.SlugField()),
+                ('description', models.TextField(default='description')),
+            ],
+            options={
+                'verbose_name_plural': 'forum_categories',
+            },
+        ),
+        migrations.CreateModel(
             name='Level',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -92,6 +128,18 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
+            name='Reply',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('content', models.TextField()),
+                ('date', models.DateTimeField(auto_now_add=True)),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='tracker.author')),
+            ],
+            options={
+                'verbose_name_plural': 'replies',
+            },
+        ),
+        migrations.CreateModel(
             name='Profile',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -101,17 +149,43 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
+            name='Post',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('title', models.CharField(max_length=400)),
+                ('slug', models.SlugField(blank=True, max_length=400, unique=True)),
+                ('content', tinymce.models.HTMLField()),
+                ('date', models.DateTimeField(auto_now_add=True)),
+                ('approved', models.BooleanField(default=True)),
+                ('comments', models.ManyToManyField(blank=True, to='tracker.comment')),
+                ('forum_categories', models.ManyToManyField(to='tracker.forum_category')),
+                ('tags', taggit.managers.TaggableManager(help_text='A comma-separated list of tags.', through='taggit.TaggedItem', to='taggit.Tag', verbose_name='Tags')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='tracker.author')),
+            ],
+        ),
+        migrations.CreateModel(
             name='Expenditure',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('title', models.CharField(max_length=20)),
-                ('description', models.TextField(max_length=280)),
+                ('description', models.CharField(max_length=280)),
                 ('image', models.ImageField(blank=True, upload_to='images')),
                 ('expense', models.DecimalField(decimal_places=2, max_digits=20, validators=[django.core.validators.MinValueValidator(Decimal('0.01'))])),
                 ('date_created', models.DateTimeField(default=django.utils.timezone.now)),
+                ('is_binned', models.BooleanField(default=False)),
                 ('category', models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='tracker.category')),
                 ('user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
+        ),
+        migrations.AddField(
+            model_name='comment',
+            name='replies',
+            field=models.ManyToManyField(blank=True, to='tracker.reply'),
+        ),
+        migrations.AddField(
+            model_name='comment',
+            name='user',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='tracker.author'),
         ),
         migrations.CreateModel(
             name='Activity',

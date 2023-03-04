@@ -96,6 +96,7 @@ class ExpenditureForm(forms.ModelForm):
 
         #initialises the category queryset so it only shows categories the user is subscribed to (fixes glitch)
         self.fields['category'].queryset = Category.objects.filter(users__id=self.request.user.id)
+        
     # description = forms.CharField(label="Description", widget=forms.CharField(attrs={'size':100}))
     # field_order=['title', 'description', 'expense']
 
@@ -113,5 +114,9 @@ class AddCategoryForm(forms.ModelForm):
 
     name = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
     week_limit = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
+
+class ReportForm(forms.Form):
+    start_date = forms.DateField(label='Start Date', widget=forms.TextInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(label='End Date', widget=forms.TextInput(attrs={'type': 'date'}))
 
 

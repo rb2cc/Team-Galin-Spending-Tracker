@@ -1,6 +1,5 @@
 from django.contrib.auth import views as auth_views
 
-
 """personal_spending_tracker URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -18,7 +17,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import re_path, path
-from tracker import views
+from tracker import views, expenditure_views
 from tracker.views import UserEditView
 from django.urls.conf import include
 from django.conf import settings
@@ -54,15 +53,21 @@ urlpatterns = [
         name="password_reset_complete"),
 
     path('edit_user/', UserEditView.as_view(), name='edit_user'),
-    path('expenditure_list/', views.expenditure_list, name='expenditure_list'),
-
+    path('expenditure_list/', expenditure_views.expenditure_list, name='expenditure_list'),
     path('forum_home/', views.forum_home, name='forum_home'),
     path('posts/', views.posts, name='posts'),
     path('detail/', views.detail, name='detail'),
     path('category_list', views.category_list, name='category_list'),
     path('remove_category/<int:id>', views.remove_category, name='remove_category'),
+    path('bin_expenditure', expenditure_views.bin_expenditure, name='bin_expenditure'),
+    path('recover_expenditure', expenditure_views.recover_expenditure, name='recover_expenditure'),
+    path('update_expenditure/<int:id>', expenditure_views.update_expenditure, name='update_expenditure'),
+    path('delete_expenditure', expenditure_views.delete_expenditure, name="delete_expenditure"),
+    path('expenditure_bin/', expenditure_views.binned_expenditure_list, name='expenditure_bin'),
+    path('filter_title/', expenditure_views.filter_by_title, name='filter_title'),
+    path('filter_category/', expenditure_views.filter_by_category, name='filter_category'),
+    path('filter_miscellaneous/', expenditure_views.filter_by_miscellaneous, name='filter_miscellaneous'),
     path('edit_category/<int:id>', views.edit_category, name='edit_category'),
-
     path('challenge_list/', views.challenge_list, name='challenge_list'),
     path('challenge_details/<int:id>/', views.challenge_details, name='challenge_details'),
     path('enter_challenge/', views.enter_challenge, name='enter_challenge'),
@@ -73,10 +78,16 @@ urlpatterns = [
     path('my_achievements/', views.my_achievements, name='my_achievements'),
     path('share_achievement/<int:id>', views.share_achievement, name='share_achievement'),
     path('share/', views.share, name='share'),
-    path('create_avatar', views.create_avatar, name='create_avatar'),
+    path('create_avatar/', views.create_avatar, name='create_avatar'),
     re_path(r'^my_activity/$', views.my_activity, name='my_activity'),
     re_path(r'^my_avatar/$', views.my_avatar, name='my_avatar'),
-    re_path(r'^unlock_avatar/$', views.unlock_avatar, name='unlock_avatar')
+    re_path(r'^unlock_avatar/$', views.unlock_avatar, name='unlock_avatar'),
+    path('report/', views.report, name='report'),
+    path('forum_home/', views.forum_home, name='forum_home'),
+    path('posts/<slug>/', views.posts, name='posts'),
+    path('detail/<slug>/', views.detail, name='detail'),
+    path('tinymce/', include('tinymce.urls')),
+    path('hitcount/', include('hitcount.urls', namespace='hitcount')),
 ]
 
 if settings.DEBUG:

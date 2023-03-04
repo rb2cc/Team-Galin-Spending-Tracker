@@ -49,7 +49,19 @@ p.cover-text {
   padding-right: 50px;
   padding-bottom: 30px;
   border-radius: 10px;
+}
 
+.report-card {
+  background-color: rgb(255, 255, 255, 0.9);
+  margin-top: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 1300px;
+  padding-top: 30px;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-bottom: 30px;
+  border-radius: 10px;
 }
 
 .main-cardOne {
@@ -101,7 +113,6 @@ p.cover-text {
   height: 800px;
   padding-top: 10px;
   padding-left: 10px;
-
   padding-bottom: 30px;
   border-radius: 10px;
 }
@@ -143,6 +154,7 @@ input[type=password] {
   display:block;
   table-layout:fixed;
   width:100%;
+  overflow-y:auto;
 }
 
 .mainThead {
@@ -151,7 +163,7 @@ input[type=password] {
 
 .mainTbody{
   display:block;
-  height: 700px;
+  max-height: 715px;
   overflow-y:auto;
 }
 
@@ -174,4 +186,55 @@ input[type=password] {
   background-color: rgb(255, 255, 255, 0.5);
 }
 
+.action_button label {
+  margin: 3px 5px 0 0;
+  position: relative;
+  cursor: pointer;
+}
+
+.action_button input {
+  display: none;
+}
+
+.filter_dropdown {
+  float:left;
+  margin-right: 15px;
+}
+.filter_search {
+  float:left;
+  margin-right: 125px;
+  margin-bottom: 15px;
+}
+
+.filters {
+  width:200px; 
+  display: inline-block;
+}
+
+.refresh {
+  border-radius: 25px;
+  border-color: darkslateblue;
+}
+
+.go {
+  background-color: #8765f0;
+  color:white;
+  border-color: #f109fd;
+  border-radius: 25px;
+}
+
+.go:hover {
+  background-color:#2cb6e5;
+  transition: 0.5s;
+}
+
+@media print
+{
+    html{
+        zoom: 55%; 
+    }
+    body, html, div, #wrapper {
+      height: 100%;
+    }
+}
 
