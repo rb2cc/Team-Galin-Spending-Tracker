@@ -7,12 +7,13 @@ from tracker.forms import AddCategoryForm
 class EditCategoryViewTestCase(TestCase):
 
     fixtures = ['tracker/tests/fixtures/default_user.json',
-                'tracker/tests/fixtures/default_category.json']
+                'tracker/tests/fixtures/default_category.json',
+                'tracker/tests/fixtures/extra_categories.json']
 
     def setUp(self):
         self.user = User.objects.get(email = 'james@example.org')
         self.cat_one = Category.objects.get(name = 'Test')
-        self.cat_two = Category.objects.create(id = 1, name = 'Test2', week_limit = 150)
+        self.cat_two = Category.objects.get(name = 'Test2')
         self.url = reverse('edit_category', kwargs={'id': 0})
         self.form_input = {
             'name':'Changed Test',
