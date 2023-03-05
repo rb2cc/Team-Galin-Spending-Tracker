@@ -6,7 +6,8 @@ from tracker.forms import AddCategoryForm
 """Unit tests for the category_list view"""
 class CategoryListViewTestCase(TestCase):
 
-    fixtures = ['tracker/tests/fixtures/default_user.json']
+    fixtures = ['tracker/tests/fixtures/default_user.json',
+                'tracker/tests/fixtures/default_category.json']
 
     def setUp(self):
         self.url = reverse('category_list')
@@ -21,7 +22,7 @@ class CategoryListViewTestCase(TestCase):
         self.assertEqual(self.url, '/category_list')
 
     def test_get_category_list(self):
-        cat_one = Category.objects.create(name = 'Test', week_limit = 100)
+        cat_one = Category.objects.get(name = 'Test')
         cat_two = Category.objects.create(name = 'Test2', week_limit = 150)
         cat_three = Category.objects.create(name = 'Test3', week_limit = 200)
         self.user.available_categories.add(cat_one, cat_two, cat_three)

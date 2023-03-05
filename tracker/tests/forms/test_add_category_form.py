@@ -8,11 +8,6 @@ class AddCategoryFormTestCase(TestCase):
 
     def setUp(self):
 
-        self.category = Category.objects.create(
-            name = 'Test',
-            week_limit = 100,
-        )
-
         self.form_input = {
             'name':'New',
             'week_limit':30

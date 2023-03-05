@@ -6,11 +6,12 @@ from tracker.forms import AddCategoryForm
 """Unit tests for edit_category view"""
 class EditCategoryViewTestCase(TestCase):
 
-    fixtures = ['tracker/tests/fixtures/default_user.json']
+    fixtures = ['tracker/tests/fixtures/default_user.json',
+                'tracker/tests/fixtures/default_category.json']
 
     def setUp(self):
         self.user = User.objects.get(email = 'james@example.org')
-        self.cat_one = Category.objects.create(id = 0, name = 'Test', week_limit = 100)
+        self.cat_one = Category.objects.get(name = 'Test')
         self.cat_two = Category.objects.create(id = 1, name = 'Test2', week_limit = 150)
         self.url = reverse('edit_category', kwargs={'id': 0})
         self.form_input = {
