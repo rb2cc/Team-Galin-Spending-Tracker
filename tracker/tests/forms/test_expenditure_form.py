@@ -9,18 +9,16 @@ import django.contrib.auth
 """Unit tests for the expenditure form"""
 
 class RequestFormTestCase(TestCase):
+
+    fixtures = ['tracker/tests/fixtures/default_user.json']
+
     def setUp(self): 
 
         self.factory = RequestFactory()
         url = 'test_image/fortlobby.png'
         
         
-        self.user = User.objects.create_user(
-            email = 'james@example.org',
-            first_name='James',
-            last_name = 'Lu',
-            password = 'Lu123'
-        )
+        self.user = User.objects.get(email = 'james@example.org')
         cat_three = Category.objects.create(name = 'Test3', week_limit = 200)
         self.user.available_categories.add(cat_three)
 

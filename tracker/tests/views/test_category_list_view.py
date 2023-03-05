@@ -6,14 +6,11 @@ from tracker.forms import AddCategoryForm
 """Unit tests for the category_list view"""
 class CategoryListViewTestCase(TestCase):
 
+    fixtures = ['tracker/tests/fixtures/default_user.json']
+
     def setUp(self):
         self.url = reverse('category_list')
-        self.user = User.objects.create_user(
-            email = 'james@example.org',
-            first_name='James',
-            last_name = 'Lu',
-            password = 'Lu123',
-        )
+        self.user = User.objects.get(email = 'james@example.org')
         self.form_input = {
             'name':'New',
             'week_limit':50
