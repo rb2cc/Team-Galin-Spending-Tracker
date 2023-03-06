@@ -5,16 +5,15 @@ from tracker.models import User, Category
 """Unit tests for the remove_category view"""
 class RemoveCategoryViewTestCase(TestCase):
 
+    fixtures = ['tracker/tests/fixtures/default_user.json',
+                'tracker/tests/fixtures/default_category.json',
+                'tracker/tests/fixtures/extra_categories.json']
+
     def setUp(self):
-        self.user = User.objects.create_user(
-            email = 'james@example.org',
-            first_name='James',
-            last_name = 'Lu',
-            password = 'Lu123',
-        )
-        self.cat_one = Category.objects.create(id = 0, name = 'Test', week_limit = 100)
-        self.cat_two = Category.objects.create(id = 1, name = 'Test2', week_limit = 150)
-        self.cat_three = Category.objects.create(id = 2, name = 'Test3', week_limit = 200)
+        self.user = User.objects.get(email = 'james@example.org')
+        self.cat_one = Category.objects.get(name = 'Test')
+        self.cat_two = Category.objects.get(name = 'Test2')
+        self.cat_three = Category.objects.get(name = 'Test3')
         self.url = reverse('remove_category', kwargs={'id': 0})
 
     def test_remove_category_url(self):

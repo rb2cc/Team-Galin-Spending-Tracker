@@ -4,20 +4,15 @@ from tracker.models import User, Category
 
 """Unit tests for the category model"""
 class CategoryModelTestCase(TestCase):
+
+    fixtures = ['tracker/tests/fixtures/default_user.json',
+                'tracker/tests/fixtures/default_category.json']
     
     def setUp(self):
         
-        self.user = User.objects.create_user(
-            email = 'james@example.org',
-            first_name='James',
-            last_name = 'Lu',
-            password = 'Lu123',
-        )
+        self.user = User.objects.get(email = 'james@example.org')
 
-        self.category = Category.objects.create(
-            name = 'Test',
-            week_limit = 100,
-        )
+        self.category = Category.objects.get(name = 'Test')
 
     def test_valid_category(self):
         self._assert_category_is_valid()

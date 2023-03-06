@@ -1,0 +1,10 @@
+[
+    {
+      "model": "tracker.category",
+      "pk": 0,
+      "fields": {
+        "name": "Test",
+        "week_limit": 100
+      }
+    }
+  ]

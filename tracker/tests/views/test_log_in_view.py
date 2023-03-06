@@ -7,14 +7,11 @@ from tracker.tests.helpers import LogInTester
 
 class LogInViewTestCase(TestCase, LogInTester):
 
+    fixtures = ['tracker/tests/fixtures/default_user.json']
+
     def setUp(self):
         self.url = reverse('home')
-        self.user = User.objects.create_user(
-            email = 'james@example.org',
-            first_name='James',
-            last_name = 'Lu',
-            password = 'Lu123',
-        )
+        self.user = User.objects.get(email = 'james@example.org')
 
     def test_log_in_url(self):
         self.assertEqual(self.url, '/')

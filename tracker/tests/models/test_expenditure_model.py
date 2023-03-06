@@ -6,21 +6,16 @@ from tracker.models import User, Category, Expenditure
 """Unit tests for the expenditure model"""
 class ExpenditureModelTestCase(TestCase):
 
+    fixtures = ['tracker/tests/fixtures/default_user.json',
+                'tracker/tests/fixtures/default_category.json']
+
     def setUp(self):
 
         url = 'test_image/fortlobby.png'
 
-        self.user = User.objects.create_user(
-            email = 'james@example.org',
-            first_name='James',
-            last_name = 'Lu',
-            password = 'Lu123',
-        )
+        self.user = User.objects.get(email = 'james@example.org')
 
-        self.category = Category.objects.create(
-            name = 'Test',
-            week_limit = 100,
-        )
+        self.category = Category.objects.get(name = 'Test')
         
         self.expenditure = Expenditure.objects.create(
             category = self.category,
