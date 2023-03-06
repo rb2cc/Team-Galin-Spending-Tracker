@@ -166,6 +166,7 @@ def landing_page(request):
         'user_tier_name': user_tier_name
     })
 
+
 def getCategoryAndExpenseList(objectList, request):
     categoryList = []
     expenseList = []
@@ -450,6 +451,15 @@ def update_user_level(user):
         user_level.level = current_level
         user_level.save()
 
+def share_avatar(request):
+    template_path = os.path.join(settings.STATICFILES_DIRS[1], 'template.svg')
+    svg = open(template_path, 'r').read()
+    name = "My avatar"
+    description = "Avatar created in Galin's Spending Tracker"
+    url = request.build_absolute_uri(reverse('my_avatar'))
+    text = "Here is my avatar created in Galin's Spending Tracker"
+    return share(request, svg, name, description, url, text)
+
 def share_challenge(request, id):
     user_challenge = UserChallenge.objects.get(id=id)
     name = user_challenge.challenge.name
@@ -485,6 +495,9 @@ def share(request, user_object, name, description, url, text):
         return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'achievement'})
     elif isinstance(user_object, UserChallenge):
         return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'challenge'})
+    elif isinstance(user_object, str):
+        user_tier_colour = get_user_tier_colour(request)
+        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'avatar', 'user_tier_colour': user_tier_colour})
 
 def handle_share(request):
     type = unquote(request.GET.get('type'))
@@ -540,23 +553,33 @@ def create_avatar(request):
     svg = open(template_path, 'r').read()
 
     for category, component in request.GET.items():
-        if category in ['skin', 'accessories', 'shirt', 'hair', 'background']:
-            if category == "background":
+        if category in ['skin', 'accessories', 'shirt', 'hair', 'background', 'clear']:
+            if category in ['background', 'clear']:
                 colour_blocks = re.findall(r'<rect\s+id="background".*?>', svg)
             else:
                 colour_blocks = re.findall(fr'<path id="{category}"[^>]*>', svg)
             for colour_block in colour_blocks:
                 fill_param = re.search(r'fill="([^"]+)"', colour_block)
+                if category == "clear":
+                    component = "#ffffff"
                 new_fill_param = f'fill="{component}"'
                 block_with_new_fill_param = colour_block.replace(fill_param.group(0), new_fill_param)
                 svg = svg.replace(colour_block, block_with_new_fill_param)
-        else:
-            svg_paths = get_svg_paths_for_component(category, component)
-            category_g_block = re.search(fr'<g id="{category}"[^>]*>', svg)
-            if category_g_block:
-                start_index = category_g_block.end()
-                end_index = svg.find('</g>', start_index)
-                svg = svg[:start_index] + svg_paths + svg[end_index:]
+        if category in ['eyewear', 'body', 'face', 'facial-hair', 'head', 'clear']:
+            if 'clear' in request.GET.keys():
+                for category in ['eyewear', 'body', 'face', 'facial-hair', 'head']:
+                   category_g_block = re.search(fr'<g id="{category}"[^>]*>', svg)
+                   if category_g_block:
+                        start_index = category_g_block.end()
+                        end_index = svg.find('</g>', start_index)
+                        svg = svg[:start_index] + svg[end_index:]
+            else:
+                svg_paths = get_svg_paths_for_component(category, component)
+                category_g_block = re.search(fr'<g id="{category}"[^>]*>', svg)
+                if category_g_block:
+                    start_index = category_g_block.end()
+                    end_index = svg.find('</g>', start_index)
+                    svg = svg[:start_index] + svg_paths + svg[end_index:]
 
         create_avatar_activity(request)
 

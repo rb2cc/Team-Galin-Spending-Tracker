@@ -6,6 +6,9 @@
     <div class='row'>
         <div class = 'card' style="margin: auto; max-width: 350px; text-align: center; padding: 20px">
             <h1>Share {{ type }}</h1>
+            {% if type == 'avatar' %}
+                <img src="{% url 'create_avatar' %}" style="max-width: 100%; height: auto; border: 5px solid {{ user_tier_colour }}; margin-bottom: 1rem" />
+            {% endif %}
             <p>Name: {{ name }}</p>
             <p>Description: {{ description }}</p>
             <div class='share-buttons'>

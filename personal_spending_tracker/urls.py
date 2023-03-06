@@ -79,6 +79,7 @@ urlpatterns = [
     path('share_achievement/<int:id>', views.share_achievement, name='share_achievement'),
     path('share/', views.share, name='share'),
     path('create_avatar/', views.create_avatar, name='create_avatar'),
+    path('share_avatar/', views.share_avatar, name='share_avatar'),
     re_path(r'^my_activity/$', views.my_activity, name='my_activity'),
     re_path(r'^my_avatar/$', views.my_avatar, name='my_avatar'),
     re_path(r'^unlock_avatar/$', views.unlock_avatar, name='unlock_avatar'),
