@@ -249,10 +249,14 @@ def category_list(request):
 
 def remove_category(request, id):
     category = Category.objects.get(id = id)
+    diff = category.week_limit
     if category.is_global:
         request.user.available_categories.remove(category)
     else:
         category.delete()
+    overall = Category.objects.filter(is_overall = True).get(users__id=request.user.id)
+    overall.week_limit -= diff
+    overall.save(force_update = True)
     return redirect('category_list')
 
 def edit_category(request, id):
