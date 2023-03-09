@@ -239,13 +239,14 @@ def category_list(request):
             return redirect('category_list')
     else:
         form = AddCategoryForm()
-    categoryList = Category.objects.filter(users__id=user_id).order_by('name')
+    categoryList = Category.objects.filter(users__id=user_id).filter(is_overall=False).order_by('name')
+    overall = Category.objects.filter(users__id=user_id).get(is_overall=True)
     if categoryList.count() == 1:
         try:
             user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Budget boss"))
         except IntegrityError:
             pass
-    return render(request, 'category_list.html', {'categories':categoryList, 'form':form})
+    return render(request, 'category_list.html', {'categories':categoryList, 'form':form, 'overall':overall})
 
 def remove_category(request, id):
     category = Category.objects.get(id = id)
