@@ -258,11 +258,16 @@ def remove_category(request, id):
 def edit_category(request, id):
     current_user = request.user
     category = Category.objects.get(id = id)
+    before_limit = category.week_limit
     if request.method == "POST":
         form = AddCategoryForm(request.POST, instance = category)
         if form.is_valid():
             category = form.save(commit=False)
             category.save()
+            diff = before_limit - category.week_limit       
+            overall = Category.objects.filter(is_overall = True).get(users__id=current_user.id)
+            overall.week_limit -= diff
+            overall.save(force_update = True)
             return redirect('category_list')
     else:
         form = AddCategoryForm(instance=category)
