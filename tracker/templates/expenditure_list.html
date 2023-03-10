@@ -67,10 +67,11 @@
                             -->  
                                 {% comment %} <td><a href="{{ spending.image.url }}">View</a></td> {% endcomment %}
                                 <td>
-                                    <input class="image_button" type="button" name="radio_pk" data-bs-toggle="modal" data-bs-target="#image_modal">
+                                    <input class="image_button" type="button" name="radio_pk" data-bs-toggle="modal" data-bs-target="#image_modal{{ forloop.counter }}">
+                                </td>
                                     <!-- image modal -->
                                     <!-- modal used to view images -->
-                                    <div class="modal fade" id="image_modal" tabindex="-1" aria-labelledby="image_modal_label" aria-hidden="true">
+                                    <div class="modal fade" id="image_modal{{ forloop.counter }}" tabindex="-1" aria-labelledby="image_modal_label" aria-hidden="true">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
@@ -84,9 +85,8 @@
                                             </div>
                                         </div>
                                     </div>
-                                </td>
                             {% else %}
-                                <td><a> None </a></td>
+                                <td>None</td>
                             {% endif %}
                             <td style="background-color: #efe8fa;"><a class = "btn btn-sm clear" href="{% url 'update_expenditure' spending.id %}"> ⚙️ </a></td>
                             <td style="background-color: #efe8fa;">
