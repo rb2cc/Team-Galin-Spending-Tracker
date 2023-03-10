@@ -71,7 +71,7 @@ def sign_up(request):
                     pass
                 user_activity = Activity.objects.create(user=request.user, image = "images/user.png", name = "You've created an account on Galin's Spending Tracker")
                 user_activity = Activity.objects.create(user=request.user, image = "badges/new_user.png", name = "You've earned \"New user\" achievement")
-                user_achievement = UserAchievement.objects.create(user=request.user, achievement = Achievement.objects.get(name="New user"))
+                #user_achievement = UserAchievement.objects.create(user=request.user, achievement = Achievement.objects.get(name="New user"))
                 overall = Category.objects.create(name="Overall", week_limit=overall_count, is_overall = True)
                 user.available_categories.add(overall)
                 return redirect('landing_page')
