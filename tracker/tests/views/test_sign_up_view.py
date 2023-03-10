@@ -59,10 +59,11 @@ class SignUpViewTestCase(TestCase, LogInTester):
         self.assertTrue(is_password_correct)
         self.assertTrue(self._is_logged_in())
 
-    def test_global_categories_assigned_on_signup(self):
+    def test_correct_categories_assigned_on_signup(self):
         self.client.post(self.url, self.form_input, follow=True)
         user = User.objects.get(email = 'james@example.org')
-        self.assertEqual(Category.objects.all().count(), 5)
-        self.assertEqual(user.available_categories.all().count(), 2)
+        self.assertEqual(Category.objects.all().count(), 6)
+        self.assertEqual(user.available_categories.all().count(), 3)
+        self.assertEqual(user.available_categories.filter(is_overall = True).count(), 1)
 
 

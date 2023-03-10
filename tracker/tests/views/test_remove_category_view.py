@@ -14,13 +14,14 @@ class RemoveCategoryViewTestCase(TestCase):
         self.cat_one = Category.objects.get(name = 'Test')
         self.cat_two = Category.objects.get(name = 'Test2')
         self.cat_three = Category.objects.get(name = 'Test3')
+        self.overall_cat = Category.objects.get(name = 'Test4')
         self.url = reverse('remove_category', kwargs={'id': 0})
 
     def test_remove_category_url(self):
         self.assertEqual(self.url, '/remove_category/0')
 
     def test_remove_category_view_removes_category(self):
-        self.user.available_categories.add(self.cat_one, self.cat_two, self.cat_three)
+        self.user.available_categories.add(self.cat_one, self.cat_two, self.cat_three, self.overall_cat)
         self.client.login(username = self.user.email, password = 'Lu123')
         before_count = Category.objects.count()
         response = self.client.post(self.url)

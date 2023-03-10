@@ -2,8 +2,11 @@
 from .forms import SignUpForm, LogInForm, EditUserForm, ReportForm, PostForm
 from django.contrib.auth.forms import UserChangeForm
 from .models import User
-from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm
+
 from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel, Activity, Post, Forum_Category, Comment, Reply
+from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm, EditOverallForm
+#from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel, Post, Forum_Category
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import redirect, render, get_object_or_404
@@ -54,9 +57,11 @@ def sign_up(request):
             if not User.objects.filter(email=form.cleaned_data.get('email')).exists():
                 user = form.save()
                 global_categories = Category.objects.filter(is_global=True)
+                overall_count = 0
                 for x in global_categories:
                     tempName = x.name
                     tempLimit = x.week_limit
+                    overall_count += x.week_limit
                     tempCategory = Category.objects.create(name=tempName, week_limit=tempLimit)
                     user.available_categories.add(tempCategory)
                 login(request, user)
@@ -66,6 +71,9 @@ def sign_up(request):
                     pass
                 user_activity = Activity.objects.create(user=request.user, image = "images/user.png", name = "You've created an account on Galin's Spending Tracker")
                 user_activity = Activity.objects.create(user=request.user, image = "badges/new_user.png", name = "You've earned \"New user\" achievement")
+                user_achievement = UserAchievement.objects.create(user=request.user, achievement = Achievement.objects.get(name="New user"))
+                overall = Category.objects.create(name="Overall", week_limit=overall_count, is_overall = True)
+                user.available_categories.add(overall)
                 return redirect('landing_page')
             else:
                 messages.add_message(request, messages.ERROR, "This email has already been registered")          
@@ -291,7 +299,8 @@ def category_list(request):
             return redirect('category_list')
     else:
         form = AddCategoryForm()
-    categoryList = Category.objects.filter(users__id=user_id).order_by('name')
+    categoryList = Category.objects.filter(users__id=user_id).filter(is_overall=False).order_by('name')
+    overall = Category.objects.filter(users__id=user_id).get(is_overall=True)
     if categoryList.count() == 1:
         try:
             try:
@@ -302,16 +311,20 @@ def category_list(request):
             activity_points(request, user_activity.points)
         except IntegrityError:
             pass
-    return render(request, 'category_list.html', {'categories':categoryList, 'form':form})
+    return render(request, 'category_list.html', {'categories':categoryList, 'form':form, 'overall':overall})
 
 def remove_category(request, id):
     category = Category.objects.get(id = id)
     category_name = category.name
+    diff = category.week_limit
     if category.is_global:
         request.user.available_categories.remove(category)
     else:
         category.delete()
     user_activity = Activity.objects.create(user=request.user, image = "images/delete.png", name = f'You\'ve deleted \"{category_name}\" category')
+    overall = Category.objects.filter(is_overall = True).get(users__id=request.user.id)
+    overall.week_limit -= diff
+    overall.save(force_update = True)
     return redirect('category_list')
 
 def edit_category(request, id):
@@ -319,20 +332,50 @@ def edit_category(request, id):
     category = Category.objects.get(id = id)
     category_name = category.name
     category_week_limit = category.week_limit
+    # if request.method == "POST":
+    #     form = AddCategoryForm(request.POST, instance = category)
+    #     if form.is_valid():
+    #         category = form.save(commit=False)
+    #         category.save()
+    #         if (category.name != category_name):
+    #             activity_name = f'You\'ve changed \"{category_name}\" category name to \"{category.name}\"'
+    #             user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
+    #         if (category.week_limit != category_week_limit):
+    #             activity_name = f'You\'ve changed \"{category.name}\" category week limit from {category_week_limit} to {category.week_limit}'
+    #             user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
+    #         return redirect('category_list')
+    before_limit = category.week_limit
     if request.method == "POST":
-        form = AddCategoryForm(request.POST, instance = category)
-        if form.is_valid():
-            category = form.save(commit=False)
-            category.save()
-            if (category.name != category_name):
-                activity_name = f'You\'ve changed \"{category_name}\" category name to \"{category.name}\"'
-                user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
-            if (category.week_limit != category_week_limit):
-                activity_name = f'You\'ve changed \"{category.name}\" category week limit from {category_week_limit} to {category.week_limit}'
-                user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
-            return redirect('category_list')
+        if category.is_overall==False:
+            form = AddCategoryForm(request.POST, instance = category)
+            if form.is_valid():
+                category = form.save(commit=False)
+                category.save()
+                if (category.name != category_name):
+                    activity_name = f'You\'ve changed \"{category_name}\" category name to \"{category.name}\"'
+                    user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
+                if (category.week_limit != category_week_limit):
+                    activity_name = f'You\'ve changed \"{category.name}\" category week limit from {category_week_limit} to {category.week_limit}'
+                    user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
+                diff = before_limit - category.week_limit       
+                overall = Category.objects.filter(is_overall = True).get(users__id=current_user.id)
+                overall.week_limit -= diff
+                overall.save(force_update = True)
+                return redirect('category_list')
+        else:
+            form = EditOverallForm(request.POST, instance = category, user = current_user)
+            if form.is_valid():
+                category = form.save(commit=False)
+                category.save()
+                if (category.week_limit != category_week_limit):
+                    activity_name = f'You\'ve changed \"{category.name}\" category week limit from {category_week_limit} to {category.week_limit}'
+                    user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
+                return redirect('category_list')
     else:
-        form = AddCategoryForm(instance=category)
+        if category.is_overall==False:
+            form = AddCategoryForm(instance=category)
+        else:
+            form = EditOverallForm(instance=category, user = current_user)
     return render(request, 'edit_category.html', {'form' : form})
 
 def forum_home(request):

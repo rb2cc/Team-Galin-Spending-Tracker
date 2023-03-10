@@ -89,6 +89,7 @@ class Category(models.Model):
     name = models.CharField(max_length=50, blank=False)
     week_limit = models.PositiveIntegerField()
     is_global = models.BooleanField(default=False)
+    is_overall = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = 'Category'

@@ -1,7 +1,7 @@
 from django.core.validators import validate_email
 from django.core.validators import RegexValidator
 from django import forms
-
+from django.forms import ValidationError
 from .models import User, Post
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm, PasswordResetForm
 
@@ -123,8 +123,32 @@ class ReportForm(forms.Form):
     start_date = forms.DateField(label='Start Date', widget=forms.TextInput(attrs={'type': 'date'}))
     end_date = forms.DateField(label='End Date', widget=forms.TextInput(attrs={'type': 'date'}))
 
-# Form to allow users to create new forum posts.
+class EditOverallForm(forms.ModelForm):
+    """Form enabling users to edit the overall category"""
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user")
+        super(EditOverallForm, self).__init__(*args, **kwargs)
 
+    def clean(self):
+        cleaned_data = super().clean()
+        limit = cleaned_data.get('week_limit')
+        sum = 0
+        others = Category.objects.filter(is_overall=False).filter(users__id=self.user.id)
+        for cat in others:
+            sum += cat.week_limit
+        if int(limit) < sum:
+            raise ValidationError({"week_limit":"The overall limit cannot be less than the sum of other categories."})
+        return cleaned_data
+        
+
+    class Meta:
+        """Form options"""
+        model = Category
+        fields = ['week_limit']
+
+    week_limit = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
+
+# Form to allow users to create new forum posts.
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post

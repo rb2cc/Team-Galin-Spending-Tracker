@@ -18,15 +18,16 @@ class CategoryListViewTestCase(TestCase):
             'week_limit':50
         }
         self.achievement = Achievement.objects.create(name = "Budget boss", description = "Test", criteria = "Test", badge = "Test")
+        cat_one = Category.objects.get(name = 'Test')
+        cat_two = Category.objects.get(name = 'Test2')
+        cat_three = Category.objects.get(name = 'Test3')
+        cat_overall = Category.objects.get(name = 'Test4')
+        self.user.available_categories.add(cat_one, cat_two, cat_three, cat_overall)
 
     def test_category_list_url(self):
         self.assertEqual(self.url, '/category_list')
 
     def test_get_category_list(self):
-        cat_one = Category.objects.get(name = 'Test')
-        cat_two = Category.objects.get(name = 'Test2')
-        cat_three = Category.objects.get(name = 'Test3')
-        self.user.available_categories.add(cat_one, cat_two, cat_three)
         self.client.login(username = self.user.email, password = 'Lu123')
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
