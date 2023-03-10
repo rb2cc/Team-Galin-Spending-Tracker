@@ -40,13 +40,19 @@ class Command(BaseCommand):
             is_global = False
         )
 
+        overallCategory = Category.objects.create(
+            name = "Overall",
+            week_limit = 600,
+            is_overall = True
+        )
+
         james = User.objects.create(
             email = "james@kcl.ac.uk",
             password = password_data,
             first_name = "Yusheng",
             last_name = "Lu",
         )
-        james.available_categories.add(foodCategoryLocal,travelCategoryLocal)
+        james.available_categories.add(foodCategoryLocal,travelCategoryLocal, overallCategory)
 
         for _ in range(0,100):
             Expenditure.objects.create(
