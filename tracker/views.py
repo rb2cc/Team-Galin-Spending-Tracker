@@ -550,10 +550,13 @@ def complete_challenge(request, challenge_id):
     return redirect('challenge_list')
 
 def activity_points(request, points):
-    user_level = UserLevel.objects.get(user=request.user)
-    user_level.points += points
-    user_level.save()
-    update_user_level(request.user)
+    try:
+        user_level = UserLevel.objects.get(user=request.user)
+        user_level.points += points
+        user_level.save()
+        update_user_level(request.user)
+    except ObjectDoesNotExist:
+        pass
 
 def update_user_level(user):
     user_level = UserLevel.objects.get(user=user)
