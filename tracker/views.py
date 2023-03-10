@@ -872,9 +872,11 @@ def report(request):
         previous_total_difference = previous_total-total_expense
 
     if average_daily>previous_average:
-        previous_average_difference = float(average_daily)-previous_average
+        previous_average_difference = float(average_daily)-float(previous_average)
     else:
-        previous_average_difference = previous_average-float(average_daily)
+        previous_average_difference = float(previous_average)-float(average_daily)
+
+    previous_average_difference = round(previous_average_difference,2)
 
     context = {
         'expenditures': expenditures,
