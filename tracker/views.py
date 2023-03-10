@@ -1,9 +1,9 @@
 
-from .forms import SignUpForm, LogInForm, EditUserForm, ReportForm
+from .forms import SignUpForm, LogInForm, EditUserForm, ReportForm, PostForm
 from django.contrib.auth.forms import UserChangeForm
 from .models import User
 from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm
-from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel, Post, Forum_Category
+from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel, Post, Forum_Category, Comment, Reply
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import redirect, render, get_object_or_404
@@ -19,6 +19,7 @@ from django.db import IntegrityError
 from math import floor
 from urllib.parse import urlencode, unquote
 import math
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 from .utils import update_views
 
@@ -266,30 +267,107 @@ def edit_category(request, id):
     
 def forum_home(request):
     all_forum_categories = Forum_Category.objects.all()
+    num_posts = Post.objects.all().count()
+    num_users = User.objects.all().count()
+    num_categories = all_forum_categories.count()
+
+    if Post.objects.count() == 0:
+        last_post = None
+    else:
+        last_post = Post.objects.latest('date')
+    # last_post = Post.objects.latest('date')     
+  
+    
+
+
     context = {
         "all_forum_categories": all_forum_categories,
+        "num_posts": num_posts,
+        "num_users": num_users,
+        "num_categories": num_categories,
+        "last_post": last_post,
+        "title": "Forum Home",
     }
     return render(request, 'forum/forum_home.html', context)
 
 def posts(request, slug):
     category = get_object_or_404(Forum_Category, slug=slug)
     posts = Post.objects.filter(approved=True, forum_categories=category)
+    paginator = Paginator(posts, 5)
+    page = request.GET.get("page")
+    try:
+        posts = paginator.page(page)
+    except PageNotAnInteger:
+        posts = paginator.page(1)
+    except EmptyPage:
+        posts = paginator.pag(paginator.num_pages)
 
     context = {
         "posts":posts,
         "forum": category,
+        "title": "Posts",
 
     }
   
     return render(request, 'forum/posts.html', context)
 
+# @login_required(login_url=reverse_lazy("login"))
 def detail(request, slug):
     post = get_object_or_404(Post, slug=slug)
+    author = request.user
+
+    if "comment-form" in request.POST:
+        
+
+        # print("Comment")
+
+        comment = request.POST.get("comment")
+        new_comment, created = Comment.objects.get_or_create(user=author, content=comment)
+        post.comments.add(new_comment.id)
+
+    if "reply-form" in request.POST:
+
+        reply = request.POST.get("reply")
+        commenr_id = request.POST.get("comment-id")
+        comment_obj = Comment.objects.get(id=commenr_id)
+        new_reply, created = Reply.objects.get_or_create(user=author, content=reply)
+        comment_obj.replies.add(new_reply.id)
+
     context = {
-        "post":post
+        "post":post,
+        "title": post.title,
     }
     update_views(request, post)
     return render(request, 'forum/detail.html', context)
+
+@login_required
+def create_post(request):
+    context = {}
+    form = PostForm(request.POST or None)
+    if request.method == "POST":
+        if form.is_valid():
+            author = request.user
+            new_post = form.save(commit=False)
+            new_post.user = author
+            new_post.save()
+            form.save_m2m()
+            return redirect("forum_home")
+    context.update({
+        "form": form,
+        "title": "Create New Post"
+    })
+    return render(request, "forum/create_post.html", context)
+
+def latest_posts(request):
+    posts = Post.objects.all().filter(approved=True)[:10]
+    context = {
+        "posts": posts,
+        "title": "Lastest 10 Posts"
+    }
+    return render(request, "forum/latest_posts.html", context)
+
+def search_result(request):
+    return render(request, "forum/search.html")
 
 def challenge_list(request):
     challenges = Challenge.objects.all()
