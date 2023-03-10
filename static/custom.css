@@ -228,6 +228,20 @@ input[type=password] {
   transition: 0.5s;
 }
 
+.image_button {
+  border-radius: 12px;
+  border-color: darkslateblue;
+  background-color: #8765f0;
+  width: 23px;
+  height: 23px;
+}
+
+.image {
+  border-radius: 10px;
+  width: 450px;
+  height: auto;
+}
+
 @media print
 {
     html{

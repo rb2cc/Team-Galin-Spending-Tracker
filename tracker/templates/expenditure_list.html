@@ -62,12 +62,27 @@
                             <td width="130px">{{ spending.date_created }}</td>
                             <td width="680px">{{ spending.description }}</td>
                             {% if spending.image %}
-                            <!-- This code can show full images.
-                                <td style="max-width:0px"><img src="media/{{ spending.image }} " alt="image"></td>
-                            -->  
-                                <td><a href="{{ spending.image.url }}">View</a></td>
+                                <td>
+                                    <input class="image_button" type="button" name="radio_pk" data-bs-toggle="modal" data-bs-target="#image_modal{{ forloop.counter }}">
+                                </td>
+                                    <!-- image modal -->
+                                    <!-- modal used to view images -->
+                                    <div class="modal fade" id="image_modal{{ forloop.counter }}" tabindex="-1" aria-labelledby="image_modal_label" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h1 class="modal-title fs-5" id="image_modal_label">Viewing Image</h1>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p style="text-align:center;"><img class = "image" src="{{ spending.image.url }}" alt="expenditure image"></p>
+                                                    </div><div class="modal-footer">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                             {% else %}
-                                <td><a> None </a></td>
+                                <td>None</td>
                             {% endif %}
                             <td style="background-color: #efe8fa;"><a class = "btn btn-sm clear" href="{% url 'update_expenditure' spending.id %}"> ⚙️ </a></td>
                             <td style="background-color: #efe8fa;">
@@ -104,6 +119,7 @@
       </div>
     </div>
 </div>
+
 <!-- javascript for persisting drop down selection after onchange function occurs -->
 <script> 
     $('#selected_category').on('change', function() {

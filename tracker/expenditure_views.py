@@ -72,7 +72,7 @@ def update_expenditure(request, id):
     previous_category = expenditure.category.name
     form  = ExpenditureForm(instance = expenditure, r=request)
     if request.POST:
-        form = ExpenditureForm(request.POST, instance = expenditure, r=request)
+        form = ExpenditureForm(request.POST, request.FILES, instance = expenditure, r=request)
         if form.is_valid():
             expenditure = form.save(commit=False)
             expenditure.save() #save the updated form inputs
