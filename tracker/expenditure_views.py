@@ -1,5 +1,6 @@
 from .forms import ExpenditureForm
-from .models import Category, Expenditure
+from .models import Category, Expenditure, Activity
+from .views import activity_points
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.utils.datastructures import MultiValueDictKeyError
@@ -25,6 +26,7 @@ def bin_expenditure(request):
             expenditure = Expenditure.objects.get(pk=expenditure_pk)
             expenditure.is_binned = True
             expenditure.save()
+            Activity.objects.create(user=request.user, image = "images/delete.png", name = f'You\'ve put \"{expenditure.title}\" expenditure in the bin')
             return redirect('expenditure_list')
         except Expenditure.DoesNotExist:
             return redirect('expenditure_list')
@@ -39,6 +41,7 @@ def recover_expenditure(request):
             expenditure = Expenditure.objects.get(pk=expenditure_pk)
             expenditure.is_binned = False
             expenditure.save()
+            Activity.objects.create(user=request.user, image = "images/recover.png", name = f'You\'ve recovered \"{expenditure.title}\" expenditure from the bin')
             return redirect('expenditure_bin')
         except Expenditure.DoesNotExist:
             return redirect('expenditure_bin')
@@ -51,7 +54,9 @@ def delete_expenditure(request):
         try:
             expenditure_pk = request.POST['radio_pk']
             expenditure = Expenditure.objects.get(pk=expenditure_pk)
+            expenditure_title = expenditure.title
             expenditure.delete()
+            Activity.objects.create(user=request.user, image = "images/delete.png", name = f'You\'ve deleted \"{expenditure_title}\" expenditure')
             return redirect('expenditure_bin')
         except Expenditure.DoesNotExist:
             return redirect('expenditure_bin')
@@ -60,13 +65,18 @@ def delete_expenditure(request):
 
 #Gets selected expenditure object and returns its form allowing changing of its fields and saves the changes
 def update_expenditure(request, id):
-    expenditure = Expenditure.objects.get(id = id) 
+    expenditure = Expenditure.objects.get(id = id)
+    previous_title = expenditure.title
+    previous_expense = int(expenditure.expense)
+    previous_description = expenditure.description
+    previous_category = expenditure.category.name
     form  = ExpenditureForm(instance = expenditure, r=request)
     if request.POST:
         form = ExpenditureForm(request.POST, request.FILES, instance = expenditure, r=request)
         if form.is_valid():
             expenditure = form.save(commit=False)
             expenditure.save() #save the updated form inputs
+            create_expenditure_activity(request, expenditure, previous_title, previous_expense, previous_description, previous_category)
             return redirect('expenditure_list')
     categories = Category.objects.filter(users__id=request.user.id)
     return render(request, 'update_expenditure.html', {'form' : form, 'categories':categories} )
@@ -111,4 +121,18 @@ def filter_by_miscellaneous(request):
     elif (query == "new"):
         expenditures = Expenditure.objects.filter(is_binned=False).order_by('-date_created')
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
+
+def create_expenditure_activity(request, expenditure, previous_title, previous_expense, previous_description, previous_category):
+    if (expenditure.title != previous_title):
+        activity_name = f'You\'ve changed \"{previous_title}\" expenditure title to \"{expenditure.title}\"'
+        Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
+    if (expenditure.expense != previous_expense):
+        activity_name = f'You\'ve changed \"{expenditure.title}\" expenditure expense from {previous_expense} to {expenditure.expense}'
+        Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
+    if (expenditure.description != previous_description):
+        activity_name = f'You\'ve changed \"{expenditure.title}\" expenditure description from \"{previous_description}\" to \"{expenditure.description}\"'
+        Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
+    if (expenditure.category.name != previous_category):
+        activity_name = f'You\'ve changed \"{expenditure.title}\" expenditure category from \"{previous_category}\" to \"{expenditure.category.name}\"'
+        Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
 

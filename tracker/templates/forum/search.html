@@ -1,0 +1,70 @@
+{% extends 'base_content.html' %}
+{% load hitcount_tags %}
+{% block content %}
+
+
+<header>
+    <!---Search Box--->
+    <form action="{% url 'search_result' %}" role="form" method="GET">
+        <div class="search-box">
+            <div>
+                <select name="" id="">
+                    <option value="everything"> Everything </option>
+                    <option value="titles"> Titles </option>
+                    <option value="description"> Description </option>
+                </select>
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+                <input type="text" name="q" id="" placeholder"search ..."></input>
+                <button type="submit" name ="search"><i class="fa fa-search"></i></button>
+            </div>
+    </div>
+</form>
+</header>
+
+        <div class="container">
+
+            <!---Navigation--->
+            <div class="navigate">
+                <span> Search: "{{query}}" --> {{objects|length}} Result(s) Found </span>
+
+            </div>
+
+            <div class="posts-table">
+                <div class="table-head">
+                    <div class="status"> Status </div>
+                    <div class="subjects"> Subjects </div>
+                    <div class="replies"> Replies/Views </div>
+                    <div class="last-reply"> Last Reply </div>
+                </div>
+
+                {% for post in objects %}
+                <div class="table-row">
+                    <div class="status"><i class="fa fa-fire"> </i></div>
+                    <div class="subjects"><a href="{{post.get_url}}"> {{post.title}} </a>
+                    <br>
+                    <span>Started by <b><a href="#"> {{post.user.fullname|title}} </a></b>.</span>
+                    </div>
+                    <div class="replies">
+                        {{post.num_comments}} comments <br> {% get_hit_count for post %} views
+                    </div>
+                            <div class="last-reply">
+                                {{post.last_reply.date|date}}
+                                <br>
+                                By <b> <a href="#"> {{post.last_reply.user.username|title}} </a> </b>
+                            </div>
+                </div>
+                {% endfor %}
+
+
+            </div>
+    </div>
+
+<!---Pagination--->
+<div class="pagination">
+        Pages: {% for num_page in posts.paginator.page_range %}<a href="?page={{num_page}}"> {{num_page}} </a>  {% endfor %}
+</div>
+
+
+    </body>
+</html>
+{% endblock content %}

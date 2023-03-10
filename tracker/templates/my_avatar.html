@@ -1,0 +1,69 @@
+{% extends 'base_content.html' %}
+{% load static %}
+{% block content %}
+<div class='container'>
+    <div class='row'>
+        <div class = 'card' style="margin: auto; padding: 20px">
+            <h1 style="text-align: center">My Avatar</h1>
+            <div class="row">
+                <div class="col-md-6">
+                    {% for category, file_names in components.items %}
+                        <div class="card" style="margin: 20px 0;">
+                            <h3 class="card-header">{{ category|title }}</h3>
+                            <div class="card-body row">
+                                {% for file_name in file_names %}
+                                    <div class="col-md-2">
+                                        <div class="card" style="margin: 10px; overflow: hidden">
+                                            {% if file_name in locked_items %}
+                                                <a href="{% url 'unlock_avatar' %}?{{ category }}={{ file_name|cut:'.svg' }}&tier={{ locked_items|get_tier_name:file_name }}">
+                                                    <div class="overlay" style="position: absolute; width: 100%; height: 100%; background-color: {{ locked_items|get_tier_colour:file_name }}90">
+                                                        <img src="{% static 'images/' %}lock.svg" style="width: 100%; height: 100%; padding: 3px;" />
+                                                    </div>
+                                                    <img src="{% static 'avatar/' %}{{ category }}/{{ file_name }}" style="width: 100%;" />
+                                                </a>
+                                            {% else %}
+                                                <a href="{% url 'my_avatar' %}?{{ category }}={{ file_name|cut:'.svg' }}">
+                                                    <img src="{% static 'avatar/' %}{{ category }}/{{ file_name }}" style="width: 100%;" />
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-6">
+                    <div class="card" style="margin: 20px 0;">
+                        <div class="card-body">
+                            <img src="{% url 'create_avatar' %}" style="max-width: 100%; height: auto; border: 5px solid {{ user_tier_colour }}"/>
+                        </div>
+                        <div class="avatar-buttons">
+                            <div style="display: inline-block; padding-left: 20px; padding-bottom: 10px">
+                                <a class="btn btn-primary btn-sm" href="{% url 'share_avatar' %}" style="width: 200px; margin-top: 0px">Share</a>
+                            </div>
+                            <div style="display: inline-block; padding-left: 20px; padding-bottom: 10px">
+                                <a class="btn btn-primary btn-sm" href="{% url 'my_avatar' %}?clear" style="width: 200px; margin-top: 0px">Clear</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% for category, category_colours in colours.items %}
+                        <div class="card" style="margin: 20px 0;">
+                            <h3 class="card-header">{{ category|title }}</h3>
+                            <div class="card-body row" style="padding: 10px;">
+                                {% for colour in category_colours %}
+                                    <div class="col-md-2">
+                                        <a href="{% url 'my_avatar' %}?{{ category }}={{ colour|urlencode }}">
+                                            <div class="card" style="margin: 10px; background-color: {{ colour }}; height: 50px; width: 50px; border: 1px solid black"></div>
+                                        </a>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
