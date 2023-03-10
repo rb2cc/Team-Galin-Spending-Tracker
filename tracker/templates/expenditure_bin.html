@@ -24,11 +24,11 @@
                 <div class="scroll">
                     {% for binned in binned_spendings %}
                         <tr>
-                            <td width="80px">{{ spending.category }}</td>
-                            <td width="120px">{{ spending.title }}</td>
-                            <td width="90px">£{{ spending.expense }}</td>
-                            <td width="130px">{{ spending.date_created }}</td>
-                            <td width="680px">{{ spending.description }}</td>
+                            <td width="80px">{{ binned.category }}</td>
+                            <td width="120px">{{ binned.title }}</td>
+                            <td width="90px">£{{ binned.expense }}</td>
+                            <td width="130px">{{ binned.date_created }}</td>
+                            <td width="680px">{{ binned.description }}</td>
                             {% if binned.image %}
                             <!-- This code can show full images.
                                 <td style="max-width:0px"><img src="media/{{ spending.image }} " alt="image"></td>
