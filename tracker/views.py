@@ -1,4 +1,3 @@
-
 from .forms import SignUpForm, LogInForm, EditUserForm, ReportForm, PostForm
 from django.contrib.auth.forms import UserChangeForm
 
@@ -373,10 +372,6 @@ def forum_home(request):
         last_post = None
     else:
         last_post = Post.objects.latest('date')
-    # last_post = Post.objects.latest('date')
-
-
-
 
     context = {
         "all_forum_categories": all_forum_categories,
@@ -415,16 +410,11 @@ def detail(request, slug):
     author = request.user
 
     if "comment-form" in request.POST:
-
-
-        # print("Comment")
-
         comment = request.POST.get("comment")
         new_comment, created = Comment.objects.get_or_create(user=author, content=comment)
         post.comments.add(new_comment.id)
 
     if "reply-form" in request.POST:
-
         reply = request.POST.get("reply")
         commenr_id = request.POST.get("comment-id")
         comment_obj = Comment.objects.get(id=commenr_id)
@@ -936,6 +926,3 @@ def report(request):
         'previous_average_difference':previous_average_difference,
     }
     return render(request, 'report.html', context)
-
-
-
