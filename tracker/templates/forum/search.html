@@ -21,17 +21,11 @@
 </form>
 </header>
 
-<div>
-    {% if user.is_authenticated %}
-        <div class="post-box"><a href="{% url 'create_post' %}"> + </a></div>
-        {% endif %}
-</div>
-
         <div class="container">
 
             <!---Navigation--->
-            <div class="navigate" >
-                <span><a href="{% url 'forum_home'}"> My Forum - Forums</a> >> <a href="{{forum.get_url}}"> {{forum.title}} </a>
+            <div class="navigate">
+                <span> Search: "{{query}}" --> {{objects|length}} Result(s) Found </span>
 
             </div>
 
@@ -43,33 +37,12 @@
                     <div class="last-reply"> Last Reply </div>
                 </div>
 
-                {% for post in posts %}
+                {% for post in objects %}
                 <div class="table-row">
-
-                    {% if post.closed == True %}
-                    <div class="status"><i class="fa fa-lock"> </i></div>
-
-                    {% elif post.num_comments == 0 %}
-                    <div class="status"><i class="fa fa-frown-o"> </i></div>
-
-                    {% elif post.num_comments > 0 and post.num_comments < 2 %}
-                    <div class="status"><i class="fa fa-book""> </i></div>
-
-                    {% elif post.num_comments > 2 and post.num_comments < 5 %}
-                    <div class="status"><i class="fa fa-rocket"> </i></div>
-
-                    {% elif post.num_comments >= 4 %}
                     <div class="status"><i class="fa fa-fire"> </i></div>
-
-                    {% endif %}
-                   
-                    
-                    
-                    
-
                     <div class="subjects"><a href="{{post.get_url}}"> {{post.title}} </a>
                     <br>
-                    <span>Started by <b><a href="#"> {{post.user.username|title}} </a></b>.</span>
+                    <span>Started by <b><a href="#"> {{post.user.fullname|title}} </a></b>.</span>
                     </div>
                     <div class="replies">
                         {{post.num_comments}} comments <br> {% get_hit_count for post %} views
@@ -91,30 +64,6 @@
         Pages: {% for num_page in posts.paginator.page_range %}<a href="?page={{num_page}}"> {{num_page}} </a>  {% endfor %}
 </div>
 
-<!---Status note--->
-<div class="note">
-    <span> | &nbsp;   </span>
-    <span>
-        <i class="fa fa-lock"></i>  Closed Topic
-    </span>
-            <span> &nbsp;  |  &nbsp;   </span>
-    <span>
-        <i class="fa fa-frown-o"> </i> Zero Engagement Topic
-    </span>
-    <span> &nbsp;  |  &nbsp;   </span>
-    <span>
-    <i class="fa fa-book"> </i> Low Engagement Topic
-    </span>
-    <span> &nbsp;  |  &nbsp;   </span>
-    <span>
-        <i class="fa fa-fire"></i> Popular Topic
-    </span>
-        <span> &nbsp;  |  &nbsp;   </span>
-    <span>
-        <i class="fa fa-rocket"></i>  High Engagement Topic
-    </span>
-    <span> &nbsp;   |   </span>
-</div>
 
     </body>
 </html>

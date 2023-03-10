@@ -1,13 +1,13 @@
-{% extends 'forum/forum_base.html' %}
+{% extends 'base_content.html' %}
 {% load hitcount_tags %}
 {% block content %}
 
 
 
-        <div class="container">
+        <div class="container" style="margin:0px">
 
-            <div class="navigate">
-                <span> <a href="#"> My Forum - Forums </a>  >> <a href="{{post.categories.all.0.get_url}}"> {{post.categories.all.0}} </a> >> <a href="{{post.get_url}}"> {{post.title}} </a> </span>
+            <div class="navigate" style="margin-top:0px">
+                <span> <a href="{% url 'forum_home' %}"> My Forum - Forums </a>  >> <a href="{{post.categories.all.0.get_url}}"> {{post.categories.all.0}} </a> >> <a href="{{post.get_url}}"> {{post.title}} </a> </span>
             </div>
 
                 <div class="topic-container">
@@ -18,11 +18,11 @@
 
                     <div class="body">
                         <div class="authors">
-                            <div class="userename"><a href="#"> {{post.user.fullname|title}} </a> </div>
+                            <div class="username"><a href="#"> {{post.user.username|title}} </a> </div>
                             <div> Role </div>
-                            <img src="{{post.user.profile_pic.url}}" alt="">
-                            <div> Posts: <u> 45 </u> </div>
-                            <div> Points: <u> 5421 </u> </div>
+                            <img src="{{post.user.profile_pic}}" alt="">
+                            <div> Posts: <u> {{post.user.num_posts}} </u> </div>
+                            <div> Points: <u> {{post.user.points}} </u> </div>
                         </div>
 
 
@@ -38,11 +38,28 @@
                 </div>
 
                 <!---Comment Input--->
+                {% if post.closed == True %}
+
+                <div style="background-color:#fff;color:#000;font-weight:bolder;padding:10px;width:100%;"> This post is closed. </div>
+
+                {% else %} 
+                
+                {% if request.user.is_authenticated %}
+                <form action="." method="post">
+                    {% csrf_token %}
                 <div class="comment-area hide" id="comment-area">
                     <textarea name="comment" id="" placeholder="Add Comment......"></textarea>
-                    <input type="submit" name="" id="" value="submit">
+                    <input type="submit" value="Submit" name="comment-form">
                 </div>
-    </div>
+                </form>
+
+                {% else %}
+
+                <div style="background-color:#fff;color:#000;font-weight:bolder;padding:10px;width:100%;"> You must <a href="{% url 'home' %}"> <b> login </b> </a> to comment. </div>
+
+                {% endif %}
+                {% endif %}
+        </div>
 
 <!---Show Comments--->
 {% for comment in post.comments.all %}
@@ -54,9 +71,9 @@
 
     <div class="body">
         <div class="authors">
-            <div class="AnotherUser"><a href="#"> {{comment.user.fullname|title}} </a> </div>
+            <div class="AnotherUser"><a href="#"> {{comment.user.username|title}} </a> </div>
             <div> Role </div>
-            <img src="{{comment.user.profile_pic.url}}" alt="">
+            <img src="{{comment.user.profile_pic}}" alt="">
             <div> Posts: <u> {{comment.user.num_posts}} </u> </div>
             <div> Points: <u> {{comment.user.points}} </u> </div>
         </div>
@@ -68,21 +85,41 @@
         <br>
 
         <div class="comment">
-            <button onclick="showReply()"> Reply </button>
+            <button onclick="showReply('comment{{comment.id}}')"> Reply </button>
         </div>
 
     </div>
 </div>
 
 <!---Reply Input--->
-<div class="comment-area hide" id="reply-area">
+{% if post.closed == True %}
+
+<div> This post is closed. </div>
+
+{% else %}
+
+{% if request.user.is_authenticated %}
+<form action="." method="POST">
+    {% csrf_token %}
+
+    <div class="comment-area hide" id="comment{{comment.id}}">
     <textarea name="reply" id="" placeholder="Add reply......"></textarea>
-    <input type="submit" name="" id="" value="submit">
+    <input type="submit" value="Submit" name="reply-form">
+    <input type="hidden" name="comment-id" value="{{comment.id}}">
 </div>
 </div>
+</form>
+
+{% else %}
+
+<div style="background-color:#fff;color:#000;font-weight:bolder;padding:10px;width:100%;"> You must <a href="{% url 'home' %}"> <b> login </b> </a> to reply. </div>
+
+{% endif %}
+
+{% endif %}
 
 <!--- Reply Section -->
-{% for reply in comments.replies.all %}
+{% for reply in comment.replies.all %}
 <div class="comments-container" style="width: 95%; margin-left: 5%">
     <!-- <div class="head">
         <div class="authors"> Author </div>
@@ -91,24 +128,19 @@
 
     <div class="body">
         <div class="authors">
-            <div class="AnotherUser"><a href="#"> {{reply.user.fullname|title}} </a> </div>
+            <div class="AnotherUser"><a href="#"> {{reply.user.username|title}} </a> </div>
             <div> Role </div>
-            <img src="{{comment.user.profile_pic.url}}" alt="">
+            <img src="{{comment.user.profile_pic}}" alt="">
             <div> Posts: <u> {{reply.user.num_posts}} </u> </div>
             <div> Points: <u> {{reply.user.points}} </u> </div>
-        </div>
         </div>
 
 
     <div class="content">
-        {{comment.content}}
+        {{reply.content}}
 
         <br>
-
-        <div class="comment">
-            <button onclick="showReply()"> Reply </button>
         </div>
-
     </div>
 </div>
 

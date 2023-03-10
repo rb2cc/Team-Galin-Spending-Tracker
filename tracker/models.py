@@ -58,10 +58,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     available_categories = models.ManyToManyField('Category', symmetrical = False, related_name = 'users')
+    username = models.CharField(max_length=50, blank=True)
+    points = models.IntegerField(default=0)
 
     objects = UserManager()
     USERNAME_FIELD = 'email'
 
+    @property
+    def num_posts(self):
+        return Post.objects.filter(user=self).count()
 
 
 class Profile(models.Model):
@@ -211,7 +216,7 @@ class Forum_Category(models.Model):
 
 
 class Reply(models.Model):
-    user = models.ForeignKey(Author, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
 
@@ -223,7 +228,7 @@ class Reply(models.Model):
 
 
 class Comment(models.Model):
-    user = models.ForeignKey(Author, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
     replies = models.ManyToManyField(Reply, blank=True)
@@ -233,16 +238,17 @@ class Comment(models.Model):
 
 
 class Post(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=400)
     slug = models.SlugField(max_length=400, unique=True, blank=True)
-    user = models.ForeignKey(Author, on_delete=models.CASCADE)
     content = HTMLField()
     forum_categories = models.ManyToManyField(Forum_Category)
     date = models.DateTimeField(auto_now_add=True)
     approved = models.BooleanField(default=True)
     hit_count_generic = GenericRelation(HitCount, object_id_field='object_pk',related_query_name='hit_count_generic_relation')
-    tags = TaggableManager()
     comments = models.ManyToManyField(Comment, blank=True)
+    # closed = models.BooleanField(default=False)
+    # state = models.CharField(max_length=40, default="zero")
 
 
     def save(self, *args, **kwargs):
@@ -263,7 +269,7 @@ class Post(models.Model):
         return self.comments.count()
 
     @property
-    def last_repely(self):
+    def last_reply(self):
         return self.comments.latest("date")
 
 
