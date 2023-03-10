@@ -26,6 +26,7 @@ from django.template.defaulttags import register
 from django.views.decorators.cache import cache_control
 from django.http import HttpResponse
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.core.exceptions import ObjectDoesNotExist
 
 from .utils import update_views
 
@@ -59,7 +60,10 @@ def sign_up(request):
                     tempCategory = Category.objects.create(name=tempName, week_limit=tempLimit)
                     user.available_categories.add(tempCategory)
                 login(request, user)
-                user_achievement = UserAchievement.objects.create(user=request.user, achievement = Achievement.objects.get(name="New user"))
+                try:
+                    user_achievement = UserAchievement.objects.create(user=request.user, achievement = Achievement.objects.get(name="New user"))
+                except ObjectDoesNotExist:
+                    pass
                 user_activity = Activity.objects.create(user=request.user, image = "images/user.png", name = "You've created an account on Galin's Spending Tracker")
                 user_activity = Activity.objects.create(user=request.user, image = "badges/new_user.png", name = "You've earned \"New user\" achievement")
                 return redirect('landing_page')
@@ -101,7 +105,10 @@ def landing_page(request):
 
     if spendingList.count() == 1:
         try:
-            user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="First expenditure"))
+            try:
+                user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="First expenditure"))
+            except ObjectDoesNotExist:
+                pass
             user_activity = Activity.objects.create(user=request.user, image = "badges/first_expenditure.png", name = "You've earned \"First expenditure\" achievement", points = 15)
             activity_points(request, user_activity.points)
         except IntegrityError:
@@ -287,7 +294,10 @@ def category_list(request):
     categoryList = Category.objects.filter(users__id=user_id).order_by('name')
     if categoryList.count() == 1:
         try:
-            user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Budget boss"))
+            try:
+                user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Budget boss"))
+            except ObjectDoesNotExist:
+                pass
             user_activity = Activity.objects.create(user=request.user, image = "badges/budget_boss.png", name = "You've earned \"Budget boss\" achievement", points = 15)
             activity_points(request, user_activity.points)
         except IntegrityError:
@@ -470,14 +480,17 @@ def complete_challenge(request, challenge_id):
         user_challenge.save()
 
         user_challenges_count = UserChallenge.objects.filter(user=request.user).count()
-        if user_challenges_count == 1:
-            user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Wise spender"))
-            user_activity = Activity.objects.create(user=request.user, image = "badges/wise_spender.png", name = "You've earned \"Wise spender\" achievement", points = 15)
-            activity_points(request, user_activity.points)
-        elif user_challenges_count == 10:
-            user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Superstar"))
-            user_activity = Activity.objects.create(user=request.user, image = "badges/super_star.png", name = "You've earned \"Superstar\" achievement", points = 150)
-            activity_points(request, user_activity.points)
+        try:
+            if user_challenges_count == 1:
+                user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Wise spender"))
+                user_activity = Activity.objects.create(user=request.user, image = "badges/wise_spender.png", name = "You've earned \"Wise spender\" achievement", points = 15)
+                activity_points(request, user_activity.points)
+            elif user_challenges_count == 10:
+                user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Superstar"))
+                user_activity = Activity.objects.create(user=request.user, image = "badges/super_star.png", name = "You've earned \"Superstar\" achievement", points = 150)
+                activity_points(request, user_activity.points)
+        except ObjectDoesNotExist:
+            pass
 
         user_activity = Activity.objects.create(user=request.user, image = "images/completed.png", name = f'You\'ve completed \"{user_challenge.challenge.name}\" challenge', points = user_challenge.challenge.points)
 
@@ -582,7 +595,10 @@ def handle_share(request):
     site = unquote(request.GET.get('site'))
     share_url = unquote(request.GET.get('share_url'))
     try:
-        user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="First share"))
+        try:
+            user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="First share"))
+        except ObjectDoesNotExist:
+            pass
         user_activity = Activity.objects.create(user=request.user, image = "badges/first_share.png", name = "You've earned \"First share\" achievement", points = 15)
         activity_points(request, user_activity.points)
     except IntegrityError:
@@ -681,7 +697,10 @@ def get_avatar_colours():
 def create_avatar_activity(request):
     if Activity.objects.filter(user=request.user, name="You've created an avatar").exists():
         try:
-            user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Avatar master"))
+            try:
+                user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Avatar master"))
+            except ObjectDoesNotExist:
+                pass
         except IntegrityError:
             pass
         user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = "You've edited your avatar", points = 15)
@@ -853,9 +872,9 @@ def report(request):
         previous_total_difference = previous_total-total_expense
 
     if average_daily>previous_average:
-        previous_average_difference = average_daily-previous_average
+        previous_average_difference = float(average_daily)-previous_average
     else:
-        previous_average_difference = previous_average-average_daily
+        previous_average_difference = previous_average-float(average_daily)
 
     context = {
         'expenditures': expenditures,
