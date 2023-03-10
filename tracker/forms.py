@@ -2,7 +2,7 @@ from django.core.validators import validate_email
 from django.core.validators import RegexValidator
 from django import forms
 
-from .models import User
+from .models import User, Post
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm, PasswordResetForm
 
 
@@ -69,6 +69,10 @@ class EditUserForm(UserChangeForm):
         max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
     last_name = forms.CharField(
         max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    username = forms.CharField(
+        max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    # bio = HTMLField()
+    # profile_pic = ResizedImageField(size=[50, 80], quality=100, upload_to="Users", default=None, null=True, blank=True)
     # date_joined = forms.CharField(
     #     max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
     password = None
@@ -77,7 +81,7 @@ class EditUserForm(UserChangeForm):
         """Form options."""
 
         model = User
-        fields = ['email', 'first_name', 'last_name']
+        fields = ['email', 'first_name', 'last_name', 'username']
 
 class ExpenditureForm(forms.ModelForm):
     """Form enabling users to create expenditures"""
@@ -119,4 +123,9 @@ class ReportForm(forms.Form):
     start_date = forms.DateField(label='Start Date', widget=forms.TextInput(attrs={'type': 'date'}))
     end_date = forms.DateField(label='End Date', widget=forms.TextInput(attrs={'type': 'date'}))
 
+# Form to allow users to create new forum posts.
 
+class PostForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ["title", "content", "forum_categories"]
