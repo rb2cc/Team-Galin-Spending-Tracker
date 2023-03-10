@@ -2,9 +2,9 @@
 {% block content %}
 <div class='container'>
     <div class='row'>
-        <div class = 'card' style="margin: auto; padding: 20px">
-            <h1 style="text-align: center">Challenges</h1>
-            {% if challenges %}
+        {% if challenges %}
+            <div class = 'card' style="margin: auto; padding: 20px">
+                <h1 style="text-align: center">Challenges</h1>
                 <div class="row">
                     {% for challenge in challenges %}
                         <div class="col-md-3" style="display: inline-block">
@@ -17,10 +17,13 @@
                         </div>
                     {% endfor %}
                 </div>
-            {% else %}
+            </div>
+        {% else %}
+            <div class = 'card' style="margin: auto; max-width: 350px; text-align: center; padding: 20px">
+                <h1 style="text-align: center">Challenges</h1>
                 <p>There are no challenges yet.</p>
-            {% endif %}
-        </div>
+            </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

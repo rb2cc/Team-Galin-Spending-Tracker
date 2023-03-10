@@ -158,6 +158,13 @@ class UserLevel(models.Model):
     points = models.PositiveIntegerField()
     date_reached = models.DateTimeField(auto_now=True)
 
+class Activity(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    image = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    time = models.DateTimeField(auto_now_add=True)
+    points = models.IntegerField(default=0)
+
 # Creation of forums models
 
 User = get_user_model()
@@ -198,11 +205,11 @@ class Forum_Category(models.Model):
         return reverse("posts", kwargs= {
             "slug":self.slug
         })
-    
+
     @property
     def num_posts(self):
         return Post.objects.filter(forum_categories=self).count()
-    
+
     @property
     def last_post(self):
         return Post.objects.filter(forum_categories=self).latest("date")
@@ -215,7 +222,7 @@ class Reply(models.Model):
 
     def __str__(self):
         return self.content[:100]
-    
+
     class Meta:
         verbose_name_plural = "replies"
 

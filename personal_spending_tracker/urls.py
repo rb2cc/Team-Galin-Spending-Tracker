@@ -16,7 +16,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import re_path, path
 from tracker import views, expenditure_views
 from tracker.views import UserEditView
 from django.urls.conf import include
@@ -78,6 +78,11 @@ urlpatterns = [
     path('my_achievements/', views.my_achievements, name='my_achievements'),
     path('share_achievement/<int:id>', views.share_achievement, name='share_achievement'),
     path('share/', views.share, name='share'),
+    path('create_avatar/', views.create_avatar, name='create_avatar'),
+    path('share_avatar/', views.share_avatar, name='share_avatar'),
+    re_path(r'^my_activity/$', views.my_activity, name='my_activity'),
+    re_path(r'^my_avatar/$', views.my_avatar, name='my_avatar'),
+    re_path(r'^unlock_avatar/$', views.unlock_avatar, name='unlock_avatar'),
     path('report/', views.report, name='report'),
     path('forum_home/', views.forum_home, name='forum_home'),
     path('posts/<slug>/', views.posts, name='posts'),

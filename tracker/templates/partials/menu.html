@@ -9,6 +9,9 @@
     <li class="nav-item">
       <a class="nav-link" href="{% url 'category_list' %}">Categories</a>
     </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'my_activity' %}?num_items=10">Activity</a>
+    </li>
     <li class="nav-item dropdown">
       <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
         Rewards
@@ -32,6 +35,7 @@
         <span class='bi-person-circle' style='font-size: 1.25rem'></span>
       </a>
       <ul class="dropdown-menu dropdown-menu-end dropdown-menu-light">
+        <li><a class="dropdown-item" href="{% url 'my_avatar' %}"> My Avatar </a></li>
         <li><a class="dropdown-item" href="{% url 'edit_user' %}"> Edit Profile </a></li>
         <li><a class="dropdown-item" href="{% url 'change_password' %}"> Change Password </a></li>
         <li><a class="dropdown-item" href="{% url 'log_out' %}"> Log out </a></li>
