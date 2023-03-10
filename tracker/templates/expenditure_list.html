@@ -43,11 +43,11 @@
         </div>
             <thead class="mainThead">
                 <tr>
-                    <th width="" scope="col" >Category</th>
+                    <th width="80px" scope="col" >Category</th>
                     <th width="120px" scope="col" >Title</th>
-                    <th scope="col">Expense</th>
-                    <th width="115px" scope="col">Time</th>
-                    <th width="680px" scope="col" >Description</th>
+                    <th width="110px" scope="col">Expense</th>
+                    <th width="100px" scope="col">Time</th>
+                    <th width="650px" scope="col" >Description</th>
                     <th scope="col">Image</th>
                     <th scope="col">Actions</th>
                 </tr>
@@ -56,11 +56,11 @@
                 <div class="scroll">
                     {% for spending in spendings %}
                         <tr>
-                            <td>{{ spending.category }}</td>
-                            <td>{{ spending.title }}</td>
-                            <td>£{{ spending.expense }}</td>
-                            <td>{{ spending.date_created }}</td>
-                            <td>{{ spending.description }}</td>
+                            <td width="80px">{{ spending.category }}</td>
+                            <td width="120px">{{ spending.title }}</td>
+                            <td width="90px">£{{ spending.expense }}</td>
+                            <td width="130px">{{ spending.date_created }}</td>
+                            <td width="680px">{{ spending.description }}</td>
                             {% if spending.image %}
                             <!-- This code can show full images.
                                 <td style="max-width:0px"><img src="media/{{ spending.image }} " alt="image"></td>
