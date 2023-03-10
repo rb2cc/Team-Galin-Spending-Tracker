@@ -2,7 +2,7 @@
 from .forms import SignUpForm, LogInForm, EditUserForm, ReportForm
 from django.contrib.auth.forms import UserChangeForm
 from .models import User
-from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm
+from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm, EditOverallForm
 from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel, Post, Forum_Category
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -265,17 +265,27 @@ def edit_category(request, id):
     category = Category.objects.get(id = id)
     before_limit = category.week_limit
     if request.method == "POST":
-        form = AddCategoryForm(request.POST, instance = category)
-        if form.is_valid():
-            category = form.save(commit=False)
-            category.save()
-            diff = before_limit - category.week_limit       
-            overall = Category.objects.filter(is_overall = True).get(users__id=current_user.id)
-            overall.week_limit -= diff
-            overall.save(force_update = True)
-            return redirect('category_list')
+        if category.is_overall==False:
+            form = AddCategoryForm(request.POST, instance = category)
+            if form.is_valid():
+                category = form.save(commit=False)
+                category.save()
+                diff = before_limit - category.week_limit       
+                overall = Category.objects.filter(is_overall = True).get(users__id=current_user.id)
+                overall.week_limit -= diff
+                overall.save(force_update = True)
+                return redirect('category_list')
+        else:
+            form = EditOverallForm(request.POST, instance = category, user = current_user)
+            if form.is_valid():
+                category = form.save(commit=False)
+                category.save()
+                return redirect('category_list')
     else:
-        form = AddCategoryForm(instance=category)
+        if category.is_overall==False:
+            form = AddCategoryForm(instance=category)
+        else:
+            form = EditOverallForm(instance=category, user = current_user)
     return render(request, 'edit_category.html', {'form' : form})
     
 def forum_home(request):
