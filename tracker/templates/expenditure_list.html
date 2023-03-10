@@ -62,8 +62,8 @@
                             <td width="130px">{{ spending.date_created }}</td>
                             <td width="680px">{{ spending.description }}</td>
                             {% if spending.image %}
-                                <td>
-                                    <input class="image_button" type="button" name="radio_pk" data-bs-toggle="modal" data-bs-target="#image_modal{{ forloop.counter }}">
+                                <td >
+                                    <input value="👀" class="image_button" type="button" data-bs-toggle="modal" data-bs-target="#image_modal{{ forloop.counter }}">
                                 </td>
                                     <!-- image modal -->
                                     <!-- modal used to view images -->
