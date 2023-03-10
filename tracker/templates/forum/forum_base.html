@@ -1,3 +1,4 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -5,8 +6,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"
-    <title></title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <title> {{title}} </title>
+ 
     <link rel="stylesheet" href={% static "forum_static/style.css" %}/>
     <link rel="stylesheet"href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital@1&display=swap"/>
 </head>
@@ -31,9 +32,10 @@
                 </nav>
                 <a href="#" class="bar-icon" id="iconBar" onclick="hideIconBar()"><i class="fa fa-bars"></i></a>
                 <div class="brand"> My Forum </div>
+                
             </div>
             <!---Search Box--->
-
+                <form action="{% url 'search_result' %}" role="form" method="GET">
                 <div class="search-box">
                     <div>
                         <select name="" id="">
@@ -42,10 +44,16 @@
                             <option value="description"> Description </option>
                         </select>
                         <input type="text" name="q" id="" placeholder"search ..."></input>
-                        <button><i class="fa fa-search"></i></button>
+                        <button type="submit" name ="search"><i class="fa fa-search"></i></button>
                     </div>
             </div>
+        </form>
         </header>
+        <div>
+            {% if user.is_authenticated %}
+                <div style="font-size: 15px; font-weight:200px; margin-right:50px; margin-top:50px; margin-bottom:0px; text-align:right;"><a href="{% url 'create_post' %}"> <u> Add New Post  </u> </a></div>
+                {% endif %}
+        </div>
 
     {% block content %}
     {% endblock content %} 
