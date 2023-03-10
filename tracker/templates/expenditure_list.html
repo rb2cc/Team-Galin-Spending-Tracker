@@ -62,10 +62,6 @@
                             <td>{{ spending.date_created }}</td>
                             <td>{{ spending.description }}</td>
                             {% if spending.image %}
-                            <!-- This code can show full images.
-                                <td style="max-width:0px"><img src="media/{{ spending.image }} " alt="image"></td>
-                            -->  
-                                {% comment %} <td><a href="{{ spending.image.url }}">View</a></td> {% endcomment %}
                                 <td>
                                     <input class="image_button" type="button" name="radio_pk" data-bs-toggle="modal" data-bs-target="#image_modal{{ forloop.counter }}">
                                 </td>
