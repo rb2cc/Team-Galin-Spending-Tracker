@@ -292,6 +292,9 @@ def category_list(request):
             user_activity_name = f'You\'ve added \"{category.name}\" category with {category.week_limit} week limit'
             user_activity = Activity.objects.create(user=request.user, image = "images/category.png", name = user_activity_name, points = 15)
             activity_points(request, user_activity.points)
+            overall = overall = Category.objects.filter(is_overall = True).get(users__id=request.user.id)
+            overall.week_limit += category.week_limit
+            overall.save(force_update = True)
             return redirect('category_list')
     else:
         form = AddCategoryForm()
