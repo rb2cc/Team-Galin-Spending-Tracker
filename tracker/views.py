@@ -1,11 +1,9 @@
 
 from .forms import SignUpForm, LogInForm, EditUserForm, ReportForm, PostForm
 from django.contrib.auth.forms import UserChangeForm
-from .models import User
 
 from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel, Activity, Post, Forum_Category, Comment, Reply
 from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm, EditOverallForm
-#from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel, Post, Forum_Category
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -71,7 +69,6 @@ def sign_up(request):
                     pass
                 user_activity = Activity.objects.create(user=request.user, image = "images/user.png", name = "You've created an account on Galin's Spending Tracker")
                 user_activity = Activity.objects.create(user=request.user, image = "badges/new_user.png", name = "You've earned \"New user\" achievement")
-                #user_achievement = UserAchievement.objects.create(user=request.user, achievement = Achievement.objects.get(name="New user"))
                 overall = Category.objects.create(name="Overall", week_limit=overall_count, is_overall = True)
                 user.available_categories.add(overall)
                 return redirect('landing_page')
@@ -332,18 +329,6 @@ def edit_category(request, id):
     category = Category.objects.get(id = id)
     category_name = category.name
     category_week_limit = category.week_limit
-    # if request.method == "POST":
-    #     form = AddCategoryForm(request.POST, instance = category)
-    #     if form.is_valid():
-    #         category = form.save(commit=False)
-    #         category.save()
-    #         if (category.name != category_name):
-    #             activity_name = f'You\'ve changed \"{category_name}\" category name to \"{category.name}\"'
-    #             user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
-    #         if (category.week_limit != category_week_limit):
-    #             activity_name = f'You\'ve changed \"{category.name}\" category week limit from {category_week_limit} to {category.week_limit}'
-    #             user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
-    #         return redirect('category_list')
     before_limit = category.week_limit
     if request.method == "POST":
         if category.is_overall==False:
