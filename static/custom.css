@@ -128,6 +128,14 @@ p.cover-text {
   border-radius: 10px;
 }
 
+.main-cardGarden {
+  background-color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 30px;
+  width: 350px;
+  height: 300px;
+  border-radius: 10px;
+}
+
 .btn-primary {
   background: url('images/btn-p.jpg') no-repeat;
   margin-top: 20px;
@@ -252,6 +260,10 @@ input[type=password] {
     }
 }
 
+.centerImage {
+  width: 600px;
+}
+
 
 /* ------------------Forum Styling ----------------------- */
 
@@ -269,7 +281,7 @@ html{
 }
 
 a{
-  color: #FF0042;
+  color: rgb(0, 150, 255);
   font-weight: bolder;
   text-decoration: none;
 }

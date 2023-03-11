@@ -1,0 +1,33 @@
+{% extends 'base_content_garden.html' %}
+{% load static %}
+{% block content %}
+
+<div class="card full-card">
+    <h2 style="text-align:center;">Contribute To Our Environmental Protection Projects Now!</h2>
+    <p style="font-size:20px;">
+        &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+        Our website is in cooperation with Galin Environmental Protection Company.
+        You can use your points to redeem trees, which will be planted in the real world, on the Earth.
+        Every single tree is traceable, and will be registered with your name.
+        Welome to visit Galin Environmental Protection Company website to find out more information about this project!
+    </p>
+    <div class="row">
+        <div class="col">
+            <img src="{% static "images/garden.png" %}" class="centerImage">
+        </div>
+        <div class="col" style="padding-left:70px;padding-right:70px">
+            <h2 style="padding-top:150px;padding-bottom:20px;font-size:40px">You have planted <span style="color:red">{{treeNum}}</span> Trees</h2>
+            <strong style="font-size:20px">Total Point You Have Earned: {{pointTotal}}</strong>
+            <p></p>
+            <strong style="font-size:20px;">Points Available: {{pointLeft}}</strong>
+            <form method="post">
+                {% csrf_token %}
+                <p></p>
+                {% include 'partials/messages.html' %}
+                <input type="submit" value="Spend 100 points to plant a tree!" class='btn btn-primary' name="plant">
+            </form>
+        </div>      
+    </div>
+</div>
+
+{% endblock %}

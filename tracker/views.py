@@ -365,6 +365,31 @@ def edit_category(request, id):
             form = EditOverallForm(instance=category, user = current_user)
     return render(request, 'edit_category.html', {'form' : form})
 
+
+def garden(request):
+    currentUser = request.user
+    user_level = UserLevel.objects.get(user=currentUser)
+    treeNum = currentUser.trees
+    pointTotal = user_level.points
+    pointLeft = pointTotal - treeNum*100
+
+    if request.method == 'POST':
+        if pointLeft<100:
+            messages.add_message(request, messages.ERROR, "Not Enough Points Available") 
+        else:
+            currentUser.trees = treeNum+1
+            currentUser.save()
+
+    treeNum = currentUser.trees
+    pointTotal = user_level.points
+    pointLeft = pointTotal - treeNum*100
+
+    return render(request, 'garden.html',{
+        "treeNum":treeNum,
+        "pointTotal":pointTotal,
+        "pointLeft":pointLeft,
+    })
+
 def forum_home(request):
     all_forum_categories = Forum_Category.objects.all()
     num_posts = Post.objects.all().count()

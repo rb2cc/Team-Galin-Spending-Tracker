@@ -57,6 +57,7 @@ urlpatterns = [
     path('forum_home/', views.forum_home, name='forum_home'),
     path('posts/', views.posts, name='posts'),
     path('detail/', views.detail, name='detail'),
+    path('garden/', views.garden, name='garden'),
     path('category_list', views.category_list, name='category_list'),
     path('remove_category/<int:id>', views.remove_category, name='remove_category'),
     path('bin_expenditure', expenditure_views.bin_expenditure, name='bin_expenditure'),
