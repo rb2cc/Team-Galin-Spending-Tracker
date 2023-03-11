@@ -275,12 +275,15 @@ class Post(models.Model):
         return self.comments.latest("date")
 
 
-class ItemPosition(models.Model):
+class Tree(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    tree_id = models.AutoField(primary_key=True)
     x_position = models.IntegerField()
     y_position = models.IntegerField()
-    class Meta:
-        get_latest_by = 'id'
+
+    
+
+
 
 
 

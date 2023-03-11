@@ -32,7 +32,7 @@ from .utils import update_views
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import ItemPosition
+from .models import Tree
 import json
 
 # Create your views here.
@@ -940,10 +940,10 @@ def save_item_position(request):
     if request.method == 'POST':
         user = request.user
         data = json.loads(request.body)
-        item = ItemPosition.objects.get(user=user)
-        item.x_position = data['x']
-        item.y_position = data['y']
-        item.save()
+        tree = Tree.objects.get(tree_id=data['tree_id'])
+        tree.x_position = data['x']
+        tree.y_position = data['y']
+        tree.save()
         return JsonResponse({'success': True})
     return JsonResponse({'success': False})
 
@@ -960,20 +960,21 @@ def garden(request):
         else:
             currentUser.trees = treeNum+1
             currentUser.save()
+            Tree.objects.create(
+                user = currentUser,
+                x_position=50,
+                y_position=50,
+            )
 
     treeNum = currentUser.trees
     pointTotal = user_level.points
     pointLeft = pointTotal - treeNum*100
-    
-    try:
-        tree_position = ItemPosition.objects.filter(user=currentUser).latest()
-    except ItemPosition.DoesNotExist:
-        # Set default position to (50px, 50px) and create new ItemPosition object
-        tree_position = ItemPosition.objects.create(user=currentUser, x_position=50, y_position=50)
+
+    trees = Tree.objects.filter(user=currentUser)
 
     return render(request, 'garden.html',{
         "treeNum":treeNum,
         "pointTotal":pointTotal,
         "pointLeft":pointLeft,
-        "tree_position":tree_position,
+        "trees":trees,
     })

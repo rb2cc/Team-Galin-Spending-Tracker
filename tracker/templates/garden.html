@@ -33,84 +33,63 @@
         </div>      
     </div>
 
-    <div id="image-container"></div>
-
-
     <div id="drag-container" style="position: relative; width: 500px; height: 500px; border: 1px solid black;">
-        <img id="drag-item" src="{% static 'images/smallTree.png' %}" style="position: absolute; top: {{ tree_position.y_position }}px; left:{{ tree_position.x_position }}px; width: 100px; height: 100px;">
-      </div>
-      
-      <script>
-        var dragItem = document.getElementById("drag-item");
-        var dragContainer = document.getElementById("drag-container");
-      
-        {% if tree_position %}
-            dragItem.style.top = "{{ tree_position.y_position }}px";
-            dragItem.style.left = "{{ tree_position.x_position }}px";
-        {% endif %}
-      
-        dragItem.addEventListener("mousedown", dragStart);
-      
-        function dragStart(event) {
-          event.preventDefault();
-          var initialTop = dragItem.offsetTop;
-          var initialLeft = dragItem.offsetLeft;
-          var offsetX = event.clientX - initialLeft;
-          var offsetY = event.clientY - initialTop;
-      
-          document.addEventListener("mousemove", drag);
-          document.addEventListener("mouseup", dragEnd);
-      
-          function drag(event) {
-            event.preventDefault();
-            var newTop = event.clientY - offsetY;
-            var newLeft = event.clientX - offsetX;
-            if (newTop >= 0 && newLeft >= 0 && newTop + dragItem.clientHeight <= dragContainer.clientHeight && newLeft + dragItem.clientWidth <= dragContainer.clientWidth) {
-              dragItem.style.top = newTop + "px";
-              dragItem.style.left = newLeft + "px";
-            }
-          }
-      
-          function dragEnd(event) {
-            event.preventDefault();
-            document.removeEventListener("mousemove", drag);
-            document.removeEventListener("mouseup", dragEnd);
-      
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/save-item-position/");
-            xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
-            xhr.onload = function() {
-              if (xhr.status === 200) {
-                console.log('Item position saved successfully');
-              } else {
-                console.log('Error saving item position');
-              }
-            };
-            xhr.send(JSON.stringify({
-              "x": dragItem.offsetLeft,
-              "y": dragItem.offsetTop
-            }));
-          }
-        }
-      </script>
+    
+        {% for tree in trees%}
+            <img id="drag-item{{tree.tree_id}}" src="{% static 'images/smallTree.png' %}" style="position: absolute; top: {{ tree.y_position }}px; left:{{ tree.x_position }}px; width: 100px; height: 100px;">       
+            <script>
+                var dragItem{{tree.tree_id}} = document.getElementById("drag-item{{tree.tree_id}}");
+                var dragContainer = document.getElementById("drag-container");
+                dragItem{{tree.tree_id}}.style.top = "{{ tree.y_position }}px";
+                dragItem{{tree.tree_id}}.style.left = "{{ tree.x_position }}px";
+                dragItem{{tree.tree_id}}.addEventListener("mousedown", dragStart);
+            
+                function dragStart(event) {
 
-
+                    event.preventDefault();
+                    var initialTop{{tree.tree_id}} = dragItem{{tree.tree_id}}.offsetTop;
+                    var initialLeft{{tree.tree_id}} = dragItem{{tree.tree_id}}.offsetLeft;
+                    var offsetX{{tree.tree_id}} = event.clientX - initialLeft{{tree.tree_id}};
+                    var offsetY{{tree.tree_id}} = event.clientY - initialTop{{tree.tree_id}};
+                    document.addEventListener("mousemove", drag);
+                    document.addEventListener("mouseup", dragEnd);
+                
+                    function drag(event) {
+                        event.preventDefault();
+                        var newTop{{tree.tree_id}} = event.clientY - offsetY{{tree.tree_id}};
+                        var newLeft{{tree.tree_id}} = event.clientX - offsetX{{tree.tree_id}};
+                        if (newTop{{tree.tree_id}} >= 0 && newLeft{{tree.tree_id}} >= 0 && newTop{{tree.tree_id}} + dragItem{{tree.tree_id}}.clientHeight <= dragContainer.clientHeight && newLeft{{tree.tree_id}} + dragItem{{tree.tree_id}}.clientWidth <= dragContainer.clientWidth) {
+                            dragItem{{tree.tree_id}}.style.top = newTop{{tree.tree_id}} + "px";
+                            dragItem{{tree.tree_id}}.style.left = newLeft{{tree.tree_id}} + "px";
+                        }
+                    }
+            
+                    function dragEnd(event) {
+                        event.preventDefault();
+                        document.removeEventListener("mousemove", drag);
+                        document.removeEventListener("mouseup", dragEnd);
+                        var xhr{{tree.tree_id}} = new XMLHttpRequest();
+                        xhr{{tree.tree_id}}.open("POST", "/save-item-position/");
+                        xhr{{tree.tree_id}}.setRequestHeader("Content-Type", "application/json");
+                        xhr{{tree.tree_id}}.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                        xhr{{tree.tree_id}}.onload = function() {
+                            if (xhr{{tree.tree_id}}.status === 200) {
+                                console.log('Item position saved successfully');
+                            } else {
+                                console.log('Error saving item position');
+                            }
+                        };
+                        xhr{{tree.tree_id}}.send(JSON.stringify({
+                            "x": dragItem{{tree.tree_id}}.offsetLeft,
+                            "y": dragItem{{tree.tree_id}}.offsetTop,
+                            "tree_id":{{tree.tree_id}},
+                        }));
+                    }
+                }
+            </script>
+        {% endfor %}
+        
+    </div>
 </div>
-
-<script>
-    window.onload=showImages();
-
-    function showImages() {
-        var num = {{treeNum}};
-        var imageContainer = document.getElementById("image-container");
-        imageContainer.innerHTML = "";
-        for (var i = 1; i <= num; i++) {
-            var img = document.createElement("img");
-            img.src = "{% static "images/smallTree.png" %}";
-            imageContainer.appendChild(img);
-        }
-    }
-</script>
 
 {% endblock %}
