@@ -275,5 +275,13 @@ class Post(models.Model):
         return self.comments.latest("date")
 
 
+class ItemPosition(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    x_position = models.IntegerField()
+    y_position = models.IntegerField()
+    class Meta:
+        get_latest_by = 'id'
+
+
 
 

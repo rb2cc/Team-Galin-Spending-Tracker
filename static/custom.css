@@ -51,6 +51,20 @@ p.cover-text {
   border-radius: 10px;
 }
 
+.garden-card {
+  background-color: rgb(255, 255, 255, 0.9);
+  margin-top: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 1300px;
+  padding-top: 30px;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-bottom: 30px;
+  border-radius: 10px;
+}
+
+
 .report-card {
   background-color: rgb(255, 255, 255, 0.9);
   margin-top: 10px;
@@ -264,6 +278,12 @@ input[type=password] {
   width: 600px;
 }
 
+#image-container img {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  margin-bottom: 50px;
+}
 
 /* ------------------Forum Styling ----------------------- */
 
