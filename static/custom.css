@@ -54,9 +54,11 @@ p.cover-text {
 .garden-card {
   background-color: rgb(255, 255, 255, 0.9);
   margin-top: 10px;
+  margin-bottom:30px;
   margin-left: auto;
   margin-right: auto;
   width: 1300px;
+  height: 1500px;
   padding-top: 30px;
   padding-left: 50px;
   padding-right: 50px;
@@ -278,11 +280,12 @@ input[type=password] {
   width: 600px;
 }
 
-#image-container img {
-  width: 92px;
-  height: 92px;
-  border-radius: 50%;
-  margin-bottom: 50px;
+.gardenBackground{
+  margin-top:1px;
+  height:550px;
+  width:1200px;
+  background:url('images/soil.png') no-repeat;
+  background-size:100%;
 }
 
 /* ------------------Forum Styling ----------------------- */

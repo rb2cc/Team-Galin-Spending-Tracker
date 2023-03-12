@@ -1,94 +1,97 @@
 {% extends 'base_content_garden.html' %}
 {% load static %}
 {% block content %}
-
-<div class="card garden-card">
-    <h2 style="text-align:center;">Contribute To Our Environmental Protection Projects Now!</h2>
-    <p style="font-size:20px;">
-        &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-        Our website is in cooperation with Galin Environmental Protection Company.
-        You can use your points to redeem trees, which will be planted in the real world, on the Earth.
-        Every single tree is traceable, and will be registered with your name.
-        Welome to visit Galin Environmental Protection Company website to find out more information about this project!
-    </p>
-    <div class="row">
-        <div class="col">
-            <img src="{% static "images/garden.png" %}" class="centerImage">
-        </div>
-        <div class="col" style="padding-left:70px;padding-right:70px">
-            <div style="padding-top:70px">*How to get points:</div>
-            <li>Complete challenges</li>
-            <li>Complete achievement</li>
-            <li>Keep all categories under limit to get 10 points every week</li>
-            <h2 style="padding-top:50px;padding-bottom:20px;font-size:40px">You have planted <span style="color:red">{{treeNum}}</span> Trees</h2>
-            <strong style="font-size:20px">Total Point You Have Earned: {{pointTotal}}</strong>
-            <p></p>
-            <strong style="font-size:20px;">Points Available: {{pointLeft}}</strong>
-            <form method="post">
-                {% csrf_token %}
+<div class="row">
+    <div class="card garden-card">
+        <h2 style="text-align:center;">Contribute To Our Environmental Protection Projects Now!</h2>
+        <p style="font-size:20px;">
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+            Our website is in cooperation with Galin Environmental Protection Company.
+            You can use your points to redeem trees, which will be planted in the real world, on the Earth.
+            Every single tree is traceable, and will be registered with your name.
+            Welome to visit Galin Environmental Protection Company website to find out more information about this project!
+        </p>
+        <div class="row">
+            <div class="col">
+                <img src="{% static "images/garden.png" %}" class="centerImage">
+            </div>
+            <div class="col" style="padding-left:70px;padding-right:70px">
+                <div style="padding-top:70px">*How to get points:</div>
+                <li>Complete challenges</li>
+                <li>Complete achievement</li>
+                <li>Keep all categories under limit to get 10 points every week</li>
+                <h2 style="padding-top:50px;padding-bottom:20px;font-size:40px">You have planted <span style="color:red">{{treeNum}}</span> Trees</h2>
+                <strong style="font-size:20px">Total Point You Have Earned: {{pointTotal}}</strong>
                 <p></p>
-                {% include 'partials/messages.html' %}
-                <input type="submit" value="Spend 100 points to plant a tree!" class='btn btn-primary' name="plant">
-            </form>
-        </div>      
-    </div>
-
-    <div id="drag-container" style="position: relative; width: 500px; height: 500px; border: 1px solid black;">
-    
-        {% for tree in trees%}
-            <img id="drag-item{{tree.tree_id}}" src="{% static 'images/smallTree.png' %}" style="position: absolute; top: {{ tree.y_position }}px; left:{{ tree.x_position }}px; width: 100px; height: 100px;">       
-            <script>
-                var dragItem{{tree.tree_id}} = document.getElementById("drag-item{{tree.tree_id}}");
-                var dragContainer = document.getElementById("drag-container");
-                dragItem{{tree.tree_id}}.style.top = "{{ tree.y_position }}px";
-                dragItem{{tree.tree_id}}.style.left = "{{ tree.x_position }}px";
-                dragItem{{tree.tree_id}}.addEventListener("mousedown", dragStart);
+                <strong style="font-size:20px;">Points Available: {{pointLeft}}</strong>
+                <form method="post">
+                    {% csrf_token %}
+                    <p></p>
+                    {% include 'partials/messages.html' %}
+                    <input type="submit" value="Spend 100 points to plant a tree!" class='btn btn-primary' name="plant">
+                </form>
+            </div>      
+        </div>
+        <div style="margin-top:90px; text-align:center; font-size:30px; font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif">Try to drag your trees and build your own garden!</div>
+        <div class="gardenBackground">
+            <div id="drag-container" style="top:10px; position:relative; width:1200px; height:150px;">
             
-                function dragStart(event) {
+                {% for tree in trees%}
+                    <img id="drag-item{{tree.tree_id}}" src="{% static 'images/smallTree.png' %}" style="position: absolute; top: {{ tree.y_position }}px; left:{{ tree.x_position }}px; width: 100px; height: 100px;">       
+                    <script>
+                        var dragItem{{tree.tree_id}} = document.getElementById("drag-item{{tree.tree_id}}");
+                        var dragContainer = document.getElementById("drag-container");
+                        dragItem{{tree.tree_id}}.style.top = "{{ tree.y_position }}px";
+                        dragItem{{tree.tree_id}}.style.left = "{{ tree.x_position }}px";
+                        dragItem{{tree.tree_id}}.addEventListener("mousedown", dragStart);
+                    
+                        function dragStart(event) {
 
-                    event.preventDefault();
-                    var initialTop{{tree.tree_id}} = dragItem{{tree.tree_id}}.offsetTop;
-                    var initialLeft{{tree.tree_id}} = dragItem{{tree.tree_id}}.offsetLeft;
-                    var offsetX{{tree.tree_id}} = event.clientX - initialLeft{{tree.tree_id}};
-                    var offsetY{{tree.tree_id}} = event.clientY - initialTop{{tree.tree_id}};
-                    document.addEventListener("mousemove", drag);
-                    document.addEventListener("mouseup", dragEnd);
-                
-                    function drag(event) {
-                        event.preventDefault();
-                        var newTop{{tree.tree_id}} = event.clientY - offsetY{{tree.tree_id}};
-                        var newLeft{{tree.tree_id}} = event.clientX - offsetX{{tree.tree_id}};
-                        if (newTop{{tree.tree_id}} >= 0 && newLeft{{tree.tree_id}} >= 0 && newTop{{tree.tree_id}} + dragItem{{tree.tree_id}}.clientHeight <= dragContainer.clientHeight && newLeft{{tree.tree_id}} + dragItem{{tree.tree_id}}.clientWidth <= dragContainer.clientWidth) {
-                            dragItem{{tree.tree_id}}.style.top = newTop{{tree.tree_id}} + "px";
-                            dragItem{{tree.tree_id}}.style.left = newLeft{{tree.tree_id}} + "px";
-                        }
-                    }
-            
-                    function dragEnd(event) {
-                        event.preventDefault();
-                        document.removeEventListener("mousemove", drag);
-                        document.removeEventListener("mouseup", dragEnd);
-                        var xhr{{tree.tree_id}} = new XMLHttpRequest();
-                        xhr{{tree.tree_id}}.open("POST", "/save-item-position/");
-                        xhr{{tree.tree_id}}.setRequestHeader("Content-Type", "application/json");
-                        xhr{{tree.tree_id}}.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
-                        xhr{{tree.tree_id}}.onload = function() {
-                            if (xhr{{tree.tree_id}}.status === 200) {
-                                console.log('Item position saved successfully');
-                            } else {
-                                console.log('Error saving item position');
+                            event.preventDefault();
+                            var initialTop{{tree.tree_id}} = dragItem{{tree.tree_id}}.offsetTop;
+                            var initialLeft{{tree.tree_id}} = dragItem{{tree.tree_id}}.offsetLeft;
+                            var offsetX{{tree.tree_id}} = event.clientX - initialLeft{{tree.tree_id}};
+                            var offsetY{{tree.tree_id}} = event.clientY - initialTop{{tree.tree_id}};
+                            document.addEventListener("mousemove", drag);
+                            document.addEventListener("mouseup", dragEnd);
+                        
+                            function drag(event) {
+                                event.preventDefault();
+                                var newTop{{tree.tree_id}} = event.clientY - offsetY{{tree.tree_id}};
+                                var newLeft{{tree.tree_id}} = event.clientX - offsetX{{tree.tree_id}};
+                                if (newTop{{tree.tree_id}} >= 0 && newLeft{{tree.tree_id}} >= 0 && newTop{{tree.tree_id}} + dragItem{{tree.tree_id}}.clientHeight <= dragContainer.clientHeight && newLeft{{tree.tree_id}} + dragItem{{tree.tree_id}}.clientWidth <= dragContainer.clientWidth) {
+                                    dragItem{{tree.tree_id}}.style.top = newTop{{tree.tree_id}} + "px";
+                                    dragItem{{tree.tree_id}}.style.left = newLeft{{tree.tree_id}} + "px";
+                                }
                             }
-                        };
-                        xhr{{tree.tree_id}}.send(JSON.stringify({
-                            "x": dragItem{{tree.tree_id}}.offsetLeft,
-                            "y": dragItem{{tree.tree_id}}.offsetTop,
-                            "tree_id":{{tree.tree_id}},
-                        }));
-                    }
-                }
-            </script>
-        {% endfor %}
-        
+                    
+                            function dragEnd(event) {
+                                event.preventDefault();
+                                document.removeEventListener("mousemove", drag);
+                                document.removeEventListener("mouseup", dragEnd);
+                                var xhr{{tree.tree_id}} = new XMLHttpRequest();
+                                xhr{{tree.tree_id}}.open("POST", "/save-item-position/");
+                                xhr{{tree.tree_id}}.setRequestHeader("Content-Type", "application/json");
+                                xhr{{tree.tree_id}}.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                                xhr{{tree.tree_id}}.onload = function() {
+                                    if (xhr{{tree.tree_id}}.status === 200) {
+                                        console.log('Item position saved successfully');
+                                    } else {
+                                        console.log('Error saving item position');
+                                    }
+                                };
+                                xhr{{tree.tree_id}}.send(JSON.stringify({
+                                    "x": dragItem{{tree.tree_id}}.offsetLeft,
+                                    "y": dragItem{{tree.tree_id}}.offsetTop,
+                                    "tree_id":{{tree.tree_id}},
+                                }));
+                            }
+                        }
+                    </script>
+                {% endfor %}
+                
+            </div>
+        </div>
     </div>
 </div>
 

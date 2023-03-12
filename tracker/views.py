@@ -962,16 +962,14 @@ def garden(request):
             currentUser.save()
             Tree.objects.create(
                 user = currentUser,
-                x_position=50,
+                x_position=500,
                 y_position=50,
             )
 
     treeNum = currentUser.trees
     pointTotal = user_level.points
     pointLeft = pointTotal - treeNum*100
-
     trees = Tree.objects.filter(user=currentUser)
-
     return render(request, 'garden.html',{
         "treeNum":treeNum,
         "pointTotal":pointTotal,
