@@ -4,75 +4,95 @@
     <div class="row h-50">
       <div class="col-9">
 
-
-      <h1>{{ table_header }}</h1>
-      <table class="table">
-        <tbody>
-          <form id="tableform" method="post">
-            {% csrf_token %}
-            {% include table %}
-            </form>
-        </tbody>
-      </table>
-      <nav aria-label="Page navigation example">
-        <ul class="pagination pagination-sm">
-          {% if page.has_previous %}
-          <li class="page-item" ><a class="page-link" href="?page={{ page.previous_page_number }}" style="color: #525252;">&larr;</a></li>
-              <li class="page-item"><a class="page-link" href="?page=1" style="color: #525252;">1</a></li>
-          {% endif %}
-
-          <li class="page-item disabled"><a href='#' class="page-link" style="color: #9c9a9a;">
-            Page {{ page.number }} of {{ page.paginator.num_pages }}
-          </a></li>
-
-          {% if page.has_next %}
-              <li class="page-item"><a class="page-link" href="?page={{ page.paginator.num_pages }}" style="color: #525252;">{{ page.paginator.num_pages }}</a></li>
-              <li class="page-item"><a class="page-link" href="?page={{ page.next_page_number }}" style="color: #525252;d">&rarr;</a></li></li>
-          {% endif %}
-        </ul>
-      </nav>
-    </div>
-    <div class="col-3">
-      <div class="card main-cardFive h-50">
-        <form id="userform" method="post">
-          {% csrf_token %}
-        <select class="form-select" name="view_select">
-          <option selected>Select group to view</option>
-          <option value="Users">Users</option>
-          <option value="Categories">Categories</option>
-        </select>
-        <input type="submit" class="btn btn-primary" value="Update Table" name='table_update'></input>
-        </form>
-        <span> </span>
-        <button type="button" id="delete" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</button>
+      {# TABLE #}
+      <h1 id="tableHeader">Users</h1>
+      <div id="template">
+        {% include user_table %}
       </div>
 
+
+      {# PAGINATION #}
+
+
+    </div>
+
+    {# RIGHT HAND SIDE OF PAGE #}
+    <div class="col-3">
+      <div class="card main-cardFive">
+
+        <label for="view_select">Select view in table: </label>
+        <select class="form-select" name="view_select" id="view_select" onchange="loadTable()">
+          <option value="1" selected>Users</option>
+          <option value="2">Categories</option>
+          <option value="3">Challenges</option>
+          <option value="4">Achievements</option>
+        </select>
+
+        <button type="button" id="delete" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</button>
+        {% if request.user.is_superuser %}
+        <button type="button" id="promote_button" name="promote" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#promoteModal">Promote To Admin</button>
+        <button type="button" id="demote_button" name="demote" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#demoteModal">Demote To User</button>
+        {% endif %}
+      </div>
     </div>
   </div>
 
+    {# BOTTOM HALF OF PAGE #}
+    <div class="row h-50 mb-5">
+      <div class="row">
 
-    <div class="row h-50">
-        <div class="col-4">
-          <div class="card main-cardOne">
+        <div class="col-4" style="height: 490px;">
+          <div class="card main-cardOne" style="height: 500px">
             <form action="{% url 'admin_dashboard' %}" method="post">
               {% csrf_token %}
               {% include 'partials/bootstrap_form.html' with form=user_form %}
-              <button type="submit" class="btn btn-primary" name="create_user" method="post">Create</button>
+              <div class="row" style="padding-top: 7%;">
+                <button type="submit" class="btn btn-primary" style="" name="create_user" method="post">Create</button>
+              </div>
             </form>
           </div>
         </div>
-        <div class="col-4">
-          <div class="card main-cardOne">
+
+        <div class="col-4" style="height: 490px;">
+          <div class="card main-cardOne"  style="height: 500px">
             <form action="{% url 'admin_dashboard' %}" method="post">
               {% csrf_token %}
               {% include 'partials/bootstrap_form.html' with form=category_form %}
-              <button type="submit" class="btn btn-primary" name="create_category" method="post">Create</button>
+              <div class="row" style="padding-top: 85%;">
+                <button type="submit" class="btn btn-primary" style="" name="create_category" method="post">Create</button>
+              </div>
+
             </form>
           </div>
         </div>
+
         <div class="col-4">
-          <span>test3</span>
+          <div class="card main-cardOne"  style="height: 500px">
+            <form action="{% url 'admin_dashboard' %}" method="post">
+              {% csrf_token %}
+              {% include 'partials/bootstrap_form.html' with form=challenge_form %}
+              <div class="row">
+                <button type="submit" class="btn btn-primary" style="margin-top: 0%;" name="create_challenge" method="post">Create</button>
+              </div>
+
+            </form>
+          </div>
         </div>
+        </div>
+    </div>
+
+    <div class="row">
+      <div class="col-4" style="height: 490px;">
+        <div class="card main-cardOne" style="height: 490px">
+          <form action="{% url 'admin_dashboard' %}" method="post">
+            {% csrf_token %}
+            {% include 'partials/bootstrap_form.html' with form=achievement_form %}
+            <div class="row" style="padding-top: 5%;">
+              <button type="submit" class="btn btn-primary" style="" name="create_achievement" method="post">Create</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -95,5 +115,85 @@
       </div>
     </div>
 
+    {# PROMOTE MODAL #}
+    <div class="modal fade" id="promoteModal" tabindex="-1" aria-labelledby="promoteModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="promoteModalLabel">Promote User To Admin?</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure you want to promote this user to admin?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary"  form="tableform" formaction = "../user_promote" method="post">Promote</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# DEMOTE MODAL #}
+    <div class="modal fade" id="demoteModal" tabindex="-1" aria-labelledby="demoteModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="promoteModalLabel">Demote Admin To User?</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure you want to demote this admin to user?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary"  form="tableform" formaction = "../user_demote" method="post">Demote</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# JS #}
+    <script type="text/javascript">
+
+    function loadTable() {
+      var select_value = document.getElementById("view_select").value;
+      var table_header = document.getElementById("tableHeader");
+      if (select_value == 1) {
+        var url = "{% url 'user_table' %}";
+        table_header.innerHTML = "Users";
+        document.getElementById("promote_button").disabled = false;
+        document.getElementById("demote_button").disabled = false;
+      } else if (select_value == 2) {
+          var url = "{% url 'category_table' %}";
+          table_header.innerHTML = "Categories";
+          document.getElementById("promote_button").disabled = true;
+          document.getElementById("demote_button").disabled = true;
+      } else if (select_value == 3) {
+          var url = "{% url 'challenge_table' %}";
+          table_header.innerHTML = "Challenges";
+          document.getElementById("promote_button").disabled = true;
+          document.getElementById("demote_button").disabled = true;
+      } else if (select_value == 4) {
+          var url = "{% url 'achievement_table' %}";
+          table_header.innerHTML = "Achievements";
+          document.getElementById("promote_button").disabled = true;
+          document.getElementById("demote_button").disabled = true;
+      }
+      else {
+        return;
+      }
+      $.ajax({
+        url: url,
+        type: "GET",
+        success: function(response) {
+          $("#template").html(response);
+        }
+      });
+    }
+
+
+
+    </script>
 
 {% endblock %}

@@ -1,0 +1,27 @@
+<form id="tableform" method="post">
+  {% csrf_token %}
+<table class="table">
+<thead>
+  <tr>
+    <th scope="col">Select</th>
+    <th scope="col">Name</th>
+    <th scope="col">Description</th>
+    <th scope="col">Points</th>
+    <th scope="col">Start Date</th>
+    <th scope="col">End Date</th>
+  </tr>
+</thead>
+<tbody>
+  {% for challenge in challenge_page %}
+  <tr>
+    <th scope="row"> <input class = "form-check-input" type = "radio" name = "challenge_pk" value = {{challenge.pk}}></input> </th>
+    <td> {{challenge.name}}</td>
+    <td> {{challenge.description}}</td>
+    <td> {{challenge.points}}</td>
+    <td> {{challenge.start_date}}</td>
+    <td> {{challenge.end_date}}</td>
+  </tr>
+</tbody>
+{% endfor %}
+</table>
+</form>

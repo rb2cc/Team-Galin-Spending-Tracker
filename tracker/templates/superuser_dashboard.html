@@ -124,7 +124,7 @@
           <div class="modal-body">
             {% csrf_token %}
             {% include 'partials/bootstrap_form.html' with form=form %}
-            <input type="checkbox" name="will_be_admin" value="1">
+            <input type="checkbox" name="will_be_admin" value="1">&nbsp&nbsp&nbsp Create user as admin?</input>
           </div>
 
         <div class="modal-footer">

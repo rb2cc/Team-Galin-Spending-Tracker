@@ -144,4 +144,3 @@ class UserLevel(models.Model):
     level = models.ForeignKey(Level, on_delete=models.CASCADE)
     points = models.PositiveIntegerField()
     date_reached = models.DateTimeField(auto_now=True)
-

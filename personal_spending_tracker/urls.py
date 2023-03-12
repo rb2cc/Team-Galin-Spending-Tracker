@@ -77,9 +77,19 @@ urlpatterns = [
     path('achievement_list/', views.achievement_list, name='achievement_list'),
     path('my_achievements/', views.my_achievements, name='my_achievements'),
     path('share_achievement/<int:id>', views.share_achievement, name='share_achievement'),
-    path('share/', views.share, name='share')
+    path('share/', views.share, name='share'),
+    path('superuser_dashboard/', views.superuser_dashboard, name='superuser_dashboard'),
+    path('admin_dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('user_delete', views.user_delete, name='user_delete'),
+    path('delete', views.delete, name='delete'),
+    path('user_promote', views.user_promote, name ='user_promote'),
+    path('user_demote', views.user_demote, name ='user_demote'),
+    path('user_table/', views.user_table, name='user_table'),
+    path('category_table/', views.category_table, name='category_table'),
+    path('challenge_table/', views.challenge_table, name='challenge_table'),
+    path('achievement_table/', views.achievement_table, name='achievement_table'),
+    ]
 
 
 if settings.DEBUG:
         urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
-

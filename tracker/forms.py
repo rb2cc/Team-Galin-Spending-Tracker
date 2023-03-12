@@ -6,7 +6,7 @@ from .models import User
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm, PasswordResetForm
 
 
-from .models import User, Expenditure, Category
+from .models import User, Expenditure, Category, Challenge, Achievement
 
 
 class LogInForm(forms.Form):
@@ -104,15 +104,6 @@ class CreateUserForm(forms.ModelForm):
         )
         return user
 
-class CategoryForm(forms.ModelForm):
-
-    class Meta:
-        model = Category
-        fields = ['name','week_limit']
-
-    name = forms.CharField(label='', widget=forms.TextInput(attrs={'placeholder': 'Category Name'}))
-    week_limit = forms.CharField(label='', widget=forms.TextInput(attrs={'placeholder': 'Weekly Limit'}))
-
 
 class EditUserForm(UserChangeForm):
 
@@ -142,14 +133,14 @@ class ExpenditureForm(forms.ModelForm):
     description = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
     expense = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
     title = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
-        
+
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("r")
         super(ExpenditureForm, self).__init__(*args, **kwargs)
 
         #initialises the category queryset so it only shows categories the user is subscribed to (fixes glitch)
         self.fields['category'].queryset = Category.objects.filter(users__id=self.request.user.id)
-        
+
 
     # description = forms.CharField(label="Description", widget=forms.CharField(attrs={'size':100}))
     # field_order=['title', 'description', 'expense']
@@ -167,7 +158,29 @@ class AddCategoryForm(forms.ModelForm):
         model = Category
         fields = ['name', 'week_limit']
 
-    name = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
-    week_limit = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
+    name = forms.CharField(label='', widget=forms.TextInput(attrs={'style':'width:100%; height:10%', 'placeholder': 'Category Name'}))
+    week_limit = forms.CharField(label='', widget=forms.TextInput(attrs={'style':'width:100%; height:10%', 'placeholder': 'Weekly Limit'}))
 
+class AddChallengeForm(forms.ModelForm):
+    """Form enabling users to create custom challenges"""
+    class Meta:
+        """Form options."""
+        model = Challenge
+        fields = ['name', 'description', 'points', 'start_date', 'end_date']
 
+    name = forms.CharField(label='', widget=forms.TextInput(attrs={'style':'width:100%; height:10%;', 'placeholder': 'Challenge Name'}))
+    description = forms.CharField(label='', widget=forms.Textarea(attrs={'rows':3, 'placeholder': 'Description'}))
+    points = forms.IntegerField(label='', widget=forms.TextInput(attrs={'style':'width:100%; height:10%', 'placeholder': 'Number Of Points'}))
+    start_date = forms.DateField(label='Start Date', widget=forms.NumberInput(attrs={'style':'width:100%; height:10%', 'placeholder': 'Start Date', 'type': 'date'}))
+    end_date = forms.DateField(label='End Date', widget=forms.NumberInput(attrs={'style':'width:100%; height:10%', 'placeholder': 'Start Date', 'type': 'date'}))
+
+class AddAchievementForm(forms.ModelForm):
+    """Form enabling users to create custom challenges"""
+    class Meta:
+        """Form options."""
+        model = Achievement
+        fields = ['name', 'description', 'criteria']
+
+    name = forms.CharField(label='', widget=forms.TextInput(attrs={'style':'width:100%; height:10%;', 'placeholder': 'Achievement Name'}))
+    description = forms.CharField(label='', widget=forms.Textarea(attrs={'rows':4, 'placeholder': 'Description'}))
+    criteria = forms.CharField(label='', widget=forms.Textarea(attrs={'rows':4, 'placeholder': 'Criteria'}))

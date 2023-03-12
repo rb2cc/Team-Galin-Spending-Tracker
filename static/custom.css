@@ -195,7 +195,7 @@ input[type=password] {
 }
 
 .filters {
-  width:200px; 
+  width:200px;
   display: inline-block;
 }
 
@@ -215,4 +215,3 @@ input[type=password] {
   background-color:#2cb6e5;
   transition: 0.5s;
 }
-

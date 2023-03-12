@@ -3,7 +3,7 @@ from .forms import SignUpForm, LogInForm, EditUserForm, CreateUserForm
 from django.contrib.auth.forms import UserChangeForm
 from .models import User
 
-from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm
+from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm, AddChallengeForm, AddAchievementForm
 from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel
 
 from django.contrib.auth import authenticate, login, logout
@@ -35,8 +35,8 @@ def home(request):
             user = authenticate(email=email, password=password)
             if user is not None:
                 login(request, user)
-                if user.is_superuser == True:
-                    return redirect('superuser_dashboard')
+                if user.is_superuser or user.is_staff == True:
+                    return redirect('admin_dashboard')
                 else:
                     return redirect('landing_page')
         messages.add_message(request, messages.ERROR, "The credentials provided were invalid")
@@ -60,7 +60,7 @@ def sign_up(request):
                 user_achievement = UserAchievement.objects.create(user=request.user, achievement = Achievement.objects.get(name="New user"))
                 return redirect('landing_page')
             else:
-                messages.add_message(request, messages.ERROR, "This email has already been registered")          
+                messages.add_message(request, messages.ERROR, "This email has already been registered")
     else:
         form = SignUpForm()
     return render(request, 'sign_up.html', {'form': form})
@@ -272,7 +272,7 @@ def edit_category(request, id):
     else:
         form = AddCategoryForm(instance=category)
     return render(request, 'edit_category.html', {'form' : form})
-    
+
 def forum_home(request):
     return render(request, 'forum/forum_home.html')
 
@@ -433,79 +433,91 @@ def superuser_dashboard(request):
         form = CreateUserForm()
 
     user_list = User.objects.all()
-    paginator = Paginator(user_list, 3)
+    paginator = Paginator(user_list, 10)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
 
     return render(request, 'superuser_dashboard.html', {'form': form, 'page': page})
 
 def admin_dashboard(request):
+    if (request.user.is_staff == False) and (request.user.is_superuser == False):
+        return redirect('landing_page')
+    else:
+        if request.method == 'POST':
+            # IF CREATE USER BUTTON CLICKED
+            if 'create_user' in request.POST:
+                form = CreateUserForm(request.POST)
+                if form.is_valid():
+                    user = form.save()
+                    return redirect('admin_dashboard')
 
-    #DEFAULT PARAMETERS
-    table_view = 'Users'
-    table = 'user_table.html'
-    user_list = User.objects.filter(is_superuser=False, is_staff=False)
-    user_paginator = Paginator(user_list, 5)
-    user_page_number = request.GET.get('page')
-    page = user_paginator.get_page(user_page_number)
-    user_form = CreateUserForm()
-    category_form = CategoryForm()
+            # IF CREATE CATEGORY BUTTON CLICKED
+            if 'create_category' in request.POST:
+                form = AddCategoryForm(request.POST)
+                if form.is_valid():
+                    category = form.save()
+                    category.is_global = True
+                    category.save()
+                    return redirect('admin_dashboard')
 
-    if request.method == 'POST':
-        # IF CREATE USER BUTTON PRESSED
-        if 'create_user' in request.POST:
-            user_create_helper(request) #HELPER FUNCTION TO CLEAN UP
+            # IF CREATE CHALLENGE BUTTON CLICKED
+            if 'create_challenge' in request.POST:
+                form = AddChallengeForm(request.POST)
+                if form.is_valid():
+                    challenge = form.save()
+                    return redirect('admin_dashboard')
 
-        if 'create_category' in request.POST:
-            category_create_helper(request)
+            if 'create_achievement' in request.POST:
+                form = AddAchievementForm(request.POST)
+                if form.is_valid():
+                    achievement = form.save()
+                    achievement.badge = "badges/custom.png"
+                    achievement.save()
+                    return redirect('admin_dashboard')
 
-        # IF UPDATE TABLE BUTTON PRESSED
-        if 'table_update' in request.POST:
-            table_view = request.POST['view_select']
-            if table_view == "Users": #IF USERS SELECTED
-                table = 'user_table.html'
-                user_list = User.objects.filter(is_superuser=False, is_staff=False)
-                user_paginator = Paginator(user_list, 5)
-                user_page_number = request.GET.get('page')
-                page = user_paginator.get_page(user_page_number)
+        else:
+            # DEFAULT TABLE TO LOAD ON PAGE
+            user_table = 'user_table.html'
+            user_list = User.objects.all()
+            user_paginator = Paginator(user_list, 5)
+            user_page_number = request.GET.get('page')
+            user_page = user_paginator.get_page(user_page_number)
 
-            elif table_view == "Categories": #IF CATEGORIES SELECTED
-                table = 'category_table.html'
-                category_list = Category.objects.all()
-                category_paginator = Paginator(category_list, 5)
-                category_page_number = request.GET.get('page')
-                page = category_paginator.get_page(category_page_number)
+            user_form = CreateUserForm()
+            category_form = AddCategoryForm()
+            challenge_form = AddChallengeForm()
+            achievement_form = AddAchievementForm()
 
-            else: #DEFAULT TO USERS
-                table_view = 'Users'
-                table = 'user_table.html'
-                user_list = User.objects.filter(is_superuser=False, is_staff=False)
-                user_paginator = Paginator(user_list, 5)
-                user_page_number = request.GET.get('page')
-                page = user_paginator.get_page(user_page_number)
+        return render(request, 'admin_dashboard.html', {'user_page': user_page,'user_table': user_table,
+        'user_form': user_form, 'category_form': category_form, 'challenge_form': challenge_form, 'achievement_form': achievement_form})
 
+def user_table(request):
+  user_list = User.objects.all()
+  user_paginator = Paginator(user_list, 5)
+  user_page_number = request.GET.get('page')
+  user_page = user_paginator.get_page(user_page_number)
+  return render(request, 'user_table.html', {'user_page': user_page})
 
+def category_table(request):
+  category_list = Category.objects.all()
+  category_paginator = Paginator(category_list, 5)
+  category_page_number = request.GET.get('page')
+  category_page = category_paginator.get_page(category_page_number)
+  return render(request, 'category_table.html', {'category_page': category_page})
 
+def challenge_table(request):
+  challenge_list = Challenge.objects.all()
+  challenge_paginator = Paginator(challenge_list, 5)
+  challenge_page_number = request.GET.get('page')
+  challenge_page = challenge_paginator.get_page(challenge_page_number)
+  return render(request, 'challenge_table.html', {'challenge_page': challenge_page})
 
-    else: #DEFAULT TO USERS
-        pass
-
-    return render(request, 'admin_dashboard.html', {'page': page,'table': table,
-    'table_header': table_view, 'user_form': user_form, 'category_form': category_form})
-
-def user_create_helper(request):
-    form = CreateUserForm(request.POST)
-    if form.is_valid():
-        user = form.save()
-        return redirect('admin_dashboard')
-
-def category_create_helper(request):
-    form = CategoryForm(request.POST)
-    if form.is_valid():
-        category = form.save()
-        category.is_global = True
-        category.save()
-        return redirect('admin_dashboard')
+def achievement_table(request):
+  achievement_list = Achievement.objects.all()
+  achievement_paginator = Paginator(achievement_list, 5)
+  achievement_page_number = request.GET.get('page')
+  achievement_page = achievement_paginator.get_page(achievement_page_number)
+  return render(request, 'achievement_table.html', {'achievement_page': achievement_page})
 
 
 def user_delete(request):
@@ -539,6 +551,15 @@ def delete(request):
             except Category.DoesNotExist:
                 return redirect('admin_dashboard')
 
+        elif 'challenge_pk' in request.POST:
+            try:
+                challenge_pk = request.POST['challenge_pk']
+                ch = Challenge.objects.get(pk = challenge_pk)
+                ch.delete()
+                return redirect('admin_dashboard')
+            except Challenge.DoesNotExist:
+                return redirect('admin_dashboard')
+
         else:
             return redirect('admin_dashboard')
 
@@ -546,35 +567,40 @@ def delete(request):
 def user_promote(request):
     if request.method == "POST":
         try:
-            user_pk = request.POST['user_pk']
-            u = User.objects.get(pk = user_pk)
-            if u.is_staff == True:
-                messages.info(request, 'This is a test')
+            if 'user_pk' in request.POST:
+                user_pk = request.POST['user_pk']
+                u = User.objects.get(pk = user_pk)
+                if u.is_staff == True:
+                    messages.info(request, 'This is a test')
+                else:
+                    u.is_staff = True
+                    u.save()
+                return redirect('admin_dashboard')
             else:
-                u.is_staff = True
-                u.save()
-            return redirect('superuser_dashboard')
+                return redirect('sadmin_dashboard')
 
         except User.DoesNotExist:
-            return redirect('superuser_dashboard')
+            return redirect('admin_dashboard')
 
 def user_demote(request):
     if request.method == "POST":
         try:
-            user_pk = request.POST['user_pk']
-            u = User.objects.get(pk = user_pk)
-            if u.is_staff == False:
-                messages.info(request, 'This is a test')
+            if 'user_pk' in request.POST:
+                user_pk = request.POST['user_pk']
+                u = User.objects.get(pk = user_pk)
+                if u.is_staff == False:
+                    messages.info(request, 'This is a test')
+                else:
+                    u.is_staff = False
+                    u.save()
+                return redirect('admin_dashboard')
             else:
-                u.is_staff = False
-                u.save()
-            return redirect('superuser_dashboard')
+                return redirect('admin_dashboard')
 
         except User.DoesNotExist:
-            return redirect('superuser_dashboard')
+            return redirect('admin_dashboard')
 
 
 # def display_expenditures(request):
 #     expenditures = Expenditure.objects.all()
 #     return render(request, 'expenditure_list.html', {'expenditures':expenditures})
-

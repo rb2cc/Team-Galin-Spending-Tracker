@@ -20,9 +20,9 @@
         <li><a class="dropdown-item" href="{% url 'my_achievements' %}">My Achievements</a></li>
       </ul>
     </li>
-    {% if is_superuser == True %}
+    {% if request.user.is_superuser or request.user.is_staff %}
     <li class="nav-item">
-      <a class="nav-link" href="">Test</a>
+      <a class="nav-link" href="{% url 'admin_dashboard'  %}">Dashboard</a>
     </li>
     {% endif %}
 
