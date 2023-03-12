@@ -30,6 +30,11 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from .utils import update_views
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Tree
+import json
+
 # Create your views here.
 
 def home(request):
@@ -929,3 +934,45 @@ def report(request):
         'previous_average_difference':previous_average_difference,
     }
     return render(request, 'report.html', context)
+
+@csrf_exempt
+def save_item_position(request):
+    if request.method == 'POST':
+        user = request.user
+        data = json.loads(request.body)
+        tree = Tree.objects.get(tree_id=data['tree_id'])
+        tree.x_position = data['x']
+        tree.y_position = data['y']
+        tree.save()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False})
+
+def garden(request):
+    currentUser = request.user
+    user_level = UserLevel.objects.get(user=currentUser)
+    treeNum = currentUser.trees
+    pointTotal = user_level.points
+    pointLeft = pointTotal - treeNum*100
+
+    if request.method == 'POST':
+        if pointLeft<100:
+            messages.add_message(request, messages.ERROR, "Not Enough Points Available") 
+        else:
+            currentUser.trees = treeNum+1
+            currentUser.save()
+            Tree.objects.create(
+                user = currentUser,
+                x_position=500,
+                y_position=50,
+            )
+
+    treeNum = currentUser.trees
+    pointTotal = user_level.points
+    pointLeft = pointTotal - treeNum*100
+    trees = Tree.objects.filter(user=currentUser)
+    return render(request, 'garden.html',{
+        "treeNum":treeNum,
+        "pointTotal":pointTotal,
+        "pointLeft":pointLeft,
+        "trees":trees,
+    })
