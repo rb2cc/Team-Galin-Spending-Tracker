@@ -1,14 +1,23 @@
 {% extends 'base_content.html' %}
 {% block content %}
 <div class = "row">
+    <div class = 'card main-cardFive' style="margin: 30px">
+        <div class = 'card-body'>
+            <h5 class = 'card-title'>{{ overall.name }}</h5>
+            <p class = 'card-text'>Weekly Limit: {{ overall.week_limit }}</p>
+            <div class = "row">
+                <h6><a href="edit_category/{{ overall.id }}">Edit</a></h6>
+            </div>
+        </div>
+    </div>
     {% for category in categories %}
         <div class = 'card main-cardFive' style="margin: 30px">
             <div class = 'card-body'>
                 <h5 class="card-title">{{ category.name }}</h5>
                 <p class="card-text">Weekly Limit: {{ category.week_limit }}</p>
                 <div class = "row">
-                    <h6><a href="remove_category/{{ category.id }}">Delete</a></h6>
                     <h6><a href="edit_category/{{ category.id }}">Edit</a></h6>
+                    <h6><a href="remove_category/{{ category.id }}">Delete</a></h6>
                 </div>
             </div>
         </div>

@@ -1,0 +1,27 @@
+[
+    {
+      "model": "tracker.category",
+      "pk": 1,
+      "fields": {
+        "name": "Test2",
+        "week_limit": 150
+      }
+    },
+    {
+        "model": "tracker.category",
+        "pk": 2,
+        "fields": {
+          "name": "Test3",
+          "week_limit": 200
+        }
+    },
+    {
+      "model": "tracker.category",
+      "pk": 3,
+      "fields": {
+        "name": "Test4",
+        "week_limit": 500,
+        "is_overall": true
+      }
+    }
+  ]

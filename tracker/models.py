@@ -6,6 +6,14 @@ from django.core.exceptions import ValidationError
 from personal_spending_tracker import settings
 from decimal import Decimal
 from django.utils import timezone
+from taggit.managers import TaggableManager
+from django.shortcuts import reverse
+from django.utils.text import slugify
+from django.contrib.contenttypes.fields import GenericRelation
+from hitcount.models import HitCountMixin, HitCount
+from django_resized import ResizedImageField
+from tinymce.models import HTMLField
+from django.contrib.auth import get_user_model
 
 # Create your models here.
 
@@ -50,10 +58,16 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     available_categories = models.ManyToManyField('Category', symmetrical = False, related_name = 'users')
+    username = models.CharField(max_length=50, blank=True)
+    points = models.IntegerField(default=0)
+    trees = models.IntegerField(default=0)
 
     objects = UserManager()
     USERNAME_FIELD = 'email'
 
+    @property
+    def num_posts(self):
+        return Post.objects.filter(user=self).count()
 
 
 class Profile(models.Model):
@@ -76,6 +90,7 @@ class Category(models.Model):
     name = models.CharField(max_length=50, blank=False)
     week_limit = models.PositiveIntegerField()
     is_global = models.BooleanField(default=False)
+    is_overall = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = 'Category'
@@ -89,12 +104,12 @@ class Expenditure(models.Model):
 
     category = models.ForeignKey(Category, on_delete=models.CASCADE, default=1)
     title = models.CharField(max_length=20, blank=False)
-    description = models.TextField(max_length=280, blank=False)
+    description = models.CharField(max_length=280, blank=False)
     image = models.ImageField(editable=True, upload_to='images', blank=True)
     expense = models.DecimalField(max_digits=20, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))], null=False)
     date_created = models.DateTimeField(default=timezone.now)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    is_binned = models.BooleanField(default=False);
+    is_binned = models.BooleanField(default=False, null=False);
 
 class Challenge(models.Model):
     """Challenge model for storing information about challenges."""
@@ -144,3 +159,128 @@ class UserLevel(models.Model):
     level = models.ForeignKey(Level, on_delete=models.CASCADE)
     points = models.PositiveIntegerField()
     date_reached = models.DateTimeField(auto_now=True)
+
+
+class Activity(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    image = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    time = models.DateTimeField(auto_now_add=True)
+    points = models.IntegerField(default=0)
+
+# Creation of forums models
+
+User = get_user_model()
+
+class Author(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    fullname = models.CharField(max_length=40, blank=True)
+    slug = models.SlugField(max_length=400, unique=True, blank=True)
+    bio = HTMLField()
+    points = models.IntegerField(default=0)
+    profile_pic = ResizedImageField(size=[50, 80], quality=100, upload_to="authors", default=None, null=True, blank=True)
+
+    def __str__(self):
+        return self.fullname
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.fullname)
+        super(Author, self).save(*args, **kwargs)
+
+class Forum_Category(models.Model):
+    title = models.CharField(max_length=50)
+    slug = models.SlugField()
+    description = models.TextField(default="description")
+
+    class Meta:
+        verbose_name_plural = "forum_categories"
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super(Forum_Category, self).save(*args, **kwargs)
+
+    def get_url(self):
+        return reverse("posts", kwargs= {
+            "slug":self.slug
+        })
+
+    @property
+    def num_posts(self):
+        return Post.objects.filter(forum_categories=self).count()
+
+    @property
+    def last_post(self):
+        return Post.objects.filter(forum_categories=self).latest("date")
+
+
+class Reply(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.content[:100]
+
+    class Meta:
+        verbose_name_plural = "replies"
+
+
+class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
+    replies = models.ManyToManyField(Reply, blank=True)
+
+    def __str__(self):
+        return self.content[:100]
+
+
+class Post(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=400)
+    slug = models.SlugField(max_length=400, unique=True, blank=True)
+    content = HTMLField()
+    forum_categories = models.ManyToManyField(Forum_Category)
+    date = models.DateTimeField(auto_now_add=True)
+    approved = models.BooleanField(default=True)
+    hit_count_generic = GenericRelation(HitCount, object_id_field='object_pk',related_query_name='hit_count_generic_relation')
+    comments = models.ManyToManyField(Comment, blank=True)
+    # closed = models.BooleanField(default=False)
+    # state = models.CharField(max_length=40, default="zero")
+
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super(Post, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
+
+    def get_url(self):
+        return reverse("detail", kwargs= {
+            "slug":self.slug
+        })
+
+    @property
+    def num_comments(self):
+        return self.comments.count()
+
+    @property
+    def last_reply(self):
+        return self.comments.latest("date")
+
+
+class Tree(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    tree_id = models.AutoField(primary_key=True)
+    x_position = models.IntegerField()
+    y_position = models.IntegerField()
+
+    
+

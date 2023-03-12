@@ -1,0 +1,161 @@
+{% extends 'base_content.html' %}
+{% block content %}
+
+<div class="card report-card">
+    <form method="POST">
+        {% csrf_token %}
+        {{ form }}
+        <button type="submit" class="btn btn-primary" style="width:180px; height:35px; margin-left:10px; margin-top:0px; line-height: 10px; ">Generate Report</button>
+        <button class="btn btn-primary" style="width:180px; height:35px; margin-left:10px; margin-top:0px; line-height: 10px;" onclick="window.print()">Print Report</button>
+    </form>
+    <p></p><p></p>
+    
+    <h2 style="font-size: 40px;">Expenditure Report</h2>
+    <div>From {{start_date|date:'Y-m-d'}} To {{end_date|date:'Y-m-d'}}</div>
+    <p></p><p></p>
+
+    {% if expenditures %}
+    <div class = 'row'>
+        <div style="width:750px"><canvas id="expenseBarChart"></canvas></div> 
+        <div style="width:350px; margin-left:60px"><canvas id="expensePieChart"></canvas></div> 
+    <div class = 'row'>
+        <p></p>
+        <li style="font-weight:bold; font-size: 20px;">In this period, you have kept traking your spending for <span style="color:red">{{day_number}}</span> days, which is <span style="color:red">{{week_numbers}}</span> weeks (Including this week).</li>
+        {% if over_list %}
+            <li style="font-weight:bold; font-size: 20px; margin-top:10px">For:&nbsp&nbsp<span style="color:red">{% for category in over_list %}{{category}}&nbsp&nbsp{%endfor%}</span>, you exceeded your limit. Try to reduce these spending!</li>
+        {% else %}
+            <li style="font-weight:bold; font-size: 20px; margin-top:10px">Congradulation! You did not exceed any of your limit! Keep going!</li>
+        {% endif %}
+        <li style="font-weight:bold; font-size: 20px; margin-top:10px">You spend most of your money in: <span style="color:red">{{most_category}}</span>, which is <span style="color:red">{{most_expense}}%</span>!</li>
+    {% else %}
+        <p style="font-weight:bold; font-size: 50px; text-align: center; margin-top:100px">No expenditures found for this time period.</p>
+    {% endif %}
+    <p></p><p></p>
+    <div style="height:350px"><canvas id="dailyBarChart"></canvas></div> 
+    <p></p>
+    <li style="font-weight:bold; font-size: 20px;">In this period, you spent most money on <span style="color:red">{{most_date|date:'Y-m-d'}}</span>, which is <span style="color:red">{{most_daily}}</span>.</li>
+    <li style="font-weight:bold; font-size: 20px; margin-top:10px">Your average daily spending is <span style="color:red">{{average_daily}}</span>.</li>
+    <p></p><p></p>
+    <div style="width:50%"><canvas id="compareTotalBarChart"></canvas></div> 
+    <div style="width:50%"><canvas id="compareAverageBarChart"></canvas></div> 
+    <p></p><p></p>
+    <div style="font-weight:bold; font-size: 20px;">Compare with the previous <span style="color:red">{{day_number}}</span> days period:</div>
+    {% if total_expense > previous_total %}
+        <li style="font-weight:bold; font-size: 20px; margin-top:10px">You spent <span style="color:red">{{ previous_total_difference }}</span> more in total</li>
+    {% else %}
+        <li style="font-weight:bold; font-size: 20px; margin-top:10px">You spent <span style="color:red">{{ previous_total_difference }}</span> less in total.</li>
+    {% endif %}
+    {% if average_daily > previous_average %}
+        <li style="font-weight:bold; font-size: 20px; margin-top:10px">You spent <span style="color:red">{{ previous_average_difference }}</span> more in daily average</li>
+    {% else %}
+        <li style="font-weight:bold; font-size: 20px; margin-top:10px">You spent <span style="color:red">{{ previous_average_difference }}</span> less in daily average.</li>
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script>
+    const ctx1 = document.getElementById('expensePieChart');
+    const ctx2 = document.getElementById('expenseBarChart');
+    const ctx3 = document.getElementById('dailyBarChart');
+    const ctx4 = document.getElementById('compareTotalBarChart');
+    const ctx5 = document.getElementById('compareAverageBarChart');
+    chart1 = new Chart(ctx1, {
+        type: 'pie',
+        data: {
+            labels: [{% for category, sum in category_sums.items %}'{{category}}',{%endfor%}],
+            datasets: [{
+                label: 'Expense',
+                data: [{% for category, sum in category_sums.items %}'{{sum}}',{%endfor%}],
+                borderWidth: 1,
+                datalabels: {
+                    color: '#000000'
+                }
+            }]
+        },
+        plugins: [ChartDataLabels],
+    });    
+    chart2 = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: ['Total Limit', 'Total Expense', {% for category, sum in category_sums.items %}'{{category}} Limit', '{{category}} Expense',{%endfor%}],
+            datasets: [{
+                label: 'Expenditures',
+                data: [{{limit_sum}}, {{total_expense}},{% for limit, sum in limit_sum_pair.items %}{{limit}},{{sum}},{% endfor %}],
+                backgroundColor: ['rgba(255, 99, 132, 0.2)','rgba(0, 128, 0, 0.2)'],
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options:{
+            plugins:{
+                legend:{
+                    display:false
+                }
+            }
+        },
+        plugins: [ChartDataLabels],
+    });
+    chart3 = new Chart(ctx3, {
+        type: 'bar',
+        data: {
+            labels: [{% for item in dateList %}'{{item}}',{%endfor%}],
+            datasets: [{
+                label: 'Expenditures',
+                data: [{% for item in dailyExpenseList %}'{{item}}',{%endfor%}],
+                borderWidth: 1
+            }]
+        },
+        options:{
+            maintainAspectRatio: false,
+            plugins:{
+                legend:{
+                    display:false
+                }
+            }
+        },
+    });
+    chart4 = new Chart(ctx4, {
+        type: 'bar',
+        data: {
+            labels: ['Previous {{day_number}} Days Total', 'This Period Total'],
+            datasets: [{
+                label: 'Expenditures',
+                data: ['{{previous_total}}', '{{total_expense}}'],
+                backgroundColor: ['rgba(255, 99, 132, 0.2)','rgba(0, 128, 0, 0.2)'],
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options:{
+            plugins:{
+                legend:{
+                    display:false
+                }
+            }
+        },
+    });
+    chart5 = new Chart(ctx5, {
+        type: 'bar',
+        data: {
+            labels: ['Previous {{day_number}} Days Average', 'This Period Average'],
+            datasets: [{
+                label: 'Expenditures',
+                data: ['{{previous_average}}','{{average_daily}}'],
+                backgroundColor: ['rgba(255, 99, 132, 0.2)','rgba(0, 128, 0, 0.2)'],
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options:{
+            plugins:{
+                legend:{
+                    display:false
+                }
+            }
+        },
+    });
+</script>
+
+
+{% endblock %}

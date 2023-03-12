@@ -1,4 +1,5 @@
 {% extends 'base_content.html' %}
+{% load static %}
 {% block content %}
 <div class='row'>
     <div class = 'col'>
@@ -26,9 +27,8 @@
             </table>
             <h2><a href='{% url 'expenditure_list' %}' class="btn btn-primary">View Full Expenditures</a></h2>
         </div>
-        <div class="card main-cardFive">
-            <p>More functions</p>
-            <p>to be implemented</p>
+        <div class="card main-cardGarden">
+            <a href='{% url 'garden' %}'><img src="{% static "images/Tree.png" %}" style="width:350px;height:300px;border-radius:10px;"></a>
         </div>
     </div>
     <div class = 'col'>
@@ -41,7 +41,17 @@
                 </form>
             </div>
             <div class="card main-cardThree">
-                <p>{{ current_level_name }}</p>
+                <div style="padding-bottom: 20px">
+                    <a href="{% url 'my_avatar' %}">
+                        <img src="/create_avatar" style="width: auto; height: 200px; border: 5px solid {{ user_tier_colour }}"/>
+                    </a>
+                </div>
+                <p>{{ request.user.first_name }} {{ request.user.last_name }}</p>
+                <p>{{ current_level_name }}
+                    {% if user_tier_name != "" %}
+                        ({{ user_tier_name|title }} tier)
+                    {% endif %}
+                </p>
                 <p>Points: {{ current_points }}</p>
                 <p>Your progress: </p>
                 <div class="progress" style="height: 20px; border-radius: 10px; background-color: #f2f2f2; overflow: hidden">
@@ -53,17 +63,17 @@
             <div class="card main-cardFour">
                 <div class = 'row'>
                     <div class="col">
-                            <select class="form-select" id="frequency" onchange="showChart()" style="width:138px; display: inline-block;">
-                                <option value = 90>Last 90 days</option>  
+                            <select class="form-select" id="frequency" onchange="showChart()" style="width:140px; display: inline-block; margin-top:10px; margin-left:10px">
                                 <option value = 30>Last 30 days</option>  
+                                <option value = 90>Last 90 days</option>  
                                 <option value = 7>Last 7 days</option>  
                             </select>
                             <!-- <button type="button" class='btn btn-primary' onclick="showChart()" style="width:133px; margin-left:10px; margin-top:0px">Generate Graph</button> -->
-                        <div style="width:220px; margin-top:20px; margin-left:40px">
+                        <div style="width:220px; margin-top:30px; margin-left:20px">
                             <canvas id="expensePieChart"></canvas>
                         </div> 
                     </div>
-                    <div style="width:610px; margin-top:10px; margin-right:10px">
+                    <div style="width:650px; margin-top:10px; margin-right:10px">
                         <canvas id="expenseBarChart"></canvas>
                     </div>     
                 </div>    
@@ -76,7 +86,7 @@
                 <!-- JavaScript to print the chart -->
                 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>       
                 <script>
-                    recentCategory = [{%for data in categoryList.90%}'{{data}}',{%endfor%}];
+                    recentCategory = [{%for data in categoryList.30%}'{{data}}',{%endfor%}];
                     const ctx1 = document.getElementById('expensePieChart');
                     const ctx2 = document.getElementById('expenseBarChart');
                     const ctx3 = document.getElementById('expenseLineChart');
@@ -84,10 +94,10 @@
                         chart1 = new Chart(ctx1, {
                             type: 'doughnut',
                             data: {
-                                labels: [{%for data in categoryList.90%}'{{data}}',{%endfor%}],
+                                labels: [{%for data in categoryList.30%}'{{data}}',{%endfor%}],
                                 datasets: [{
                                     label: 'Expense',
-                                    data: [{%for data in expenseList.90%}'{{data}}',{%endfor%}],
+                                    data: [{%for data in expenseList.30%}'{{data}}',{%endfor%}],
                                     borderWidth: 1
                                 }]
                             },
@@ -95,9 +105,9 @@
                         chart2 = new Chart(ctx2, {
                             type: 'bar',
                             data: {
-                                labels: [{%for data in dateList.90%}'{{data}}',{%endfor%}],
+                                labels: [{%for data in dateList.30%}'{{data}}',{%endfor%}],
                                 datasets: [{
-                                    data: [{%for data in dailyExpenseList.90%}'{{data}}',{%endfor%}],
+                                    data: [{%for data in dailyExpenseList.30%}'{{data}}',{%endfor%}],
                                     borderWidth: 1
                                 }]
                             },
@@ -112,10 +122,10 @@
                         chart3 = new Chart(ctx3, {
                             type: 'line',
                             data: {
-                                labels: [{%for data in dateList.90%}'{{data}}',{%endfor%}],
+                                labels: [{%for data in dateList.30%}'{{data}}',{%endfor%}],
                                 datasets: [{
                                     label: 'Expense',
-                                    data: [{%for data in cumulativeExpenseList.90%}'{{data}}',{%endfor%}],
+                                    data: [{%for data in cumulativeExpenseList.30%}'{{data}}',{%endfor%}],
                                     borderWidth: 1
                                 }]
                             },

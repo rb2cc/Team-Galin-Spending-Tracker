@@ -16,7 +16,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import re_path, path
 from tracker import views, expenditure_views
 from tracker.views import UserEditView
 from django.urls.conf import include
@@ -57,6 +57,8 @@ urlpatterns = [
     path('forum_home/', views.forum_home, name='forum_home'),
     path('posts/', views.posts, name='posts'),
     path('detail/', views.detail, name='detail'),
+    path('garden/', views.garden, name='garden'),
+    path('save-item-position/', views.save_item_position, name='save_item_position'),
     path('category_list', views.category_list, name='category_list'),
     path('remove_category/<int:id>', views.remove_category, name='remove_category'),
     path('bin_expenditure', expenditure_views.bin_expenditure, name='bin_expenditure'),
@@ -78,6 +80,26 @@ urlpatterns = [
     path('my_achievements/', views.my_achievements, name='my_achievements'),
     path('share_achievement/<int:id>', views.share_achievement, name='share_achievement'),
     path('share/', views.share, name='share'),
+
+    path('create_avatar/', views.create_avatar, name='create_avatar'),
+    path('share_avatar/', views.share_avatar, name='share_avatar'),
+    re_path(r'^my_activity/$', views.my_activity, name='my_activity'),
+    re_path(r'^my_avatar/$', views.my_avatar, name='my_avatar'),
+    re_path(r'^unlock_avatar/$', views.unlock_avatar, name='unlock_avatar'),
+    path('report/', views.report, name='report'),
+    path('forum_home/', views.forum_home, name='forum_home'),
+    path('posts/<slug>/', views.posts, name='posts'),
+    path('detail/<slug>/', views.detail, name='detail'),
+    path('tinymce/', include('tinymce.urls')),
+    path('hitcount/', include('hitcount.urls', namespace='hitcount')),
+
+    path('create_post/', views.create_post, name='create_post'),
+
+    path('latest_posts/', views.latest_posts, name='latest_posts'),
+
+    path('search_result/', views.search_result, name ='search_result'),
+
+
     path('superuser_dashboard/', views.superuser_dashboard, name='superuser_dashboard'),
     path('admin_dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('user_delete', views.user_delete, name='user_delete'),

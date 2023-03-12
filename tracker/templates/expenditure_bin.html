@@ -5,15 +5,17 @@
     <!-- table html -->
     <form id="expenditure_form" method="POST">
                 {% csrf_token %}
+
+                <p style='text-align: center;'>*EXPENDITURES HERE WILL BE DELETED AFTER 10 MINUTES!!!*</p>
             <table class="table mainTable">
         </div>
             <thead class="mainThead">
                 <tr>
-                    <th width="" scope="col" >Category</th>
+                    <th width="0px" scope="col" >Category</th>
                     <th width="120px" scope="col" >Title</th>
-                    <th scope="col">Expense</th>
-                    <th width="115px" scope="col">Time</th>
-                    <th width="680px" scope="col" >Description</th>
+                    <th width="110px" scope="col">Expense</th>
+                    <th width="100px" scope="col">Time</th>
+                    <th width="640px" scope="col" >Description</th>
                     <th scope="col">Image</th>
                     <th scope="col">Actions</th>
                 </tr>
@@ -22,11 +24,11 @@
                 <div class="scroll">
                     {% for binned in binned_spendings %}
                         <tr>
-                            <td>{{ binned.category }}</td>
-                            <td>{{ binned.title }}</td>
-                            <td>£{{ binned.expense }}</td>
-                            <td>{{ binned.date_created }}</td>
-                            <td>{{ binned.description }}</td>
+                            <td width="80px">{{ binned.category }}</td>
+                            <td width="120px">{{ binned.title }}</td>
+                            <td width="90px">£{{ binned.expense }}</td>
+                            <td width="130px">{{ binned.date_created }}</td>
+                            <td width="680px">{{ binned.description }}</td>
                             {% if binned.image %}
                             <!-- This code can show full images.
                                 <td style="max-width:0px"><img src="media/{{ spending.image }} " alt="image"></td>

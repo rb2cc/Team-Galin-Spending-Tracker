@@ -1,8 +1,8 @@
 from django.core.validators import validate_email
 from django.core.validators import RegexValidator
 from django import forms
-
-from .models import User
+from django.forms import ValidationError
+from .models import User, Post
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm, PasswordResetForm
 
 
@@ -113,6 +113,10 @@ class EditUserForm(UserChangeForm):
         max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
     last_name = forms.CharField(
         max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    username = forms.CharField(
+        max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    # bio = HTMLField()
+    # profile_pic = ResizedImageField(size=[50, 80], quality=100, upload_to="Users", default=None, null=True, blank=True)
     # date_joined = forms.CharField(
     #     max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
     password = None
@@ -121,7 +125,7 @@ class EditUserForm(UserChangeForm):
         """Form options."""
 
         model = User
-        fields = ['email', 'first_name', 'last_name']
+        fields = ['email', 'first_name', 'last_name', 'username']
 
 class ExpenditureForm(forms.ModelForm):
     """Form enabling users to create expenditures"""
@@ -161,6 +165,42 @@ class AddCategoryForm(forms.ModelForm):
     name = forms.CharField(label='', widget=forms.TextInput(attrs={'style':'width:100%; height:10%', 'placeholder': 'Category Name'}))
     week_limit = forms.CharField(label='', widget=forms.TextInput(attrs={'style':'width:100%; height:10%', 'placeholder': 'Weekly Limit'}))
 
+
+class ReportForm(forms.Form):
+    start_date = forms.DateField(label='Start Date', widget=forms.TextInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(label='End Date', widget=forms.TextInput(attrs={'type': 'date'}))
+
+class EditOverallForm(forms.ModelForm):
+    """Form enabling users to edit the overall category"""
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user")
+        super(EditOverallForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        limit = cleaned_data.get('week_limit')
+        sum = 0
+        others = Category.objects.filter(is_overall=False).filter(users__id=self.user.id)
+        for cat in others:
+            sum += cat.week_limit
+        if int(limit) < sum:
+            raise ValidationError({"week_limit":"The overall limit cannot be less than the sum of other categories."})
+        return cleaned_data
+        
+
+    class Meta:
+        """Form options"""
+        model = Category
+        fields = ['week_limit']
+
+    week_limit = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
+
+# Form to allow users to create new forum posts.
+class PostForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ["title", "content", "forum_categories"]
+
 class AddChallengeForm(forms.ModelForm):
     """Form enabling users to create custom challenges"""
     class Meta:
@@ -184,3 +224,4 @@ class AddAchievementForm(forms.ModelForm):
     name = forms.CharField(label='', widget=forms.TextInput(attrs={'style':'width:100%; height:10%;', 'placeholder': 'Achievement Name'}))
     description = forms.CharField(label='', widget=forms.Textarea(attrs={'rows':4, 'placeholder': 'Description'}))
     criteria = forms.CharField(label='', widget=forms.Textarea(attrs={'rows':4, 'placeholder': 'Criteria'}))
+

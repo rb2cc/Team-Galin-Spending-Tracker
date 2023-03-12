@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import User, Expenditure, Category, Challenge, UserChallenge, Level, UserLevel, Achievement, UserAchievement
+from .models import User, Expenditure, Category, Challenge, UserChallenge, Level, UserLevel, Achievement, UserAchievement, Activity
+from .models import Author, Post, Forum_Category, Comment, Reply
 
 admin.site.site_header = 'Admin Dashboard'
 # Register your models here.
@@ -13,8 +14,8 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     """Configuration fo the admin interface for categories."""
-    list_display = ('name', 'week_limit', 'is_global')
-    fields = ('name', 'week_limit', 'is_global')
+    list_display = ('name', 'week_limit', 'is_global', 'is_overall')
+    fields = ('name', 'week_limit', 'is_global', 'is_overall')
 
 @admin.register(Expenditure)
 class ExpenditureAdmin(admin.ModelAdmin):
@@ -51,4 +52,16 @@ class AchievementAdmin(admin.ModelAdmin):
 class UserAchievementAdmin(admin.ModelAdmin):
     """Configuration of the admin interface for user achievements."""
     list_display = ['user', 'achievement', 'date_earned']
+
+
+@admin.register(Activity)
+class ActivityAdmin(admin.ModelAdmin):
+    """Configuration of the admin interface for activity."""
+    list_display = ['user', 'image', 'name', 'time', 'points']
+
+admin.site.register(Forum_Category)
+admin.site.register(Author)
+admin.site.register(Post)
+admin.site.register(Comment)
+admin.site.register(Reply)
 

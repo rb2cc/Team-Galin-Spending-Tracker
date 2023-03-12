@@ -1,56 +1,37 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base_content.html' %}
+{% load hitcount_tags %}
+{% block content %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"
-    <title></title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
-    <link rel="stylesheet" href={% static "forum_static/style.css" %}/>
-    <link rel="stylesheet"href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital@1&display=swap"/>
-</head>
-    <body>
 
-        <header>
-            <div class="navbar">
-                <nav class="navigation hide" id="navigation">
-                    <ul class="nav-list">
-                        <span class="close-icon" onclick="showIconBar()"><i class="fa fa-close"></i></span>
-                        <li class="nav-item">
-                            <a href="../detail/"> Detail </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="../posts/"> Posts </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="../forum_home/"> Forum </a>
-                        </li>
-                    </ul>
-                </nav>
-                <a href="#" class="bar-icon" id="iconBar" onclick="hideIconBar()"><i class="fa fa-bars"></i></a>
-                <div class="brand"> My Forum </div>
-            </div>
-            <!---Search Box--->
+<header>
+    <!---Search Box--->
+    <form action="{% url 'search_result' %}" role="form" method="GET">
+        <div class="search-box">
             <div>
-                <div class="search-box">
-                    <div>
-                        <select name="" id="">
-                            <option value="everything"> Everything </option>
-                            <option value="titles"> Titles </option>
-                            <option value="description"> Description </option>
-                        </select>
-                        <input type="text" name="q" id="" placeholder"search ..."></input>
-                        <button><i class="fa fa-search"></i></button>
-                    </div>
+                <select name="" id="">
+                    <option value="everything"> Everything </option>
+                    <option value="titles"> Titles </option>
+                    <option value="description"> Description </option>
+                </select>
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+                <input type="text" name="q" id="" placeholder"search ..."></input>
+                <button type="submit" name ="search"><i class="fa fa-search"></i></button>
             </div>
-        </header>
+    </div>
+</form>
+</header>
+
+<div>
+    {% if user.is_authenticated %}
+        <div class="post-box"><a href="{% url 'create_post' %}"> + </a></div>
+        {% endif %}
+</div>
 
         <div class="container">
 
             <!---Navigation--->
-            <div class="navigate">
-                <span><a href="#"> My Forum - Forums</a> >> <a href="#"> Random Topic </a>
+            <div class="navigate" >
+                <span><a href="{% url 'forum_home'}"> My Forum - Forums</a> >> <a href="{{forum.get_url}}"> {{forum.title}} </a>
 
             </div>
 
@@ -61,27 +42,53 @@
                     <div class="replies"> Replies/Views </div>
                     <div class="last-reply"> Last Reply </div>
                 </div>
+
+                {% for post in posts %}
                 <div class="table-row">
+
+                    {% if post.closed == True %}
+                    <div class="status"><i class="fa fa-lock"> </i></div>
+
+                    {% elif post.num_comments == 0 %}
+                    <div class="status"><i class="fa fa-frown-o"> </i></div>
+
+                    {% elif post.num_comments > 0 and post.num_comments < 2 %}
+                    <div class="status"><i class="fa fa-book""> </i></div>
+
+                    {% elif post.num_comments > 2 and post.num_comments < 5 %}
+                    <div class="status"><i class="fa fa-rocket"> </i></div>
+
+                    {% elif post.num_comments >= 4 %}
                     <div class="status"><i class="fa fa-fire"> </i></div>
-                    <div class="subjects"><a href="#"> How to save more money? </a>
+
+                    {% endif %}
+                   
+                    
+                    
+                    
+
+                    <div class="subjects"><a href="{{post.get_url}}"> {{post.title}} </a>
                     <br>
-                    <span>Started by <b><a href="#"> User </a></b>.</span>
+                    <span>Started by <b><a href="#"> {{post.user.username|title}} </a></b>.</span>
                     </div>
                     <div class="replies">
-                        2 replies <br> 125 views
+                        {{post.num_comments}} comments <br> {% get_hit_count for post %} views
                     </div>
                             <div class="last-reply">
-                                October 2021
+                                {{post.last_reply.date|date}}
                                 <br>
-                                By <b> <a href="#"> User </a> </b>
+                                By <b> <a href="#"> {{post.last_reply.user.username|title}} </a> </b>
                             </div>
                 </div>
+                {% endfor %}
+
+
             </div>
     </div>
 
 <!---Pagination--->
 <div class="pagination">
-        Pages: <a href="#"> 1 </a> <a href="#"> 2 </a> <a href="#"> 3 </a> <a href="#"> 4 </a> <a href="#"> 5 </a>
+        Pages: {% for num_page in posts.paginator.page_range %}<a href="?page={{num_page}}"> {{num_page}} </a>  {% endfor %}
 </div>
 
 <!---Status note--->
@@ -109,13 +116,6 @@
     <span> &nbsp;   |   </span>
 </div>
 
-
-
-    <footer>
-
-        <span>&copy; &nbsp; Open Source | Selmi Abderrahim | Extended Implementation By Team Galin | All Rights Reserved </span>
-
-    </footer>
-        <script src={% static "forum_static/main.js" %}></script>
     </body>
 </html>
+{% endblock content %}

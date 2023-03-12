@@ -49,7 +49,35 @@ p.cover-text {
   padding-right: 50px;
   padding-bottom: 30px;
   border-radius: 10px;
+}
 
+.garden-card {
+  background-color: rgb(255, 255, 255, 0.9);
+  margin-top: 10px;
+  margin-bottom:30px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 1300px;
+  height: 1500px;
+  padding-top: 30px;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-bottom: 30px;
+  border-radius: 10px;
+}
+
+
+.report-card {
+  background-color: rgb(255, 255, 255, 0.9);
+  margin-top: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 1300px;
+  padding-top: 30px;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-bottom: 30px;
+  border-radius: 10px;
 }
 
 .main-cardOne {
@@ -113,6 +141,14 @@ p.cover-text {
   padding-top: 20px;
   padding-left: 20px;
   padding-right: 20px;
+  border-radius: 10px;
+}
+
+.main-cardGarden {
+  background-color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 30px;
+  width: 350px;
+  height: 300px;
   border-radius: 10px;
 }
 
@@ -215,3 +251,429 @@ input[type=password] {
   background-color:#2cb6e5;
   transition: 0.5s;
 }
+
+
+.image_button {
+  border-radius: 12px;
+  border-color: darkslateblue;
+  background-color: #8765f0;
+  width: 23px;
+  height: 23px;
+}
+
+.image {
+  border-radius: 10px;
+  width: 450px;
+  height: auto;
+}
+
+@media print
+{
+    html{
+        zoom: 55%; 
+    }
+    body, html, div, #wrapper {
+      height: 100%;
+    }
+}
+
+.centerImage {
+  width: 600px;
+}
+
+.gardenBackground{
+  margin-top:1px;
+  height:550px;
+  width:1200px;
+  background:url('images/soil.png') no-repeat;
+  background-size:100%;
+}
+
+/* ------------------Forum Styling ----------------------- */
+
+/* global */
+
+*{
+  box-sizing: border-box;
+}
+
+html{
+  font-size: 16px;
+  font-family: 'Titillium Web', sans-serif;
+  background-color: rgb(0,0,0);
+  color: #FEFEFE;
+}
+
+a{
+  color: rgb(0, 150, 255);
+  font-weight: bolder;
+  text-decoration: none;
+}
+
+h1{
+  font-size: 16px;
+  font-weight: bolder;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  /* color:rgb(255, 255, 255); */
+}
+
+/* home.html */
+
+
+.subform{
+  margin-top: 0px;
+}
+
+.subforum-title{
+  background-color: rgb(255, 255, 255, 0.5);
+  padding: 5px;
+  border-radius: 5px;
+  margin: 4px;
+}
+
+.subforum-row{
+  display: grid;
+  grid-template-columns: 7% 60% 13% 20%;
+}
+
+.subforum-column{
+  padding: 10px;
+  margin: 4px;
+  border-radius: 5px;
+  background-color: rgb(255, 255, 255, 0.5);
+}
+
+.subforum-description *{
+  margin-block: 0;
+}
+
+.center{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.subforum-icon{
+  font-size: 45px;
+}
+
+.search-box{
+  /* border: solid 1px #52057b; */
+  margin-top: 0px;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  /* box-shadow: 1px 2px 3px #52057b; */
+}
+
+.search-box select{
+  padding: 10px;
+}
+
+.search-box input{
+  padding:10px;
+}
+
+.search-box button{
+  padding:10px;
+  background-color: #fff;
+  color: #000000;
+}
+
+.search-box button:hover{
+  background-color: #000000;
+  color: #fff;
+  box-shadow: 1px 2px 3px #fff;
+}
+
+/* Forum Info*/
+
+.forum-info{
+  padding: 20px;
+
+}
+
+.chart{
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/*Footer*/
+
+footer{
+  margin-top: 20px;
+  padding: 20px;
+  display: block;
+  text-align: center;
+}
+
+
+/* For mobile phones*/
+@media screen and (max-width: 460px) {
+  .container{
+      margin: 10px;
+      padding: 10px;
+  }
+
+  .subforum-row{
+      display: grid;
+      grid-template-columns: 25% 75%;
+      grid-template-rows: 65% 35%;
+  }
+
+  .subforum-stats{
+      font-size: 12px;
+  }
+
+}
+
+/* For tablets */
+
+@media screen and (min-width: 460px) and (max-width: 1021px) {
+  .containeer{
+      margin: 15px;
+      padding: 15px;
+  }
+
+  .subforum-row{
+      display: grid;
+      grid-template-columns: 10% 60% 10% 20%;
+  }
+
+  .subforum-icon{
+      font-size: 35px;
+  }
+
+  html{
+      font-size: 16px;
+
+  }
+
+  h1{
+      font-size: 18px;
+  }
+}
+
+/*navbar for smartphonees*/
+
+@media screen and (max-width:460px) {
+  .navigation{
+      max-height: auto;
+  }
+
+  .nav-item a{
+      float: left;
+      display: inline;
+      text-align: center;
+      margin-inline: 3px;
+      font-size: 10px;
+      padding: 5px;
+  }
+
+  .close-icon i{
+      font-size: 30px;
+  }
+
+  .brand{
+      font-size: 20px;
+  }
+
+
+}
+
+/* search box for smartphones */
+
+@media screen and (max-width:460px) {
+
+  .search-box input, .search-box button, .search-box select{
+      min-width: 300px;
+      margin-top: 5px;
+  }
+
+
+
+
+
+}
+
+
+/* ----------------------------------------------------------------------------------------------------*/
+/* posts.html*/
+
+.post-box{
+  color: #000000;
+  font-size: 40px; 
+  font-weight:200px; 
+  margin-right:12px; 
+  margin-top:0px; 
+  margin-bottom:0px; 
+  text-align:right;
+}
+
+
+.table-head{
+  display: flex;
+
+}
+
+.table-head div{
+  padding: 5px;
+  margin: 2px;
+  background-color: rgb(255, 255, 255, 0.5);
+  font-weight: bold;
+}
+
+.table-head .status{
+  flex: 5%;
+}
+
+.table-head .subjects{
+  flex: 70%;
+}
+
+.table-head .replies{
+  flex: 10%;
+}
+
+.table-head .last-reply{
+  flex: 15%;
+}
+
+/* Table Body */
+
+.table-row{
+  display: flex;
+}
+
+.table-row .status, .table-row .subjects, .table-row .replies, .table-row .last-reply {
+  padding: 5px;
+  margin: 2px;
+  background-color: rgb(255, 255, 255, 0.5);
+}
+
+.table-row .status{
+  flex: 5%;
+  font-size: 30px;
+  text-align: center;
+}
+
+.table-row .subjects{
+  flex: 70%
+}
+
+.table-row .replies{
+  flex: 10%
+}
+
+.table-row .last-reply{
+  flex: 15%
+}
+
+/* Pagination */
+
+.pagination{
+  padding: 20px;
+  font-size: 15px;
+  margin-inline: 22px;
+}
+
+.pagination a{
+  color: #fff;
+
+}
+
+.pagination a:hover{
+  opacity: 0.5;
+}
+
+/* Navigation*/
+
+.navigate{
+  font-weight: lighter;
+}
+
+.navigate a{
+  color: #fff;
+}
+
+.navigate a:hover{
+  color: #FF0042;
+  font-weight: bolder;
+}
+
+/* Note */
+.note{
+  padding: 10px;
+  display: block;
+  text-align: center;
+}
+
+/* ----------------------------------------------------------------------------------------------------*/
+/* detail.html*/
+
+.head{
+  display: flex;
+  background-color: rgb(255, 255, 255, 0.5);
+  padding: 5px;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.authors{
+  flex: 20%;
+}
+
+.content{
+  flex: 80%;
+}
+
+.body{
+  display: flex;
+  background-color: rgb(255, 255, 255, 0.5);
+  padding: 10px;
+  margin-top: 5px;
+
+}
+
+.body .authors .username{
+  font-size: 20px;
+}
+
+.body .authors img{
+  max-width: 50px;
+  max-height: 80px;
+}
+
+.body .content .comment button{
+  border:none;
+  padding: 10px;
+  font-weight: bolder;
+  cursor: pointer;
+  float: right;
+}
+
+/* comment */
+
+.comment-area textarea{
+  width: 100%;
+  min-height: 100px;
+  padding: 10px;
+  margin-block: 10px;
+}
+
+.comment-area input{
+  float: right;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.comment-area input:hover{
+  border: solid 1px rgb(255, 255, 255, 0.5);
+}
+
+.comments-container{
+  margin-top: 50px;
+}
+
