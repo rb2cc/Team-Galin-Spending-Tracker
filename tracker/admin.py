@@ -13,8 +13,8 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     """Configuration fo the admin interface for categories."""
-    list_display = ('name', 'week_limit', 'is_global')
-    fields = ('name', 'week_limit', 'is_global')
+    list_display = ('name', 'week_limit', 'is_global', 'is_overall')
+    fields = ('name', 'week_limit', 'is_global', 'is_overall')
 
 @admin.register(Expenditure)
 class UserAdmin(admin.ModelAdmin):

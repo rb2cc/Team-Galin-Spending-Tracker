@@ -1,9 +1,9 @@
-
 from .forms import SignUpForm, LogInForm, EditUserForm, ReportForm, PostForm
 from django.contrib.auth.forms import UserChangeForm
-from .models import User
-from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm
+
 from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel, Activity, Post, Forum_Category, Comment, Reply
+from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm, EditOverallForm
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import redirect, render, get_object_or_404
@@ -30,6 +30,11 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from .utils import update_views
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Tree
+import json
+
 # Create your views here.
 
 def home(request):
@@ -54,9 +59,11 @@ def sign_up(request):
             if not User.objects.filter(email=form.cleaned_data.get('email')).exists():
                 user = form.save()
                 global_categories = Category.objects.filter(is_global=True)
+                overall_count = 0
                 for x in global_categories:
                     tempName = x.name
                     tempLimit = x.week_limit
+                    overall_count += x.week_limit
                     tempCategory = Category.objects.create(name=tempName, week_limit=tempLimit)
                     user.available_categories.add(tempCategory)
                 login(request, user)
@@ -66,6 +73,8 @@ def sign_up(request):
                     pass
                 user_activity = Activity.objects.create(user=request.user, image = "images/user.png", name = "You've created an account on Galin's Spending Tracker")
                 user_activity = Activity.objects.create(user=request.user, image = "badges/new_user.png", name = "You've earned \"New user\" achievement")
+                overall = Category.objects.create(name="Overall", week_limit=overall_count, is_overall = True)
+                user.available_categories.add(overall)
                 return redirect('landing_page')
             else:
                 messages.add_message(request, messages.ERROR, "This email has already been registered")          
@@ -288,10 +297,14 @@ def category_list(request):
             user_activity_name = f'You\'ve added \"{category.name}\" category with {category.week_limit} week limit'
             user_activity = Activity.objects.create(user=request.user, image = "images/category.png", name = user_activity_name, points = 15)
             activity_points(request, user_activity.points)
+            overall = overall = Category.objects.filter(is_overall = True).get(users__id=request.user.id)
+            overall.week_limit += category.week_limit
+            overall.save(force_update = True)
             return redirect('category_list')
     else:
         form = AddCategoryForm()
-    categoryList = Category.objects.filter(users__id=user_id).order_by('name')
+    categoryList = Category.objects.filter(users__id=user_id).filter(is_overall=False).order_by('name')
+    overall = Category.objects.filter(users__id=user_id).get(is_overall=True)
     if categoryList.count() == 1:
         try:
             try:
@@ -302,16 +315,20 @@ def category_list(request):
             activity_points(request, user_activity.points)
         except IntegrityError:
             pass
-    return render(request, 'category_list.html', {'categories':categoryList, 'form':form})
+    return render(request, 'category_list.html', {'categories':categoryList, 'form':form, 'overall':overall})
 
 def remove_category(request, id):
     category = Category.objects.get(id = id)
     category_name = category.name
+    diff = category.week_limit
     if category.is_global:
         request.user.available_categories.remove(category)
     else:
         category.delete()
     user_activity = Activity.objects.create(user=request.user, image = "images/delete.png", name = f'You\'ve deleted \"{category_name}\" category')
+    overall = Category.objects.filter(is_overall = True).get(users__id=request.user.id)
+    overall.week_limit -= diff
+    overall.save(force_update = True)
     return redirect('category_list')
 
 def edit_category(request, id):
@@ -319,20 +336,38 @@ def edit_category(request, id):
     category = Category.objects.get(id = id)
     category_name = category.name
     category_week_limit = category.week_limit
+    before_limit = category.week_limit
     if request.method == "POST":
-        form = AddCategoryForm(request.POST, instance = category)
-        if form.is_valid():
-            category = form.save(commit=False)
-            category.save()
-            if (category.name != category_name):
-                activity_name = f'You\'ve changed \"{category_name}\" category name to \"{category.name}\"'
-                user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
-            if (category.week_limit != category_week_limit):
-                activity_name = f'You\'ve changed \"{category.name}\" category week limit from {category_week_limit} to {category.week_limit}'
-                user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
-            return redirect('category_list')
+        if category.is_overall==False:
+            form = AddCategoryForm(request.POST, instance = category)
+            if form.is_valid():
+                category = form.save(commit=False)
+                category.save()
+                if (category.name != category_name):
+                    activity_name = f'You\'ve changed \"{category_name}\" category name to \"{category.name}\"'
+                    user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
+                if (category.week_limit != category_week_limit):
+                    activity_name = f'You\'ve changed \"{category.name}\" category week limit from {category_week_limit} to {category.week_limit}'
+                    user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
+                diff = before_limit - category.week_limit       
+                overall = Category.objects.filter(is_overall = True).get(users__id=current_user.id)
+                overall.week_limit -= diff
+                overall.save(force_update = True)
+                return redirect('category_list')
+        else:
+            form = EditOverallForm(request.POST, instance = category, user = current_user)
+            if form.is_valid():
+                category = form.save(commit=False)
+                category.save()
+                if (category.week_limit != category_week_limit):
+                    activity_name = f'You\'ve changed \"{category.name}\" category week limit from {category_week_limit} to {category.week_limit}'
+                    user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
+                return redirect('category_list')
     else:
-        form = AddCategoryForm(instance=category)
+        if category.is_overall==False:
+            form = AddCategoryForm(instance=category)
+        else:
+            form = EditOverallForm(instance=category, user = current_user)
     return render(request, 'edit_category.html', {'form' : form})
 
 def forum_home(request):
@@ -345,10 +380,6 @@ def forum_home(request):
         last_post = None
     else:
         last_post = Post.objects.latest('date')
-    # last_post = Post.objects.latest('date')
-
-
-
 
     context = {
         "all_forum_categories": all_forum_categories,
@@ -387,16 +418,11 @@ def detail(request, slug):
     author = request.user
 
     if "comment-form" in request.POST:
-
-
-        # print("Comment")
-
         comment = request.POST.get("comment")
         new_comment, created = Comment.objects.get_or_create(user=author, content=comment)
         post.comments.add(new_comment.id)
 
     if "reply-form" in request.POST:
-
         reply = request.POST.get("reply")
         commenr_id = request.POST.get("comment-id")
         comment_obj = Comment.objects.get(id=commenr_id)
@@ -507,10 +533,13 @@ def complete_challenge(request, challenge_id):
     return redirect('challenge_list')
 
 def activity_points(request, points):
-    user_level = UserLevel.objects.get(user=request.user)
-    user_level.points += points
-    user_level.save()
-    update_user_level(request.user)
+    try:
+        user_level = UserLevel.objects.get(user=request.user)
+        user_level.points += points
+        user_level.save()
+        update_user_level(request.user)
+    except ObjectDoesNotExist:
+        pass
 
 def update_user_level(user):
     user_level = UserLevel.objects.get(user=user)
@@ -872,9 +901,11 @@ def report(request):
         previous_total_difference = previous_total-total_expense
 
     if average_daily>previous_average:
-        previous_average_difference = float(average_daily)-previous_average
+        previous_average_difference = float(average_daily)-float(previous_average)
     else:
-        previous_average_difference = previous_average-float(average_daily)
+        previous_average_difference = float(previous_average)-float(average_daily)
+
+    previous_average_difference = round(previous_average_difference,2)
 
     context = {
         'expenditures': expenditures,
@@ -904,5 +935,44 @@ def report(request):
     }
     return render(request, 'report.html', context)
 
+@csrf_exempt
+def save_item_position(request):
+    if request.method == 'POST':
+        user = request.user
+        data = json.loads(request.body)
+        tree = Tree.objects.get(tree_id=data['tree_id'])
+        tree.x_position = data['x']
+        tree.y_position = data['y']
+        tree.save()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False})
 
+def garden(request):
+    currentUser = request.user
+    user_level = UserLevel.objects.get(user=currentUser)
+    treeNum = currentUser.trees
+    pointTotal = user_level.points
+    pointLeft = pointTotal - treeNum*100
 
+    if request.method == 'POST':
+        if pointLeft<100:
+            messages.add_message(request, messages.ERROR, "Not Enough Points Available") 
+        else:
+            currentUser.trees = treeNum+1
+            currentUser.save()
+            Tree.objects.create(
+                user = currentUser,
+                x_position=500,
+                y_position=50,
+            )
+
+    treeNum = currentUser.trees
+    pointTotal = user_level.points
+    pointLeft = pointTotal - treeNum*100
+    trees = Tree.objects.filter(user=currentUser)
+    return render(request, 'garden.html',{
+        "treeNum":treeNum,
+        "pointTotal":pointTotal,
+        "pointLeft":pointLeft,
+        "trees":trees,
+    })

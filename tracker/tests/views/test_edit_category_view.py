@@ -14,6 +14,7 @@ class EditCategoryViewTestCase(TestCase):
         self.user = User.objects.get(email = 'james@example.org')
         self.cat_one = Category.objects.get(name = 'Test')
         self.cat_two = Category.objects.get(name = 'Test2')
+        self.overall_cat = Category.objects.get(name = 'Test4')
         self.url = reverse('edit_category', kwargs={'id': 0})
         self.form_input = {
             'name':'Changed Test',
@@ -24,7 +25,7 @@ class EditCategoryViewTestCase(TestCase):
         self.assertEqual(self.url, '/edit_category/0')
 
     def test_post_edit_category(self):
-        self.user.available_categories.add(self.cat_one, self.cat_two)
+        self.user.available_categories.add(self.cat_one, self.cat_two, self.overall_cat)
         self.client.login(username = self.user.email, password = 'Lu123')
         before_count = Category.objects.count()
         response = self.client.post(self.url, self.form_input, follow = True)
