@@ -1,0 +1,23 @@
+<form id="tableform" method="post">
+  {% csrf_token %}
+<table class="table">
+<thead>
+  <tr>
+    <th scope="col">Select</th>
+    <th scope="col">Name</th>
+    <th scope="col">Description</th>
+    <th scope="col">Criteria</th>
+  </tr>
+</thead>
+<tbody>
+  {% for achievement in achievement_page %}
+  <tr>
+    <th scope="row"> <input class = "form-check-input" type = "radio" name = "achievement_pk" value = {{achievement.pk}}></input> </th>
+    <td> {{achievement.name}}</td>
+    <td> {{achievement.description}}</td>
+    <td> {{achievement.criteria}}</td>
+  </tr>
+</tbody>
+{% endfor %}
+</table>
+</form>
