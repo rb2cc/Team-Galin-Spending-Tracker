@@ -60,6 +60,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     available_categories = models.ManyToManyField('Category', symmetrical = False, related_name = 'users')
     username = models.CharField(max_length=50, blank=True)
     points = models.IntegerField(default=0)
+    trees = models.IntegerField(default=0)
 
     objects = UserManager()
     USERNAME_FIELD = 'email'
@@ -272,6 +273,17 @@ class Post(models.Model):
     @property
     def last_reply(self):
         return self.comments.latest("date")
+
+
+class Tree(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    tree_id = models.AutoField(primary_key=True)
+    x_position = models.IntegerField()
+    y_position = models.IntegerField()
+
+    
+
+
 
 
 
