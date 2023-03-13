@@ -99,7 +99,7 @@ class ExpenditureForm(forms.ModelForm):
         super(ExpenditureForm, self).__init__(*args, **kwargs)
 
         #initialises the category queryset so it only shows categories the user is subscribed to (fixes glitch)
-        self.fields['category'].queryset = Category.objects.filter(users__id=self.request.user.id)
+        self.fields['category'].queryset = Category.objects.filter(users__id=self.request.user.id).filter(is_overall=False)
         
     # description = forms.CharField(label="Description", widget=forms.CharField(attrs={'size':100}))
     # field_order=['title', 'description', 'expense']
