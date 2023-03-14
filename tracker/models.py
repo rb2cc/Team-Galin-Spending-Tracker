@@ -273,6 +273,7 @@ class Post(models.Model):
     def last_reply(self):
         return self.comments.latest("date")
 
-
-
+class Avatar(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    file_name = models.CharField(max_length=255)
 

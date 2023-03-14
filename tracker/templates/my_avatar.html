@@ -4,7 +4,7 @@
 <div class='container'>
     <div class='row'>
         <div class = 'card' style="margin: auto; padding: 20px">
-            <h1 style="text-align: center">My Avatar</h1>
+            <h2 style="text-align: center">My Avatar</h2>
             <div class="row">
                 <div class="col-md-6">
                     {% for category, file_names in components.items %}
@@ -40,10 +40,13 @@
                         </div>
                         <div class="avatar-buttons">
                             <div style="display: inline-block; padding-left: 20px; padding-bottom: 10px">
-                                <a class="btn btn-primary btn-sm" href="{% url 'share_avatar' %}" style="width: 200px; margin-top: 0px">Share</a>
+                                <a class="btn btn-primary btn-sm" href="{% url 'share_avatar' %}" style="width: 150px; margin-top: 0px">Share</a>
                             </div>
                             <div style="display: inline-block; padding-left: 20px; padding-bottom: 10px">
-                                <a class="btn btn-primary btn-sm" href="{% url 'my_avatar' %}?clear" style="width: 200px; margin-top: 0px">Clear</a>
+                                <a class="btn btn-primary btn-sm" href="{% url 'my_avatar' %}?random" style="width: 150px; margin-top: 0px">Randomise</a>
+                            </div>
+                            <div style="display: inline-block; padding-left: 20px; padding-bottom: 10px">
+                                <a class="btn btn-primary btn-sm" href="{% url 'my_avatar' %}?clear" style="width: 150px; margin-top: 0px">Clear</a>
                             </div>
                         </div>
                     </div>

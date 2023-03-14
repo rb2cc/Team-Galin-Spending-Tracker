@@ -1,9 +1,7 @@
 from .forms import SignUpForm, LogInForm, EditUserForm, ReportForm, PostForm
 from django.contrib.auth.forms import UserChangeForm
-
-from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel, Activity, Post, Forum_Category, Comment, Reply
+from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel, Activity, Post, Forum_Category, Comment, Reply, Avatar
 from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm, EditOverallForm
-
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import redirect, render, get_object_or_404
@@ -24,11 +22,13 @@ from django.conf import settings
 import re
 from django.template.defaulttags import register
 from django.views.decorators.cache import cache_control
-from django.http import HttpResponse
+from django.http import HttpResponse, QueryDict
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.exceptions import ObjectDoesNotExist
 
 from .utils import update_views
+import hashlib
+import random
 
 # Create your views here.
 
@@ -289,6 +289,15 @@ def category_list(request):
             category = form.save(commit=False)
             category.save()
             request.user.available_categories.add(category)
+            try:
+                try:
+                    user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Budget boss"))
+                except ObjectDoesNotExist:
+                    pass
+                user_activity = Activity.objects.create(user=request.user, image = "badges/budget_boss.png", name = "You've earned \"Budget boss\" achievement", points = 15)
+                activity_points(request, user_activity.points)
+            except IntegrityError:
+                pass
             user_activity_name = f'You\'ve added \"{category.name}\" category with {category.week_limit} week limit'
             user_activity = Activity.objects.create(user=request.user, image = "images/category.png", name = user_activity_name, points = 15)
             activity_points(request, user_activity.points)
@@ -300,16 +309,6 @@ def category_list(request):
         form = AddCategoryForm()
     categoryList = Category.objects.filter(users__id=user_id).filter(is_overall=False).order_by('name')
     overall = Category.objects.filter(users__id=user_id).get(is_overall=True)
-    if categoryList.count() == 1:
-        try:
-            try:
-                user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Budget boss"))
-            except ObjectDoesNotExist:
-                pass
-            user_activity = Activity.objects.create(user=request.user, image = "badges/budget_boss.png", name = "You've earned \"Budget boss\" achievement", points = 15)
-            activity_points(request, user_activity.points)
-        except IntegrityError:
-            pass
     return render(request, 'category_list.html', {'categories':categoryList, 'form':form, 'overall':overall})
 
 def remove_category(request, id):
@@ -566,8 +565,7 @@ def update_user_level(user):
         user_level.save()
 
 def share_avatar(request):
-    template_path = os.path.join(settings.STATICFILES_DIRS[1], 'template.svg')
-    svg = open(template_path, 'r').read()
+    svg = "avatar"
     name = "My avatar"
     description = "Avatar created in Galin's Spending Tracker"
     url = request.build_absolute_uri(reverse('my_avatar'))
@@ -603,6 +601,7 @@ def share(request, user_object, name, description, url, text):
     share_urls = {
         'Facebook': 'https://www.facebook.com/dialog/share?' + urlencode(facebook_params),
         'Twitter': 'https://twitter.com/share?' + urlencode(twitter_params),
+        'Forum': request.build_absolute_uri(reverse('create_post'))
     }
 
     if isinstance(user_object, UserAchievement):
@@ -618,6 +617,8 @@ def handle_share(request):
     name = unquote(request.GET.get('name'))
     site = unquote(request.GET.get('site'))
     share_url = unquote(request.GET.get('share_url'))
+    user_activity = Activity.objects.create(user=request.user, image = "images/share.png", name = f'You\'ve shared \"{name}\" {type} post on {site}', points = 15)
+    activity_points(request, user_activity.points)
     try:
         try:
             user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="First share"))
@@ -627,8 +628,6 @@ def handle_share(request):
         activity_points(request, user_activity.points)
     except IntegrityError:
         pass
-    user_activity = Activity.objects.create(user=request.user, image = "images/share.png", name = f'You\'ve shared \"{name}\" {type} post on {site}', points = 15)
-    activity_points(request, user_activity.points)
     return redirect(share_url)
 
 @login_required
@@ -653,55 +652,108 @@ def my_avatar(request):
     create_avatar(request)
     colours = get_avatar_colours()
     components = {}
+    components_copy = {}
 
     for category in ['eyewear', 'body', 'face', 'facial-hair', 'head']:
         components[category] = []
+        components_copy[category] = []
 
         category_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', category)
         for file_name in os.listdir(category_path):
             if file_name.endswith('.svg'):
                 components[category].append(file_name)
+                # fill components copy dictionary for randomising the avatar
+                if 'random' in request.GET.keys():
+                    components_copy[category].append(file_name)
+                    # remove locked items from the components copy based on the user tier
+                    if file_name in locked_items.keys():
+                        components_copy[category].remove(file_name)
+
+        # choose a random component from each category
+        if 'random' in request.GET.keys():
+            random_component = random.choice(components_copy[category])
+            # make the request query dictionary mutable and update it with random components
+            query_dict = QueryDict('', mutable=True)
+            query_dict.update(request.GET)
+            query_dict[category] = random_component[:-4]
+            request.GET = query_dict
+
+    # choose a random colour for each coloured component
+    if 'random' in request.GET.keys():
+        for category in colours.keys():
+            random_colour = random.choice(colours[category])
+            # update the mutable query dictionary
+            query_dict.update(request.GET)
+            query_dict[category] = random_colour
+            request.GET = query_dict
+
+        # create random avatar with the filled query dictionary passed in the request
+        create_avatar(request)
 
     return render(request, 'my_avatar.html', {'components': components, 'colours': colours, 'locked_items': locked_items, 'tier_info': tier_info, 'user_tier_colour': user_tier_colour})
 
+@login_required
 @cache_control(no_store=True)
 def create_avatar(request):
-    template_path = os.path.join(settings.STATICFILES_DIRS[1], 'template.svg')
-    svg = open(template_path, 'r').read()
+    try:
+        avatar = Avatar.objects.get(user=request.user)
+    except ObjectDoesNotExist:
+        avatar = create_avatar_object(request)
+
+    try:
+        user_svg_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', avatar.file_name)
+        user_svg = open(user_svg_path, 'r').read()
+    except OSError:
+        avatar.delete()
+        avatar = create_avatar_object(request)
+        user_svg_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', avatar.file_name)
+        user_svg = open(user_svg_path, 'r').read()
 
     for category, component in request.GET.items():
         if category in ['skin', 'accessories', 'shirt', 'hair', 'background', 'clear']:
             if category in ['background', 'clear']:
-                colour_blocks = re.findall(r'<rect\s+id="background".*?>', svg)
+                colour_blocks = re.findall(r'<rect\s+id="background".*?>', user_svg)
             else:
-                colour_blocks = re.findall(fr'<path id="{category}"[^>]*>', svg)
+                colour_blocks = re.findall(fr'<path id="{category}"[^>]*>', user_svg)
             for colour_block in colour_blocks:
                 fill_param = re.search(r'fill="([^"]+)"', colour_block)
                 if category == "clear":
                     component = "#ffffff"
                 new_fill_param = f'fill="{component}"'
                 block_with_new_fill_param = colour_block.replace(fill_param.group(0), new_fill_param)
-                svg = svg.replace(colour_block, block_with_new_fill_param)
+                user_svg = user_svg.replace(colour_block, block_with_new_fill_param)
         if category in ['eyewear', 'body', 'face', 'facial-hair', 'head', 'clear']:
             if 'clear' in request.GET.keys():
                 for category in ['eyewear', 'body', 'face', 'facial-hair', 'head']:
-                   category_g_block = re.search(fr'<g id="{category}"[^>]*>', svg)
+                   category_g_block = re.search(fr'<g id="{category}"[^>]*>', user_svg)
                    if category_g_block:
                         start_index = category_g_block.end()
-                        end_index = svg.find('</g>', start_index)
-                        svg = svg[:start_index] + svg[end_index:]
+                        end_index = user_svg.find('</g>', start_index)
+                        user_svg = user_svg[:start_index] + user_svg[end_index:]
             else:
                 svg_paths = get_svg_paths_for_component(category, component)
-                category_g_block = re.search(fr'<g id="{category}"[^>]*>', svg)
+                category_g_block = re.search(fr'<g id="{category}"[^>]*>', user_svg)
                 if category_g_block:
                     start_index = category_g_block.end()
-                    end_index = svg.find('</g>', start_index)
-                    svg = svg[:start_index] + svg_paths + svg[end_index:]
+                    end_index = user_svg.find('</g>', start_index)
+                    user_svg = user_svg[:start_index] + svg_paths + user_svg[end_index:]
 
-        create_avatar_activity(request)
+        if 'random' not in request.GET.keys():
+            create_avatar_activity(request)
 
-    open(template_path, 'w').write(svg)
-    return HttpResponse(svg, content_type='image/svg+xml')
+    open(user_svg_path, 'w').write(user_svg)
+    return HttpResponse(user_svg, content_type='image/svg+xml')
+
+def create_avatar_object(request):
+    template_path = os.path.join(settings.STATICFILES_DIRS[1], 'template.svg')
+    template_svg = open(template_path, 'r').read()
+    hash = hashlib.sha1()
+    hash.update(str(timezone.now()).encode('utf-8'))
+    avatar_file_name = f'avatar-{hash.hexdigest()[:-10]}.svg'
+    avatar_file_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', avatar_file_name)
+    open(avatar_file_path, 'w').write(template_svg)
+    avatar = Avatar.objects.create(user=request.user, file_name=avatar_file_name)
+    return avatar
 
 def get_svg_paths_for_component(category, component):
     file_name = component + '.svg'
@@ -720,18 +772,19 @@ def get_avatar_colours():
 
 def create_avatar_activity(request):
     if Activity.objects.filter(user=request.user, name="You've created an avatar").exists():
+        user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = "You've edited your avatar", points = 15)
+        activity_points(request, user_activity.points)
+    else:
+        user_activity = Activity.objects.create(user=request.user, image = "images/avatar.png", name = "You've created an avatar", points = 15)
+        activity_points(request, user_activity.points)
         try:
             try:
-                user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Avatar master"))
+                UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Avatar master"))
+                Activity.objects.create(user=request.user, image = "badges/avatar_master.png", name = "You've earned \"Avatar master\" achievement")
             except ObjectDoesNotExist:
                 pass
         except IntegrityError:
             pass
-        user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = "You've edited your avatar", points = 15)
-        activity_points(request, user_activity.points)
-    else:
-        user_activity = Activity.objects.create(user=request.user, image = "images/avatar.png", name="You've created an avatar", points = 15)
-        activity_points(request, user_activity.points)
 
 def unlock_avatar(request):
     tier = request.GET.get('tier')
@@ -739,7 +792,8 @@ def unlock_avatar(request):
         if key in ['eyewear', 'body', 'face', 'facial-hair', 'head']:
             category = key
             file_name = request.GET.get(key) + '.svg'
-    return render(request, 'unlock_avatar.html', {'category': category, 'file_name': file_name, 'tier': tier})
+            name = request.GET.get(key).replace("_", " ")
+    return render(request, 'unlock_avatar.html', {'category': category, 'file_name': file_name, 'name': name, 'tier': tier})
 
 def get_tier_info():
     tier_info = {'bronze': ['400', '#f5922a'],
@@ -772,8 +826,8 @@ def get_locked_items(request):
         'sunglasses_2.svg': ['silver', tier_info.get('silver')[1]], 'monster.svg': ['bronze', tier_info.get('bronze')[1]],
         'cyclops.svg': ['silver', tier_info.get('silver')[1]], 'full_3.svg': ['gold', tier_info.get('gold')[1]],
         'moustache_2.svg': ['bronze', tier_info.get('bronze')[1]], 'moustache_3.svg': ['bronze', tier_info.get('bronze')[1]],
-        'mohawk.svg': ['silver', tier_info.get('silver')[1]], 'mohawk_2.svg': ['gold', tier_info.get('gold')[1]],
-        'bear.svg': ['platinum', tier_info.get('platinum')[1]], 'hat_hip.svg': ['silver', tier_info.get('silver')[1]]}
+        'mohawk.svg': ['platinum', tier_info.get('platinum')[1]], 'mohawk_2.svg': ['gold', tier_info.get('gold')[1]],
+        'bear.svg': ['diamond', tier_info.get('diamond')[1]], 'hat_hip.svg': ['silver', tier_info.get('silver')[1]]}
     locked_items = update_locked_items(request, locked_items)
     return locked_items
 
