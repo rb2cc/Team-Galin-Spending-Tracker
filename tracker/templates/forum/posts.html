@@ -14,7 +14,7 @@
                     <option value="description"> Description </option>
                 </select>
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
-                <input type="text" name="q" id="" placeholder"search ..."></input>
+                <input type="text" name="q" id="" placeholder="search ...">
                 <button type="submit" name ="search"><i class="fa fa-search"></i></button>
             </div>
     </div>
@@ -31,7 +31,7 @@
 
             <!---Navigation--->
             <div class="navigate" >
-                <span><a href="{% url 'forum_home'}"> My Forum - Forums</a> >> <a href="{{forum.get_url}}"> {{forum.title}} </a>
+                <span><a href="{% url 'forum_home' %}"> My Forum - Forums</a> >> <a href="{{forum.get_url}}"> {{forum.title}} </a> </span>
 
             </div>
 
@@ -53,7 +53,7 @@
                     <div class="status"><i class="fa fa-frown-o"> </i></div>
 
                     {% elif post.num_comments > 0 and post.num_comments < 2 %}
-                    <div class="status"><i class="fa fa-book""> </i></div>
+                    <div class="status"><i class="fa fa-book"> </i></div>
 
                     {% elif post.num_comments > 2 and post.num_comments < 5 %}
                     <div class="status"><i class="fa fa-rocket"> </i></div>
@@ -69,22 +69,31 @@
 
                     <div class="subjects"><a href="{{post.get_url}}"> {{post.title}} </a>
                     <br>
-                    <span>Started by <b><a href="#"> {{post.user.username|title}} </a></b>.</span>
+                    <span>Started by <b><a href="#"> {% if post.user.username is not None %}
+                                                        {{post.user.username|title}}
+                                                      {% else %}
+                                                        {{post.user.first_name}} {{post.user.last_name}}{% endif %}</a></b></span>
                     </div>
                     <div class="replies">
                         {{post.num_comments}} comments <br> {% get_hit_count for post %} views
                     </div>
                             <div class="last-reply">
-                                {{post.last_reply.date|date}}
-                                <br>
-                                By <b> <a href="#"> {{post.last_reply.user.username|title}} </a> </b>
+                                {% if post.last_reply is not None %}
+                                    {{post.last_reply.date|date}}
+                                    <br>
+                                    By <b> <a href="#"> {% if post.last_reply.user.username is not None %}
+                                                            {{post.last_reply.user.username|title}}
+                                                        {% else %}
+                                                            {{post.last_reply.user.first_name}} {{post.last_reply.user.last_name}}
+                                                        {% endif %}</a> </b>
+                                {% else %}
+                                    No replies
+                                {% endif %}
                             </div>
                 </div>
                 {% endfor %}
-
-
             </div>
-    </div>
+        </div>
 
 <!---Pagination--->
 <div class="pagination">
@@ -116,6 +125,4 @@
     <span> &nbsp;   |   </span>
 </div>
 
-    </body>
-</html>
 {% endblock content %}

@@ -58,8 +58,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     available_categories = models.ManyToManyField('Category', symmetrical = False, related_name = 'users')
-    username = models.CharField(max_length=50, blank=True)
-    points = models.IntegerField(default=0)
+    username = models.CharField(max_length=50, blank=True, unique=True, null = True)
     trees = models.IntegerField(default=0)
 
     objects = UserManager()
@@ -272,7 +271,10 @@ class Post(models.Model):
 
     @property
     def last_reply(self):
-        return self.comments.latest("date")
+        try:
+            return self.comments.latest("date")
+        except Comment.DoesNotExist:
+            return None
 
 class Avatar(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -91,12 +91,10 @@ urlpatterns = [
     path('detail/<slug>/', views.detail, name='detail'),
     path('tinymce/', include('tinymce.urls')),
     path('hitcount/', include('hitcount.urls', namespace='hitcount')),
-
     path('create_post/', views.create_post, name='create_post'),
-
     path('latest_posts/', views.latest_posts, name='latest_posts'),
-
     path('search_result/', views.search_result, name ='search_result'),
+    path('profile/<int:id>', views.profile, name ='profile'),
 ]
 
 if settings.DEBUG:

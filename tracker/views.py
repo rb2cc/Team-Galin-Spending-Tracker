@@ -161,7 +161,7 @@ def landing_page(request):
     else:
         progress_percentage = int(100+(current_points-next_level_points))
 
-    user_tier_colour = get_user_tier_colour(request)
+    user_tier_colour = get_user_tier_colour(request.user)
     reached_tiers = get_reached_tiers(UserLevel.objects.get(user=request.user).points)
     if reached_tiers:
         user_tier_name, tier_data = reached_tiers.popitem()
@@ -415,6 +415,9 @@ def posts(request, slug):
 def detail(request, slug):
     post = get_object_or_404(Post, slug=slug)
     author = request.user
+    points = {}
+    avatars = {}
+    tier_colours = {}
 
     if "comment-form" in request.POST:
         comment = request.POST.get("comment")
@@ -423,14 +426,30 @@ def detail(request, slug):
 
     if "reply-form" in request.POST:
         reply = request.POST.get("reply")
-        commenr_id = request.POST.get("comment-id")
-        comment_obj = Comment.objects.get(id=commenr_id)
+        comment_id = request.POST.get("comment-id")
+        comment_obj = Comment.objects.get(id=comment_id)
         new_reply, created = Reply.objects.get_or_create(user=author, content=reply)
         comment_obj.replies.add(new_reply.id)
+
+    for comment in post.comments.all():
+        points[comment.user.id] = UserLevel.objects.get(user=comment.user).points
+        avatars[comment.user.id] = 'avatar/' + Avatar.objects.get(user=comment.user).file_name
+        tier_colours[comment.user.id] = get_user_tier_colour(comment.user)
+        for reply in comment.replies.all():
+            points[reply.user.id] = UserLevel.objects.get(user=reply.user).points
+            avatars[reply.user.id] = 'avatar/' + Avatar.objects.get(user=reply.user).file_name
+            tier_colours[reply.user.id] = get_user_tier_colour(reply.user)
+
+    points[post.user.id] = UserLevel.objects.get(user=post.user).points
+    avatars[post.user.id] = 'avatar/' + Avatar.objects.get(user=post.user).file_name
+    tier_colours[post.user.id] = get_user_tier_colour(post.user)
 
     context = {
         "post":post,
         "title": post.title,
+        "points": points,
+        "avatars": avatars,
+        "tier_colours": tier_colours,
     }
     update_views(request, post)
     return render(request, 'forum/detail.html', context)
@@ -457,7 +476,7 @@ def latest_posts(request):
     posts = Post.objects.all().filter(approved=True)[:10]
     context = {
         "posts": posts,
-        "title": "Lastest 10 Posts"
+        "title": "Latest 10 Posts"
     }
     return render(request, "forum/latest_posts.html", context)
 
@@ -614,7 +633,7 @@ def share(request, user_object, name, description, url, text):
     elif isinstance(user_object, UserChallenge):
         return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'challenge'})
     elif isinstance(user_object, str):
-        user_tier_colour = get_user_tier_colour(request)
+        user_tier_colour = get_user_tier_colour(request.user)
         return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'avatar', 'user_tier_colour': user_tier_colour})
 
 def handle_share(request):
@@ -652,7 +671,7 @@ def my_activity(request):
 @cache_control(no_store=True)
 def my_avatar(request):
     locked_items = get_locked_items(request)
-    user_tier_colour = get_user_tier_colour(request)
+    user_tier_colour = get_user_tier_colour(request.user)
     tier_info = get_tier_info()
     create_avatar(request)
     colours = get_avatar_colours()
@@ -816,8 +835,8 @@ def get_reached_tiers(points):
             reached_tiers[tier_name] = tier_data
     return reached_tiers
 
-def get_user_tier_colour(request):
-    reached_tiers = get_reached_tiers(UserLevel.objects.get(user=request.user).points)
+def get_user_tier_colour(user):
+    reached_tiers = get_reached_tiers(UserLevel.objects.get(user=user).points)
     if reached_tiers:
         tier_name, tier_data = reached_tiers.popitem()
         tier_colour = tier_data[1]
@@ -851,6 +870,16 @@ def get_tier_name(locked_items, file_name):
 @register.filter
 def get_tier_colour(locked_items, file_name):
     return locked_items.get(file_name)[1]
+
+@register.filter
+def get_forum_item(dictionary, user_id):
+    return dictionary.get(user_id)
+
+def create_forum_avatar(request, id):
+    query_dict = request.GET.copy()
+    query_dict['user'] = id
+    request.GET = query_dict
+    return create_avatar(request)
 
 def report(request):
     user = request.user
@@ -1030,3 +1059,28 @@ def garden(request):
         "pointLeft":pointLeft,
         "trees":trees,
     })
+
+def profile(request, id):
+    user = User.objects.get(id=id)
+    user_level = UserLevel.objects.get(user=user)
+    current_level_name = user_level.level.name
+    user_tier_colour = get_user_tier_colour(user)
+    reached_tiers = get_reached_tiers(UserLevel.objects.get(user=user).points)
+    avatar = 'avatar/' + Avatar.objects.get(user=user).file_name
+    user_achievements = UserAchievement.objects.filter(user=user)
+    user_posts = Post.objects.filter(user=user)
+    if reached_tiers:
+        user_tier_name, tier_data = reached_tiers.popitem()
+    else:
+        user_tier_name = ""
+    context = {
+        'user': user,
+        'user_tier_colour': user_tier_colour,
+        'user_tier_name': user_tier_name,
+        'current_level_name': current_level_name,
+        'user_level': user_level,
+        'avatar': avatar,
+        'user_achievements': user_achievements,
+        'user_posts': user_posts,
+    }
+    return render(request, 'profile.html', context)

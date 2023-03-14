@@ -14,7 +14,7 @@
                     <option value="description"> Description </option>
                 </select>
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
-                <input type="text" name="q" id="" placeholder"search ..."></input>
+                <input type="text" name="q" id="" placeholder="search ...">
                 <button type="submit" name ="search"><i class="fa fa-search"></i></button>
             </div>
     </div>
@@ -50,7 +50,11 @@
                             <div class="last-reply">
                                 {{post.last_reply.date|date}}
                                 <br>
-                                By <b> <a href="#"> {{post.last_reply.user.username|title}} </a> </b>
+                                By <b> <a href="#"> {% if post.last_reply.user.username is not None %}
+                                                        {{post.last_reply.user.username|title}}
+                                                    {% else %}
+                                                        {{post.last_reply.user.first_name}} {{post.last_reply.user.last_name}}
+                                                    {% endif %}</a> </b>
                             </div>
                 </div>
                 {% endfor %}
@@ -63,8 +67,4 @@
 <div class="pagination">
         Pages: {% for num_page in posts.paginator.page_range %}<a href="?page={{num_page}}"> {{num_page}} </a>  {% endfor %}
 </div>
-
-
-    </body>
-</html>
 {% endblock content %}

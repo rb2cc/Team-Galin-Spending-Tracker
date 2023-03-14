@@ -2,7 +2,11 @@
 {% load crispy_forms_tags %}
 {% block content %}
 
-<h1 style="text-align:center; margin-block:50px; color:rgb(255, 255, 255)"> Hey, {{user.username}} create a post</h1>
+<h1 style="text-align:center; margin-block:50px; color:rgb(255, 255, 255)"> Hey, {% if user.username is not None %}
+                        {{user.username|title}}
+                       {% else %}
+                        {{user.first_name}} {{user.last_name}}
+                        {% endif %} create a post</h1>
 
 <form method="POST" style="margin-left:150px;">
 

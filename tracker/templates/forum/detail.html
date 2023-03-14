@@ -1,5 +1,6 @@
 {% extends 'base_content.html' %}
 {% load hitcount_tags %}
+{% load static %}
 {% block content %}
 
 
@@ -18,13 +19,17 @@
 
                     <div class="body">
                         <div class="authors">
-                            <div class="username"><a href="#"> {{post.user.username|title}} </a> </div>
+                            <div class="avatar-container"><img src="{% static avatars|get_forum_item:post.user.id %}" style="border: 3px solid {{ tier_colours|get_forum_item:post.user.id }}"/></div>
+                            <div class="username"><a href="{% url 'profile' post.user.id %}">  {% if post.user.username is not None %}
+                                                                    {{post.user.username|title}}
+                                                                {% else %}
+                                                                    {{post.user.first_name}} {{post.user.last_name}}
+                                                                {% endif %}</a> </div>
                             <div> Role </div>
-                            <img src="{{post.user.profile_pic}}" alt="">
                             <div> Posts: <u> {{post.user.num_posts}} </u> </div>
-                            <div> Points: <u> {{post.user.points}} </u> </div>
+                            <div> Points: <u> {{points|get_forum_item:post.user.id}} </u> </div>
                         </div>
-
+                    </div>
 
                     <div class="content">
                         {{post.content|safe}}
@@ -71,13 +76,17 @@
 
     <div class="body">
         <div class="authors">
-            <div class="AnotherUser"><a href="#"> {{comment.user.username|title}} </a> </div>
+            <div class="avatar-container"><img src="{% static avatars|get_forum_item:comment.user.id %}" style="border: 3px solid {{ tier_colours|get_forum_item:comment.user.id }}"/></div>
+            <div class="AnotherUser"><a href="{% url 'profile' comment.user.id %}">{% if comment.user.username is not None %}
+                                                        {{comment.user.username|title}}
+                                                    {% else %}
+                                                        {{comment.user.first_name}} {{comment.user.last_name}}
+                                                    {% endif %}</a> </div>
             <div> Role </div>
-            <img src="{{comment.user.profile_pic}}" alt="">
             <div> Posts: <u> {{comment.user.num_posts}} </u> </div>
-            <div> Points: <u> {{comment.user.points}} </u> </div>
+            <div> Points: <u> {{points|get_forum_item:comment.user.id}} </u> </div>
         </div>
-
+    </div>
 
     <div class="content">
         {{comment.content}}
@@ -106,8 +115,7 @@
     <textarea name="reply" id="" placeholder="Add reply......"></textarea>
     <input type="submit" value="Submit" name="reply-form">
     <input type="hidden" name="comment-id" value="{{comment.id}}">
-</div>
-</div>
+    </div>
 </form>
 
 {% else %}
@@ -128,19 +136,23 @@
 
     <div class="body">
         <div class="authors">
-            <div class="AnotherUser"><a href="#"> {{reply.user.username|title}} </a> </div>
+            <div class="avatar-container"><img src="{% static avatars|get_forum_item:reply.user.id %}" style="border: 3px solid {{ tier_colours|get_forum_item:reply.user.id }}"/></div>
+            <div class="AnotherUser"><a href="{% url 'profile' reply.user.id %}"> {% if reply.user.username is not None %}
+                                                    {{reply.user.username|title}}
+                                                  {% else %}
+                                                     {{reply.user.first_name}} {{reply.user.last_name}}
+                                                  {% endif %}</a> </div>
             <div> Role </div>
-            <img src="{{comment.user.profile_pic}}" alt="">
             <div> Posts: <u> {{reply.user.num_posts}} </u> </div>
-            <div> Points: <u> {{reply.user.points}} </u> </div>
+            <div> Points: <u> {{points|get_forum_item:reply.user.id}} </u> </div>
         </div>
+    </div>
 
 
     <div class="content">
         {{reply.content}}
 
         <br>
-        </div>
     </div>
 </div>
 

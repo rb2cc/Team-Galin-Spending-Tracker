@@ -14,7 +14,7 @@
                     <option value="description"> Description </option>
                 </select>
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
-                <input type="text" name="q" id="" placeholder"search ..."></input>
+                <input type="text" name="q" id="" placeholder="search ...">
                 <button type="submit" name ="search"><i class="fa fa-search"></i></button>
             </div>
     </div>
@@ -45,7 +45,11 @@
                             <span> {{category.num_posts}} Posts </span>
                         </div>
                         <div class="subforum-info subforum-column">
-                            <b><a href="{{category.last_post.get_url}}"> Last Post </a></b>  by  <a href=""> {{category.last_post.user.username|title}} </a>
+                            <b><a href="{{category.last_post.get_url}}"> Last Post </a></b>  by  <a href="">{% if category.last_post.user.username is not None %}
+                                                                                                                {{category.last_post.user.username|title}}
+                                                                                                            {% else %}
+                                                                                                                {{category.last_post.user.first_name}} {{category.last_post.user.last_name}}
+                                                                                                            {% endif %}</a>
                             <br>
                             on <small> {{category.last_post.date|date}} </small>
                         </div>
@@ -65,7 +69,11 @@
         <div>
             <span> <u> {{num_posts}} </u> Posts in <u> {{num_categorise}} </u>Topics by <u> {{num_users}} </u> Users </span> <br>
             
-            <span> Check <a href="{% url 'latest_posts' %}"></a> <u> Latest Post </u> :  &nbsp; <b><a href="{{last_post.get_url}}">{{last_post.title}}</a></b> on {{late_post.date|date}} by <a href="#"> {{last_post.user.username|title}} </a></span>
+            <span> Check <a href="{% url 'latest_posts' %}"></a> <u> Latest Post </u> :  &nbsp; <b><a href="{{last_post.get_url}}">{{last_post.title}}</a></b> on {{late_post.date|date}} by <a href="#">{% if last_post.user.username is not None %}
+                                                                                                                                                                                                        {{last_post.user.username|title}}
+                                                                                                                                                                                                    {% else %}
+                                                                                                                                                                                                        {{last_post.user.first_name}} {{last_post.user.last_name}}
+                                                                                                                                                                                                    {% endif %}</a></span>
         </div>
 
         {% else %}
@@ -77,8 +85,5 @@
         {% endif %}
 
     </div>
-
-    </body>
-</html>
 
 {% endblock content %}
