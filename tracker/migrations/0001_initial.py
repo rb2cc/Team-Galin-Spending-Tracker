@@ -34,6 +34,7 @@ class Migration(migrations.Migration):
                 ('is_active', models.BooleanField(default=True)),
                 ('username', models.CharField(blank=True, max_length=50)),
                 ('points', models.IntegerField(default=0)),
+                ('trees', models.IntegerField(default=0)),
             ],
             options={
                 'abstract': False,
@@ -113,6 +114,15 @@ class Migration(migrations.Migration):
                 ('points', models.PositiveIntegerField()),
                 ('date_reached', models.DateTimeField(auto_now=True)),
                 ('level', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='tracker.level')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Tree',
+            fields=[
+                ('tree_id', models.AutoField(primary_key=True, serialize=False)),
+                ('x_position', models.IntegerField()),
+                ('y_position', models.IntegerField()),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
