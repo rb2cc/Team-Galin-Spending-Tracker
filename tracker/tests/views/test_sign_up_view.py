@@ -4,7 +4,7 @@ from django.urls import reverse
 from tracker.forms import SignUpForm
 from tracker.models import User, Category, Achievement
 from tracker.tests.helpers import LogInTester, CategoryFunctions
-
+from django.core.exceptions import ObjectDoesNotExist
 
 class SignUpViewTestCase(TestCase, LogInTester):
 
@@ -66,4 +66,35 @@ class SignUpViewTestCase(TestCase, LogInTester):
         self.assertEqual(user.available_categories.all().count(), 3)
         self.assertEqual(user.available_categories.filter(is_overall = True).count(), 1)
 
+    def test_sign_up_with_existing_email(self):
+        User.objects.create_user(
+            email='james@example.org',
+            password='Lu123',
+            first_name='James',
+            last_name='Lu'
+        )
+        before_count = User.objects.count()
+        response = self.client.post(self.url, self.form_input)
+        after_count = User.objects.count()
+        self.assertEqual(after_count, before_count)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'sign_up.html')
+        form = response.context['form']
+        self.assertTrue(isinstance(form, SignUpForm))
+        self.assertTrue(form.is_bound)
+        self.assertFalse(self._is_logged_in())
+        self.assertTrue('This email has already been registered' in response.content.decode())
+
+    def test_sign_up_without_new_user_achievement(self):
+        self.achievement.delete()
+        before_count = User.objects.count()
+        response = self.client.post(self.url, self.form_input, follow=True)
+        after_count = User.objects.count()
+        self.assertEqual(after_count, before_count+1)
+        response_url = reverse('landing_page')
+        self.assertRedirects(response, response_url, status_code=302, target_status_code=200)
+        self.assertTemplateUsed(response, 'landing_page.html')
+        user = User.objects.get(email='james@example.org')
+        with self.assertRaises(ObjectDoesNotExist):
+            user.userachievement_set.get(achievement__name="New user")
 
