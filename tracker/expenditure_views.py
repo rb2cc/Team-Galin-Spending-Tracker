@@ -9,7 +9,7 @@ from django.utils.datastructures import MultiValueDictKeyError
 #Returns both expenditure data and category data which is filtered by what user the category belongs to
 def expenditure_list(request):
     spending_list = Expenditure.objects.filter(user=request.user, is_binned=False).order_by('-date_created')
-    categories = Category.objects.filter(users__id=request.user.id)
+    categories = Category.objects.filter(users__id=request.user.id).filter(is_overall=False)
     return render(request, 'expenditure_list.html', {'spendings': spending_list, 'categories': categories})
 
 #Gets all expenditures under the filter of being binned
