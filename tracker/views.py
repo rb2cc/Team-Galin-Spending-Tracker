@@ -303,8 +303,8 @@ def category_list(request):
             return redirect('category_list')
     else:
         form = AddCategoryForm()
-    categoryList = Category.objects.filter(users__id=user_id).filter(is_overall=False).order_by('name')
-    overall = Category.objects.filter(users__id=user_id).get(is_overall=True)
+    categoryList = Category.objects.filter(users__id=user_id).filter(is_overall=False, is_binned=False).order_by('name')
+    overall = Category.objects.filter(users__id=user_id,).get(is_overall=True)
     if categoryList.count() == 1:
         try:
             try:
@@ -317,14 +317,16 @@ def category_list(request):
             pass
     return render(request, 'category_list.html', {'categories':categoryList, 'form':form, 'overall':overall})
 
-def remove_category(request, id):
+def bin_category(request, id):
     category = Category.objects.get(id = id)
     category_name = category.name
     diff = category.week_limit
     if category.is_global:
         request.user.available_categories.remove(category)
     else:
-        category.delete()
+        # category.delete()
+        category.is_binned = True
+        category.save()
     user_activity = Activity.objects.create(user=request.user, image = "images/delete.png", name = f'You\'ve deleted \"{category_name}\" category')
     overall = Category.objects.filter(is_overall = True).get(users__id=request.user.id)
     overall.week_limit -= diff
@@ -369,6 +371,43 @@ def edit_category(request, id):
         else:
             form = EditOverallForm(instance=category, user = current_user)
     return render(request, 'edit_category.html', {'form' : form})
+
+#Gets all expenditures under the filter of being binned
+def binned_category_list(request):
+    binned_list = Category.objects.filter(users__id=request.user.id).filter(is_overall=False, is_binned=True).order_by('name')
+    return render(request, 'category_bin.html', {'binned_categories': binned_list})
+
+#Gets id field of the selected expenditure recover button and changes the is_binned field from true to false
+def recover_category(request):
+    if request.method == "POST":
+        try:
+            category_pk = request.POST['radio_pk']
+            category = Category.objects.get(pk=category_pk)
+            category.is_binned = False
+            category.save()
+            overall = overall = Category.objects.filter(is_overall = True).get(users__id=request.user.id)
+            overall.week_limit += category.week_limit
+            overall.save(force_update = True)
+            # Activity.objects.create(user=request.user, image = "images/recover.png", name = f'You\'ve recovered \"{expenditure.title}\" expenditure from the bin')
+            return redirect('category_bin')
+        except Expenditure.DoesNotExist:
+            return redirect('category_bin')
+        except MultiValueDictKeyError:
+            return redirect('category_bin')
+        
+#Gets id field of the selected expenditure delete button and deletes the object from the database
+def delete_category(request):
+    if request.method == "POST":
+        try:
+            category_pk = request.POST['radio_pk']
+            category = Category.objects.get(pk=category_pk)
+            category.delete()
+            # Activity.objects.create(user=request.user, image = "images/delete.png", name = f'You\'ve deleted \"{expenditure_title}\" expenditure')
+            return redirect('category_bin')
+        except Expenditure.DoesNotExist:
+            return redirect('category_bin')
+        except MultiValueDictKeyError:
+            return redirect('category_bin')
 
 def forum_home(request):
     all_forum_categories = Forum_Category.objects.all()
