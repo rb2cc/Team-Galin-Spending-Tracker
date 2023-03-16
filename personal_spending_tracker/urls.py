@@ -17,7 +17,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import re_path, path
-from tracker import views, expenditure_views
+from tracker import views, expenditure_views, category_views
 from tracker.views import UserEditView
 from django.urls.conf import include
 from django.conf import settings
@@ -59,8 +59,8 @@ urlpatterns = [
     path('detail/', views.detail, name='detail'),
     path('garden/', views.garden, name='garden'),
     path('save-item-position/', views.save_item_position, name='save_item_position'),
-    path('category_list', views.category_list, name='category_list'),
-    path('remove_category/<int:id>', views.remove_category, name='remove_category'),
+    path('category_list', category_views.category_list, name='category_list'),
+    path('remove_category/<int:id>', category_views.remove_category, name='remove_category'),
     path('bin_expenditure', expenditure_views.bin_expenditure, name='bin_expenditure'),
     path('recover_expenditure', expenditure_views.recover_expenditure, name='recover_expenditure'),
     path('update_expenditure/<int:id>', expenditure_views.update_expenditure, name='update_expenditure'),
@@ -69,7 +69,7 @@ urlpatterns = [
     path('filter_title/', expenditure_views.filter_by_title, name='filter_title'),
     path('filter_category/', expenditure_views.filter_by_category, name='filter_category'),
     path('filter_miscellaneous/', expenditure_views.filter_by_miscellaneous, name='filter_miscellaneous'),
-    path('edit_category/<int:id>', views.edit_category, name='edit_category'),
+    path('edit_category/<int:id>', category_views.edit_category, name='edit_category'),
     path('challenge_list/', views.challenge_list, name='challenge_list'),
     path('challenge_details/<int:id>/', views.challenge_details, name='challenge_details'),
     path('enter_challenge/', views.enter_challenge, name='enter_challenge'),
