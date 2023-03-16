@@ -1,7 +1,11 @@
 from .forms import AddCategoryForm, EditOverallForm
-from .models import User, Category, Activity, UserAchievement
+from .models import User, Category, Activity, UserAchievement, Expenditure
 from django.shortcuts import redirect, render
 from .views import activity_points
+
+from  datetime import date
+from dateutil.relativedelta import relativedelta, MO, SU
+from django.utils import timezone
 
 def category_list(request):
     user_id = request.user.id
@@ -86,3 +90,44 @@ def edit_category(request, id):
         else:
             form = EditOverallForm(instance=category, user = current_user)
     return render(request, 'edit_category.html', {'form' : form})
+
+def category_progress(request, offset):
+
+    def _make_percent(num, cat_name, user):
+        denom = Category.objects.filter(users__id = user.id).get(name=cat_name).week_limit
+        percent = int(100 * (float(num)/float(denom)))
+        if percent > 100:
+            return 100
+        return percent
+
+    def _get_colour(percent):
+        if percent == 100:
+            return "#FF2B2B"
+        elif percent >= 75:
+            return "#F2B933"
+        elif percent >= 50:
+            return "#118DD5"
+        else:
+            return "#4CAF50"
+
+    user = request.user
+    week_start = timezone.now().date() + relativedelta(weekday=MO(-1-offset))
+    week_end = week_start + relativedelta(weekday=SU(1)) 
+    categories = Category.objects.filter(is_overall = False).filter(users__id = user.id)
+    val_dict = {}
+    for category in categories:
+        val_dict[category.name] = 0 
+    expenditures = Expenditure.objects.filter(user=user, date_created__gte = week_start, date_created__lte = week_end)
+    for expenditure in expenditures:
+        val_dict[expenditure.category.name] += expenditure.expense#dict from category name -> total expense
+    overall_spend = sum(val_dict.values())
+    overall = Category.objects.filter(users__id = user.id).get(is_overall=True)
+    overall_percent = _make_percent(overall_spend, overall.name, user)
+    overall_colour = _get_colour(overall_percent)
+    val_dict = {k:_make_percent(v, k, user) for k, v in val_dict.items()}
+    val_dict = {k:(v, _get_colour(v)) for k, v in val_dict.items()}
+    return render(request, 'category_progress.html', {
+        'cat_map':val_dict,
+        'overall_percent':overall_percent,
+        'overall_colour':overall_colour
+    })

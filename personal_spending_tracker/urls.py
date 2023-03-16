@@ -97,6 +97,7 @@ urlpatterns = [
     path('latest_posts/', views.latest_posts, name='latest_posts'),
 
     path('search_result/', views.search_result, name ='search_result'),
+    path('category_progress/<int:offset>', category_views.category_progress, name='category_progress'),
 ]
 
 if settings.DEBUG:
