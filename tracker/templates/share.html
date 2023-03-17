@@ -7,7 +7,11 @@
         <div class = 'card' style="margin: auto; max-width: 350px; text-align: center; padding: 20px">
             <h2>Share {{ type }}</h2>
             {% if type == 'avatar' %}
-                <img src="{% url 'create_avatar' %}" style="max-width: 100%; height: auto; border: 5px solid {{ user_tier_colour }}; margin-bottom: 1rem" />
+                <img src="{% static avatar %}" style="max-width: 100%; height: auto; border: 5px solid {{ user_tier_colour }}; margin-bottom: 1rem" />
+            {% elif type == 'post' %}
+                {% if media %}
+                    <img class = "media" src="{{ media.url }}" style="max-width: 100%; height: auto; margin-bottom: 1rem">
+                {% endif %}
             {% endif %}
             <p>Name: {{ name }}</p>
             <p>Description: {{ description }}</p>

@@ -8,7 +8,7 @@
                         {{user.first_name}} {{user.last_name}}
                         {% endif %} create a post</h1>
 
-<form method="POST" style="margin-left:150px;">
+<form method="POST" style="margin-left:150px;" enctype="multipart/form-data">
 
 {% csrf_token %}
 

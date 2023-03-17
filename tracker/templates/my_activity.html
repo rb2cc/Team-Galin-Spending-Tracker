@@ -29,7 +29,7 @@
                     <tbody>
                     {% for activity in user_activity %}
                         <tr>
-                            <td><img src="{% static activity.image %}" style = "display: block; margin: 0 auto"></td>
+                            <td><img src="{% static activity.image %}" style = "display: block; margin: 0 auto; max-width: 64px"></td>
                             <td style="vertical-align: middle;">{{ activity.name }}</td>
                             <td style="vertical-align: middle;">{{ activity.time }}</td>
                             {% if activity.points != 0 %}

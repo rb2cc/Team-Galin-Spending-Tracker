@@ -95,6 +95,15 @@ urlpatterns = [
     path('latest_posts/', views.latest_posts, name='latest_posts'),
     path('search_result/', views.search_result, name ='search_result'),
     path('profile/<int:id>', views.profile, name ='profile'),
+    path('delete_post/<int:id>', views.delete_post, name = 'delete_post'),
+    path('edit_post/<int:id>', views.edit_post, name = 'edit_post'),
+    path('share_post/<int:id>', views.share_post, name = 'share_post'),
+    path('delete_comment/<int:id>', views.delete_comment, name = 'delete_comment'),
+    path('edit_comment/<int:id>', views.edit_comment, name = 'edit_comment'),
+    path('share_comment/<int:id>', views.share_comment, name = 'share_comment'),
+    path('delete_reply/<int:id>', views.delete_reply, name = 'delete_reply'),
+    path('edit_reply/<int:id>', views.edit_reply, name = 'edit_reply'),
+    path('share_reply/<int:id>', views.share_reply, name = 'share_reply'),
 ]
 
 if settings.DEBUG:

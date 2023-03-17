@@ -152,4 +152,4 @@ class EditOverallForm(forms.ModelForm):
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ["title", "content", "forum_categories"]
+        fields = ["title", "content", "forum_categories", "media"]

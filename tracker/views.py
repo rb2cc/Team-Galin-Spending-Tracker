@@ -68,11 +68,11 @@ def sign_up(request):
                     user.available_categories.add(tempCategory)
                 login(request, user)
                 try:
-                    user_achievement = UserAchievement.objects.create(user=request.user, achievement = Achievement.objects.get(name="New user"))
+                    UserAchievement.objects.create(user=request.user, achievement = Achievement.objects.get(name="New user"))
                 except ObjectDoesNotExist:
                     pass
-                user_activity = Activity.objects.create(user=request.user, image = "images/user.png", name = "You've created an account on Galin's Spending Tracker")
-                user_activity = Activity.objects.create(user=request.user, image = "badges/new_user.png", name = "You've earned \"New user\" achievement")
+                Activity.objects.create(user=request.user, image = "images/user.png", name = "You've created an account on Galin's Spending Tracker")
+                Activity.objects.create(user=request.user, image = "badges/new_user.png", name = "You've earned \"New user\" achievement")
                 overall = Category.objects.create(name="Overall", week_limit=overall_count, is_overall = True)
                 user.available_categories.add(overall)
                 return redirect('landing_page')
@@ -115,7 +115,7 @@ def landing_page(request):
     if spendingList.count() == 1:
         try:
             try:
-                user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="First expenditure"))
+                UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="First expenditure"))
             except ObjectDoesNotExist:
                 pass
             user_activity = Activity.objects.create(user=request.user, image = "badges/first_expenditure.png", name = "You've earned \"First expenditure\" achievement", points = 15)
@@ -168,6 +168,14 @@ def landing_page(request):
     else:
         user_tier_name = ""
 
+    try:
+        avatar = 'avatar/' + Avatar.objects.get(user=request.user).file_name
+        avatar_path = os.path.join(settings.STATICFILES_DIRS[0], avatar)
+        if not os.path.exists(avatar_path):
+            avatar = 'avatar/default_avatar.png'
+    except Avatar.DoesNotExist:
+        avatar = 'avatar/default_avatar.png'
+
     return render(request, 'landing_page.html', {
         'form': form,
         'spendings': spendingList,
@@ -180,7 +188,8 @@ def landing_page(request):
         'current_points': current_points,
         'progress_percentage': progress_percentage,
         'user_tier_colour': user_tier_colour,
-        'user_tier_name': user_tier_name
+        'user_tier_name': user_tier_name,
+        'avatar': avatar,
     })
 
 def getCategoryAndExpenseList(objectList, request):
@@ -245,7 +254,7 @@ def getAllList(objectList, num, request):
     return cat, exp, dat, dai, cum
 
 def change_password_success(request):
-    user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = "You've changed your password")
+    Activity.objects.create(user=request.user, image = "images/edit.png", name = "You've changed your password")
     return render(request, 'change_password_success.html')
 
 class UserEditView(generic.UpdateView):
@@ -268,13 +277,13 @@ class UserEditView(generic.UpdateView):
 
         if old_email != user.email:
             activity_name = f'You\'ve changed your email from {old_email} to {user.email}'
-            user_activity = Activity.objects.create(user=self.request.user, image = "images/edit.png", name = activity_name)
+            Activity.objects.create(user=self.request.user, image = "images/edit.png", name = activity_name)
         if old_first_name != user.first_name:
             activity_name = f'You\'ve changed your first name from {old_first_name} to {user.first_name}'
-            user_activity = Activity.objects.create(user=self.request.user, image = "images/edit.png", name = activity_name)
+            Activity.objects.create(user=self.request.user, image = "images/edit.png", name = activity_name)
         if old_last_name != user.last_name:
             activity_name = f'You\'ve changed your last name from {old_last_name} to {user.last_name}'
-            user_activity = Activity.objects.create(user=self.request.user, image = "images/edit.png", name = activity_name)
+            Activity.objects.create(user=self.request.user, image = "images/edit.png", name = activity_name)
 
         return super().form_valid(form)
 
@@ -296,7 +305,7 @@ def category_list(request):
             request.user.available_categories.add(category)
             try:
                 try:
-                    user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Budget boss"))
+                    UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Budget boss"))
                 except ObjectDoesNotExist:
                     pass
                 user_activity = Activity.objects.create(user=request.user, image = "badges/budget_boss.png", name = "You've earned \"Budget boss\" achievement", points = 15)
@@ -306,7 +315,7 @@ def category_list(request):
             user_activity_name = f'You\'ve added \"{category.name}\" category with {category.week_limit} week limit'
             user_activity = Activity.objects.create(user=request.user, image = "images/category.png", name = user_activity_name, points = 15)
             activity_points(request, user_activity.points)
-            overall = overall = Category.objects.filter(is_overall = True).get(users__id=request.user.id)
+            overall = Category.objects.filter(is_overall = True).get(users__id=request.user.id)
             overall.week_limit += category.week_limit
             overall.save(force_update = True)
             return redirect('category_list')
@@ -324,7 +333,7 @@ def remove_category(request, id):
         request.user.available_categories.remove(category)
     else:
         category.delete()
-    user_activity = Activity.objects.create(user=request.user, image = "images/delete.png", name = f'You\'ve deleted \"{category_name}\" category')
+    Activity.objects.create(user=request.user, image = "images/delete.png", name = f'You\'ve deleted \"{category_name}\" category')
     overall = Category.objects.filter(is_overall = True).get(users__id=request.user.id)
     overall.week_limit -= diff
     overall.save(force_update = True)
@@ -344,10 +353,10 @@ def edit_category(request, id):
                 category.save()
                 if (category.name != category_name):
                     activity_name = f'You\'ve changed \"{category_name}\" category name to \"{category.name}\"'
-                    user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
+                    Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
                 if (category.week_limit != category_week_limit):
                     activity_name = f'You\'ve changed \"{category.name}\" category week limit from {category_week_limit} to {category.week_limit}'
-                    user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
+                    Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
                 diff = before_limit - category.week_limit       
                 overall = Category.objects.filter(is_overall = True).get(users__id=current_user.id)
                 overall.week_limit -= diff
@@ -360,7 +369,7 @@ def edit_category(request, id):
                 category.save()
                 if (category.week_limit != category_week_limit):
                     activity_name = f'You\'ve changed \"{category.name}\" category week limit from {category_week_limit} to {category.week_limit}'
-                    user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
+                    Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
                 return redirect('category_list')
     else:
         if category.is_overall==False:
@@ -400,10 +409,10 @@ def posts(request, slug):
     except PageNotAnInteger:
         posts = paginator.page(1)
     except EmptyPage:
-        posts = paginator.pag(paginator.num_pages)
+        posts = paginator.page(paginator.num_pages)
 
     context = {
-        "posts":posts,
+        "posts": posts,
         "forum": category,
         "title": "Posts",
 
@@ -414,50 +423,72 @@ def posts(request, slug):
 # @login_required(login_url=reverse_lazy("login"))
 def detail(request, slug):
     post = get_object_or_404(Post, slug=slug)
+    posts = Post.objects.all()
     author = request.user
     points = {}
     avatars = {}
     tier_colours = {}
+    user_levels = {}
+    user_tier_names = {}
 
     if "comment-form" in request.POST:
         comment = request.POST.get("comment")
-        new_comment, created = Comment.objects.get_or_create(user=author, content=comment)
+        media = request.FILES.get("media")
+        new_comment, created = Comment.objects.get_or_create(user=author, content=comment, media=media)
         post.comments.add(new_comment.id)
 
     if "reply-form" in request.POST:
         reply = request.POST.get("reply")
+        media = request.FILES.get("media")
         comment_id = request.POST.get("comment-id")
         comment_obj = Comment.objects.get(id=comment_id)
-        new_reply, created = Reply.objects.get_or_create(user=author, content=reply)
+        new_reply, created = Reply.objects.get_or_create(user=author, content=reply, media=media)
         comment_obj.replies.add(new_reply.id)
 
     for comment in post.comments.all():
-        points[comment.user.id] = UserLevel.objects.get(user=comment.user).points
-        avatars[comment.user.id] = 'avatar/' + Avatar.objects.get(user=comment.user).file_name
-        tier_colours[comment.user.id] = get_user_tier_colour(comment.user)
+        points, avatars, tier_colours, user_levels, user_tier_names = get_forum_user_info(points, avatars, tier_colours, user_levels, user_tier_names, comment)
         for reply in comment.replies.all():
-            points[reply.user.id] = UserLevel.objects.get(user=reply.user).points
-            avatars[reply.user.id] = 'avatar/' + Avatar.objects.get(user=reply.user).file_name
-            tier_colours[reply.user.id] = get_user_tier_colour(reply.user)
+            points, avatars, tier_colours, user_levels, user_tier_names = get_forum_user_info(points, avatars, tier_colours, user_levels, user_tier_names, reply)
 
-    points[post.user.id] = UserLevel.objects.get(user=post.user).points
-    avatars[post.user.id] = 'avatar/' + Avatar.objects.get(user=post.user).file_name
-    tier_colours[post.user.id] = get_user_tier_colour(post.user)
+    points, avatars, tier_colours, user_levels, user_tier_names = get_forum_user_info(points, avatars, tier_colours, user_levels, user_tier_names, post)
 
     context = {
-        "post":post,
+        "post": post,
         "title": post.title,
         "points": points,
         "avatars": avatars,
         "tier_colours": tier_colours,
+        "user_levels": user_levels,
+        "user_tier_names": user_tier_names,
+        "posts": posts,
     }
     update_views(request, post)
     return render(request, 'forum/detail.html', context)
 
+def get_forum_user_info(points, avatars, tier_colours, user_levels, user_tier_names, forum_object):
+    user_level = UserLevel.objects.get(user=forum_object.user)
+    user_points = user_level.points
+    points[forum_object.user.id] = user_points
+    try:
+        avatars[forum_object.user.id] = 'avatar/' + Avatar.objects.get(user=forum_object.user).file_name
+        avatar_path = os.path.join(settings.STATICFILES_DIRS[0], avatars[forum_object.user.id])
+        if not os.path.exists(avatar_path):
+            avatars[forum_object.user.id] = 'avatar/default_avatar.png'
+    except Avatar.DoesNotExist:
+        avatars[forum_object.user.id] = 'avatar/default_avatar.png'
+    tier_colours[forum_object.user.id] = get_user_tier_colour(forum_object.user)
+    user_levels[forum_object.user.id] = user_level.level.name
+    reached_tiers = get_reached_tiers(user_points)
+    if reached_tiers:
+        user_tier_names[forum_object.user.id], tier_data = reached_tiers.popitem()
+    else:
+        user_tier_names[forum_object.user.id] = ""
+    return points, avatars, tier_colours, user_levels, user_tier_names
+
 @login_required
 def create_post(request):
     context = {}
-    form = PostForm(request.POST or None)
+    form = PostForm(request.POST or None, request.FILES or None)
     if request.method == "POST":
         if form.is_valid():
             author = request.user
@@ -472,6 +503,61 @@ def create_post(request):
     })
     return render(request, "forum/create_post.html", context)
 
+def delete_post(request, id):
+    try:
+        post = Post.objects.get(id = id)
+        post.delete()
+    except Post.DoesNotExist:
+        pass
+    return redirect('forum_home')
+
+def edit_post(request, id):
+    try:
+        post = Post.objects.get(id=id)
+        if request.method == "POST":
+            form = PostForm(request.POST, instance=post)
+            if form.is_valid():
+                post = form.save(commit=False)
+                post.save()
+                form.save_m2m()
+                return redirect('forum_home')
+        else:
+            form = PostForm(instance=post)
+    except Post.DoesNotExist:
+        return redirect('forum_home')
+    return render(request, 'forum/edit_post.html', {'form' : form})
+
+def delete_comment(request, id):
+    try:
+        comment = Comment.objects.get(id=id)
+        post = Post.objects.get(comments=comment)
+        post.comments.remove(comment)
+        post_slug = post.slug
+        comment.delete()
+        return redirect(reverse('detail', args=[post_slug]))
+    except Comment.DoesNotExist:
+        pass
+    return redirect('forum_home')
+
+def edit_comment(request, id):
+    return
+
+def delete_reply(request, id):
+    try:
+        reply = Reply.objects.get(id=id)
+        comment = Comment.objects.get(replies=reply)
+        comment.replies.remove(reply)
+        reply.delete()
+        post = Post.objects.get(comments=comment)
+        post_slug = post.slug
+        return redirect(reverse('detail', args=[post_slug]))
+    except Reply.DoesNotExist:
+        pass
+    return redirect('forum_home')
+
+def edit_reply(request, id):
+    return
+
 def latest_posts(request):
     posts = Post.objects.all().filter(approved=True)[:10]
     context = {
@@ -481,7 +567,18 @@ def latest_posts(request):
     return render(request, "forum/latest_posts.html", context)
 
 def search_result(request):
-    return render(request, "forum/search.html")
+    query = request.GET.get('q')
+    results = Post.objects.filter(title__icontains=query)
+
+    paginator = Paginator(results, 5)
+    page = request.GET.get('page')
+    objects = paginator.get_page(page)
+
+    context = {
+        'query': query,
+        'objects': objects,
+    }
+    return render(request, 'forum/search.html', context)
 
 def challenge_list(request):
     challenges = Challenge.objects.all()
@@ -526,17 +623,17 @@ def complete_challenge(request, challenge_id):
         user_challenges_count = UserChallenge.objects.filter(user=request.user).count()
         try:
             if user_challenges_count == 1:
-                user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Wise spender"))
+                UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Wise spender"))
                 user_activity = Activity.objects.create(user=request.user, image = "badges/wise_spender.png", name = "You've earned \"Wise spender\" achievement", points = 15)
                 activity_points(request, user_activity.points)
             elif user_challenges_count == 10:
-                user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Superstar"))
+                UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Superstar"))
                 user_activity = Activity.objects.create(user=request.user, image = "badges/super_star.png", name = "You've earned \"Superstar\" achievement", points = 150)
                 activity_points(request, user_activity.points)
         except ObjectDoesNotExist:
             pass
 
-        user_activity = Activity.objects.create(user=request.user, image = "images/completed.png", name = f'You\'ve completed \"{user_challenge.challenge.name}\" challenge', points = user_challenge.challenge.points)
+        Activity.objects.create(user=request.user, image = "images/completed.png", name = f'You\'ve completed \"{user_challenge.challenge.name}\" challenge', points = user_challenge.challenge.points)
 
         try:
             user_level = UserLevel.objects.get(user=request.user)
@@ -566,7 +663,7 @@ def update_user_level(user):
     try:
         current_level = Level.objects.get(name = f"Level {floor(total_points / 100) + 1}")
         if (user_level.level.id < current_level.id):
-            user_activity = Activity.objects.create(user=user, image = "images/level_up.png", name = f'You\'ve leveled up to {current_level.name}')
+            Activity.objects.create(user=user, image = "images/level_up.png", name = f'You\'ve leveled up to {current_level.name}')
         user_level.level = current_level
         user_level.save()
     except Level.DoesNotExist:
@@ -581,7 +678,7 @@ def update_user_level(user):
         	required_points = last_level_points + (i * 100)
         	new_level = Level.objects.create(name=name, description=description, required_points=required_points)
         	if (user_level.level.id < new_level.id):
-        	    user_activity = Activity.objects.create(user=user, image = "images/level_up.png", name = f'You\'ve leveled up to {new_level.name}')
+        	    Activity.objects.create(user=user, image = "images/level_up.png", name = f'You\'ve leveled up to {new_level.name}')
         	new_level.save()
 
         current_level = Level.objects.get(name = f"Level {floor(total_points / 100) + 1}")
@@ -612,6 +709,20 @@ def share_achievement(request, id):
     text = f"I've earned the \"{name}\" achievement on Galin's Spending Tracker"
     return share(request, user_achievement, name, description, url, text)
 
+def share_post(request, id):
+    post = Post.objects.get(id=id)
+    name = post.title
+    description = "Forum post on Galin's Spending Tracker"
+    url = request.build_absolute_uri(post.get_url())
+    text = f"Check out my \"{name}\" post on Galin's Spending Tracker"
+    return share(request, post, name, description, url, text)
+
+def share_comment(request, id):
+    return
+
+def share_reply(request, id):
+    return
+
 def share(request, user_object, name, description, url, text):
     facebook_params = {
         'app_id': '1437874963685388',
@@ -634,7 +745,17 @@ def share(request, user_object, name, description, url, text):
         return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'challenge'})
     elif isinstance(user_object, str):
         user_tier_colour = get_user_tier_colour(request.user)
-        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'avatar', 'user_tier_colour': user_tier_colour})
+        try:
+            avatar = 'avatar/' + Avatar.objects.get(user=request.user).file_name
+            avatar_path = os.path.join(settings.STATICFILES_DIRS[0], avatar)
+            if not os.path.exists(avatar_path):
+                avatar = 'avatar/default_avatar.png'
+        except Avatar.DoesNotExist:
+            avatar = 'avatar/default_avatar.png'
+        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'avatar', 'user_tier_colour': user_tier_colour, 'avatar': avatar})
+    elif isinstance(user_object, Post):
+        media = user_object.media
+        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'post', 'media': media})
 
 def handle_share(request):
     type = unquote(request.GET.get('type'))
@@ -645,7 +766,7 @@ def handle_share(request):
     activity_points(request, user_activity.points)
     try:
         try:
-            user_achievement = UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="First share"))
+            UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="First share"))
         except ObjectDoesNotExist:
             pass
         user_activity = Activity.objects.create(user=request.user, image = "badges/first_share.png", name = "You've earned \"First share\" achievement", points = 15)
@@ -677,6 +798,11 @@ def my_avatar(request):
     colours = get_avatar_colours()
     components = {}
     components_copy = {}
+
+    required_items_selected = check_required_items(request)
+
+    if not required_items_selected and 'random' not in request.GET.keys():
+        messages.info(request, 'You need to select at least body, face and head for avatar to be saved.')
 
     for category in ['eyewear', 'body', 'face', 'facial-hair', 'head']:
         components[category] = []
@@ -713,8 +839,37 @@ def my_avatar(request):
 
         # create random avatar with the filled query dictionary passed in the request
         create_avatar(request)
+        check_required_items(request)
 
     return render(request, 'my_avatar.html', {'components': components, 'colours': colours, 'locked_items': locked_items, 'tier_info': tier_info, 'user_tier_colour': user_tier_colour})
+
+def check_required_items(request):
+    required_items_selected = True
+    current_template = Avatar.objects.get(user=request.user).current_template
+
+    if current_template.endswith('.svg'):
+        avatar_file_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', current_template)
+        user_svg = open(avatar_file_path, 'r').read()
+
+        for category in ['body', 'face', 'head']:
+            category_g_block = re.search(fr'<g id="{category}"[^>]*>', user_svg)
+            if category_g_block:
+                start_index = category_g_block.end()
+                end_index = user_svg.find('</g>', start_index)
+                category_content = user_svg[start_index:end_index]
+                if not category_content.strip():
+                    required_items_selected = False
+
+        if not required_items_selected:
+            avatar = Avatar.objects.get(user=request.user)
+            avatar.file_name = "default_avatar.png"
+            avatar.save()
+        else:
+            avatar = Avatar.objects.get(user=request.user)
+            avatar.file_name = avatar.current_template
+            avatar.save()
+
+    return required_items_selected
 
 @login_required
 @cache_control(no_store=True)
@@ -725,12 +880,12 @@ def create_avatar(request):
         avatar = create_avatar_object(request)
 
     try:
-        user_svg_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', avatar.file_name)
+        user_svg_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', avatar.current_template)
         user_svg = open(user_svg_path, 'r').read()
     except OSError:
         avatar.delete()
         avatar = create_avatar_object(request)
-        user_svg_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', avatar.file_name)
+        user_svg_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', avatar.current_template)
         user_svg = open(user_svg_path, 'r').read()
 
     for category, component in request.GET.items():
@@ -776,7 +931,7 @@ def create_avatar_object(request):
     avatar_file_name = f'avatar-{hash.hexdigest()[:-10]}.svg'
     avatar_file_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', avatar_file_name)
     open(avatar_file_path, 'w').write(template_svg)
-    avatar = Avatar.objects.create(user=request.user, file_name=avatar_file_name)
+    avatar = Avatar.objects.create(user=request.user, file_name='default_avatar.png', current_template=avatar_file_name)
     return avatar
 
 def get_svg_paths_for_component(category, component):
@@ -864,6 +1019,10 @@ def update_locked_items(request, locked_items):
     return locked_items
 
 @register.filter
+def clean_title(category_name):
+    return category_name.replace('-',' ').title()
+
+@register.filter
 def get_tier_name(locked_items, file_name):
     return locked_items.get(file_name)[0]
 
@@ -874,6 +1033,16 @@ def get_tier_colour(locked_items, file_name):
 @register.filter
 def get_forum_item(dictionary, user_id):
     return dictionary.get(user_id)
+
+@register.filter
+def check_forum_instance(type, value):
+    if isinstance(value, Post):
+        type = "post"
+    elif isinstance(value, Comment):
+        type = "comment"
+    elif isinstance(value, Reply):
+        type = "reply"
+    return type
 
 def create_forum_avatar(request, id):
     query_dict = request.GET.copy()
@@ -1048,8 +1217,10 @@ def garden(request):
                 x_position=500,
                 y_position=50,
             )
+            Activity.objects.create(user=request.user, image = "images/smallTree.png", name = "You've planted a tree in Galin Environmental Project")
 
     treeNum = currentUser.trees
+    check_tree_achievements(request, treeNum)
     pointTotal = user_level.points
     pointLeft = pointTotal - treeNum*100
     trees = Tree.objects.filter(user=currentUser)
@@ -1060,21 +1231,44 @@ def garden(request):
         "trees":trees,
     })
 
+def check_tree_achievements(request, treeNum):
+    tree_achievements = {1: ("Planting pioneer", 10), 10: ("Forest friend", 50), 100: ("Green guardian", 100)}
+    if treeNum in tree_achievements:
+        achievement_name, points = tree_achievements[treeNum]
+        try:
+            try:
+                UserAchievement.objects.create(user=request.user,
+                                               achievement=Achievement.objects.get(name=achievement_name))
+            except ObjectDoesNotExist:
+                pass
+            user_activity = Activity.objects.create(user=request.user, image="badges/custom.png",
+                                                    name=f"You've earned \"{achievement_name}\" achievement",
+                                                    points=points)
+            activity_points(request, user_activity.points)
+        except IntegrityError:
+            pass
+
 def profile(request, id):
-    user = User.objects.get(id=id)
-    user_level = UserLevel.objects.get(user=user)
+    profile_user = User.objects.get(id=id)
+    user_level = UserLevel.objects.get(user=profile_user)
     current_level_name = user_level.level.name
-    user_tier_colour = get_user_tier_colour(user)
-    reached_tiers = get_reached_tiers(UserLevel.objects.get(user=user).points)
-    avatar = 'avatar/' + Avatar.objects.get(user=user).file_name
-    user_achievements = UserAchievement.objects.filter(user=user)
-    user_posts = Post.objects.filter(user=user)
+    user_tier_colour = get_user_tier_colour(profile_user)
+    reached_tiers = get_reached_tiers(UserLevel.objects.get(user=profile_user).points)
+    try:
+        avatar = 'avatar/' + Avatar.objects.get(user=profile_user).file_name
+        avatar_path = os.path.join(settings.STATICFILES_DIRS[0], avatar)
+        if not os.path.exists(avatar_path):
+            avatar = 'avatar/default_avatar.png'
+    except Avatar.DoesNotExist:
+        avatar = 'avatar/default_avatar.png'
+    user_achievements = UserAchievement.objects.filter(user=profile_user)
+    user_posts = Post.objects.filter(user=profile_user)
     if reached_tiers:
         user_tier_name, tier_data = reached_tiers.popitem()
     else:
         user_tier_name = ""
     context = {
-        'user': user,
+        'profile_user': profile_user,
         'user_tier_colour': user_tier_colour,
         'user_tier_name': user_tier_name,
         'current_level_name': current_level_name,

@@ -7,8 +7,8 @@
                 <h2 style="text-align: center">My Challenges</h2>
                 <div class="row">
                     {% for user_challenge in user_challenges %}
-                        <div class="col-md-3" style="display: inline-block">
-                            <div class="card-body" style="text-align: center">
+                        <div class="col-md-3" style="display: inline-block; position: relative">
+                            <div class="card-body" style="text-align: center; padding-bottom: 30px;">
                                 <h5 class="card-title">{{ user_challenge.challenge.name }}</h5>
                                 <p class="card-text">Date entered: {{ user_challenge.date_entered }}</p>
                                 {% if user_challenge.date_completed %}
@@ -16,7 +16,9 @@
                                 {% else %}
                                     <p class="card-text">Not completed</p>
                                 {% endif %}
-                                <a class="btn btn-primary btn-sm" href="{% url 'share_challenge' user_challenge.id %}">Share</a>
+                                <div class="share-btn" style="position: absolute; bottom: 0; left: 0; right: 0; margin: 0 auto; width: 80%">
+                                    <a class="btn btn-primary btn-sm" href="{% url 'share_challenge' user_challenge.id %}">Share</a>
+                                </div>
                             </div>
                         </div>
                     {% endfor %}

@@ -9,7 +9,7 @@
                 <div class="col-md-6">
                     {% for category, file_names in components.items %}
                         <div class="card" style="margin: 20px 0;">
-                            <h3 class="card-header">{{ category|title }}</h3>
+                            <h3 class="card-header">{{ category|clean_title }}</h3>
                             <div class="card-body row">
                                 {% for file_name in file_names %}
                                     <div class="col-md-2">
