@@ -36,7 +36,7 @@ class SignUpForm(forms.ModelForm):
         )]
     )
     password_confirmation = forms.CharField(
-        label='', widget=forms.PasswordInput(attrs={'placeholder': 'Password Comfirmation'}))
+        label='', widget=forms.PasswordInput(attrs={'placeholder': 'Password Confirmation'}))
 
     def clean(self):
         """Clean the data and generate messages for any errors."""
@@ -80,7 +80,7 @@ class CreateUserForm(forms.ModelForm):
         )]
     )
     password_confirmation = forms.CharField(
-        label='', widget=forms.PasswordInput(attrs={'placeholder': 'Password Comfirmation'}))
+        label='', widget=forms.PasswordInput(attrs={'placeholder': 'Password Confirmation'}))
     # will_be_admin = forms.BooleanField(label='Create user as admin?', widget=forms.CheckboxInput(choices='yes'), required=False)
 
     def clean(self):
@@ -186,7 +186,7 @@ class EditOverallForm(forms.ModelForm):
         if int(limit) < sum:
             raise ValidationError({"week_limit":"The overall limit cannot be less than the sum of other categories."})
         return cleaned_data
-        
+
 
     class Meta:
         """Form options"""
@@ -224,4 +224,3 @@ class AddAchievementForm(forms.ModelForm):
     name = forms.CharField(label='', widget=forms.TextInput(attrs={'style':'width:100%; height:10%;', 'placeholder': 'Achievement Name'}))
     description = forms.CharField(label='', widget=forms.Textarea(attrs={'rows':4, 'placeholder': 'Description'}))
     criteria = forms.CharField(label='', widget=forms.Textarea(attrs={'rows':4, 'placeholder': 'Criteria'}))
-

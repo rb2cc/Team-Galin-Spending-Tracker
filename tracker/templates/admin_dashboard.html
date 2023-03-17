@@ -46,7 +46,17 @@
             <form action="{% url 'admin_dashboard' %}" method="post">
               {% csrf_token %}
               {% include 'partials/bootstrap_form.html' with form=user_form %}
-              <div class="row" style="padding-top: 7%;">
+              {% if request.user.is_superuser %}
+                <div class="row" style="padding-top: 0%;">
+              {% else %}
+                <div class="row" style="padding-top: 7%;">
+              {% endif %}
+                {% if request.user.is_superuser %}
+                <div style="display: inline-block; vertical-align: middle;">
+                  <label for="will_be_admin" >Create user as admin? &nbsp</label>
+                  <input type="checkbox" name="will_be_admin" id="will_be_admin" value="1"></input>
+                </div>
+                {% endif %}
                 <button type="submit" class="btn btn-primary" style="" name="create_user" method="post">Create</button>
               </div>
             </form>
