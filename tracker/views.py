@@ -558,6 +558,10 @@ def create_post(request):
 def delete_post(request, id):
     try:
         post = Post.objects.get(id = id)
+        comments = post.comments.all()
+        for comment in comments:
+            comment.replies.all().delete()
+        comments.all().delete()
         post.delete()
     except Post.DoesNotExist:
         pass
@@ -585,6 +589,7 @@ def delete_comment(request, id):
         post = Post.objects.get(comments=comment)
         post.comments.remove(comment)
         post_slug = post.slug
+        comment.replies.all().delete()
         comment.delete()
         return redirect(reverse('detail', args=[post_slug]))
     except Comment.DoesNotExist:
