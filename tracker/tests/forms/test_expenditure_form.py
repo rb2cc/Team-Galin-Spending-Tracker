@@ -17,7 +17,6 @@ class RequestFormTestCase(TestCase):
         self.factory = RequestFactory()
         url = 'test_image/fortlobby.png'
         
-        
         self.user = User.objects.get(email = 'james@example.org')
         cat_three = Category.objects.create(name = 'Test3', week_limit = 200)
         self.user.available_categories.add(cat_three)

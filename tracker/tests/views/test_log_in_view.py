@@ -63,3 +63,13 @@ class LogInViewTestCase(TestCase, LogInTester):
         messages_list = list(response.context['messages'])
         self.assertEqual(len(messages_list),1)
         self.assertEqual(messages_list[0].level,messages.ERROR)
+
+    def test_log_out(self):
+        self.client.login(username='james@example.org', password='Lu123')
+        self.assertTrue(self._is_logged_in())
+        log_out_url = reverse('log_out')
+        response = self.client.get(log_out_url, follow=True)
+        self.assertFalse(self._is_logged_in())
+        self.assertRedirects(response, self.url, status_code=302, target_status_code=200)
+        self.assertTemplateUsed(response, 'home.html')
+

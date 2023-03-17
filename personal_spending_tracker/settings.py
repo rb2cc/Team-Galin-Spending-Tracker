@@ -166,5 +166,5 @@ CRISPY_TEMPLATE_PACK = ('bootstrap4')
 # Automated cron job directory
 # cron job runs function that deletes expenditures with is_binned=True every 10 minutes
 CRONJOBS = [
-    ('*/10 * * * *', 'tracker.cron.delete_old_expenditure_cron_job')
+    ('*/10 * * * *', 'tracker.cron.delete_binned_objects_cron_job')
 ]

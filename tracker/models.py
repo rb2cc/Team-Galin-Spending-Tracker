@@ -90,6 +90,7 @@ class Category(models.Model):
     week_limit = models.PositiveIntegerField()
     is_global = models.BooleanField(default=False)
     is_overall = models.BooleanField(default=False)
+    is_binned = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = 'Category'
@@ -101,7 +102,7 @@ class Category(models.Model):
 class Expenditure(models.Model):
     """Expenditure model for user spending"""
 
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, default=1)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, default=1, null=True)
     title = models.CharField(max_length=20, blank=False)
     description = models.CharField(max_length=280, blank=False)
     image = models.ImageField(editable=True, upload_to='images', blank=True)

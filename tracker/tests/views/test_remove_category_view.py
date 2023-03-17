@@ -15,18 +15,18 @@ class RemoveCategoryViewTestCase(TestCase):
         self.cat_two = Category.objects.get(name = 'Test2')
         self.cat_three = Category.objects.get(name = 'Test3')
         self.overall_cat = Category.objects.get(name = 'Test4')
-        self.url = reverse('remove_category', kwargs={'id': 0})
+        self.url = reverse('bin_category', kwargs={'id': 0})
 
     def test_remove_category_url(self):
-        self.assertEqual(self.url, '/remove_category/0')
+        self.assertEqual(self.url, '/bin_category/0')
 
     def test_remove_category_view_removes_category(self):
         self.user.available_categories.add(self.cat_one, self.cat_two, self.cat_three, self.overall_cat)
         self.client.login(username = self.user.email, password = 'Lu123')
         before_count = Category.objects.count()
         response = self.client.post(self.url)
-        after_count = Category.objects.count()
+        after_count = Category.objects.filter(is_binned=False).count()
         self.assertEqual(after_count, before_count-1)
-        remaining = list(map(lambda category: category.name, list(Category.objects.all())))
+        remaining = list(map(lambda category: category.name, list(Category.objects.filter(is_binned=False))))
         self.assertFalse('Test' in remaining)
         self.assertRedirects(response, reverse('category_list'), status_code=302, target_status_code=200)
