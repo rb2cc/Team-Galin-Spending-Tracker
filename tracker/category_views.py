@@ -117,7 +117,7 @@ def category_progress(request, offset):
     val_dict = {}
     for category in categories:
         val_dict[category.name] = 0 
-    expenditures = Expenditure.objects.filter(user=user, date_created__gte = week_start, date_created__lte = week_end)
+    expenditures = Expenditure.objects.filter(user=user, date_created__gte = week_start, date_created__lte = week_end, is_binned = False)
     for expenditure in expenditures:
         val_dict[expenditure.category.name] += expenditure.expense#dict from category name -> total expense
     overall_spend = sum(val_dict.values())
