@@ -131,4 +131,6 @@ def category_progress(request, offset):
         'overall_percent':overall_percent,
         'overall_colour':overall_colour,
         'offset':offset,
+        'start':week_start,
+        'end':week_end,
     })
