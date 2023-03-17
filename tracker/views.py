@@ -321,7 +321,7 @@ def category_list(request):
             return redirect('category_list')
     else:
         form = AddCategoryForm()
-    categoryList = Category.objects.filter(users__id=user_id).filter(is_overall=False).order_by('name')
+    categoryList = Category.objects.filter(users__id=user_id).filter(is_overall=False, is_binned=False).order_by('name')
     overall = Category.objects.filter(users__id=user_id).get(is_overall=True)
     return render(request, 'category_list.html', {'categories':categoryList, 'form':form, 'overall':overall})
 
