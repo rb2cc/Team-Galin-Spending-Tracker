@@ -6,8 +6,12 @@
     <li class="nav-item">
       <a class="nav-link" href="{% url 'report' %}">Report</a>
     </li>
-    <li class="nav-item">
-      <a class="nav-link" href="{% url 'category_list' %}">Categories</a>
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Categories</a>
+      <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <li><a class="dropdown-item" href="{% url 'category_progress' offset=0%}">Weekly Progress</a></li>
+        <li><a class="dropdown-item" href="{% url 'category_list' %}">Manage Categories</a></li>
+      </ul>
     </li>
     <li class="nav-item">
       <a class="nav-link" href="{% url 'my_activity' %}?num_items=10">Activity</a>

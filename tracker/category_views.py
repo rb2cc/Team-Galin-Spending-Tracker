@@ -129,5 +129,6 @@ def category_progress(request, offset):
     return render(request, 'category_progress.html', {
         'cat_map':val_dict,
         'overall_percent':overall_percent,
-        'overall_colour':overall_colour
+        'overall_colour':overall_colour,
+        'offset':offset,
     })
