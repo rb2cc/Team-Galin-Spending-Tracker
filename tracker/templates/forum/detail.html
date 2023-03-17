@@ -1,8 +1,9 @@
 {% extends 'base_content.html' %}
 {% load hitcount_tags %}
+{% load static %}
 {% block content %}
 
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
 
         <div class="container" style="margin:0px">
 
@@ -18,48 +19,79 @@
 
                     <div class="body">
                         <div class="authors">
-                            <div class="username"><a href="#"> {{post.user.username|title}} </a> </div>
-                            <div> Role </div>
-                            <img src="{{post.user.profile_pic}}" alt="">
+                            <div class="avatar-container"><img src="{% static avatars|get_forum_item:post.user.id %}" style="border: 3px solid {{ tier_colours|get_forum_item:post.user.id }}"/></div>
+                            <div class="username"><a href="{% url 'profile' post.user.id %}">  {% if post.user.username is not None %}
+                                                                    {{post.user.username|title}}
+                                                                {% else %}
+                                                                    {{post.user.first_name}} {{post.user.last_name}}
+                                                                {% endif %}</a> </div>
+                            <div> {{ user_levels|get_forum_item:post.user.id }}
+                                {% if user_tier_names|get_forum_item:post.user.id != "" %}
+                                    ({{ user_tier_names|get_forum_item:post.user.id|title }} tier)
+                                {% endif %}
+                            </div>
                             <div> Posts: <u> {{post.user.num_posts}} </u> </div>
-                            <div> Points: <u> {{post.user.points}} </u> </div>
+                            <div> Points: <u> {{points|get_forum_item:post.user.id}} </u> </div>
                         </div>
 
+                        <div class="content" style="position: relative">
+                            {% if post.media %}
+                                <p><img class="media" src="{{ post.media.url }}" style="max-width: 20%"></p>
+                            {% endif %}
+                            {{post.content|safe}}
+                            <br>
 
-                    <div class="content">
-                        {{post.content|safe}}
-                       <br>
+                            {% if post.user == user %}
+                                <div class="actions" style="position: absolute; bottom: 0; right: 0">
 
-                        <div class="comment">
-                            <button onclick="showComment()"> Comment </button>
+                                    <div class="comment" style="display: inline-block;">
+                                        <a href="{% url 'share_post' post.id %}">
+                                            <button>Share</button>
+                                        </a>
+                                    </div>
+
+                                    <div class="comment" style="display: inline-block;">
+                                        <a href="{% url 'edit_post' post.id %}">
+                                            <button style="margin-left: 10px">Edit</button>
+                                        </a>
+                                    </div>
+
+                                    <div class="comment" style="display: inline-block;">
+                                        <button class="delete-button" data-bs-toggle="modal" data-bs-target="#delete_modal" data-object-type="post" data-object-id="{{ post.id }}" style="margin-left: 10px">Delete</button>
+                                    </div>
+
+                                </div>
+                            {% endif %}
+
                         </div>
-
                     </div>
+
+                    <!---Comment Input--->
+                    {% if post.closed == True %}
+
+                        <div style="background-color:#fff;color:#000;font-weight:bolder;padding:10px;width:100%;"> This post is closed. </div>
+
+                    {% else %}
+
+                        {% if request.user.is_authenticated %}
+                            <form action="." method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="comment-area hide" id="comment-area">
+                                    <textarea name="comment" id="" placeholder="Add Comment......"></textarea>
+                                    <input type="submit" value="Submit" name="comment-form">
+                                </div>
+                                <div>
+                                    <input type="file" name="media" accept="image/*" id="id_media">
+                                </div>
+                            </form>
+
+                        {% else %}
+
+                            <div style="background-color:#fff;color:#000;font-weight:bolder;padding:10px;width:100%;"> You must <a href="{% url 'home' %}"> <b> login </b> </a> to comment. </div>
+
+                        {% endif %}
+                    {% endif %}
                 </div>
-
-                <!---Comment Input--->
-                {% if post.closed == True %}
-
-                <div style="background-color:#fff;color:#000;font-weight:bolder;padding:10px;width:100%;"> This post is closed. </div>
-
-                {% else %} 
-                
-                {% if request.user.is_authenticated %}
-                <form action="." method="post">
-                    {% csrf_token %}
-                <div class="comment-area hide" id="comment-area">
-                    <textarea name="comment" id="" placeholder="Add Comment......"></textarea>
-                    <input type="submit" value="Submit" name="comment-form">
-                </div>
-                </form>
-
-                {% else %}
-
-                <div style="background-color:#fff;color:#000;font-weight:bolder;padding:10px;width:100%;"> You must <a href="{% url 'home' %}"> <b> login </b> </a> to comment. </div>
-
-                {% endif %}
-                {% endif %}
-        </div>
 
 <!---Show Comments--->
 {% for comment in post.comments.all %}
@@ -71,23 +103,49 @@
 
     <div class="body">
         <div class="authors">
-            <div class="AnotherUser"><a href="#"> {{comment.user.username|title}} </a> </div>
-            <div> Role </div>
-            <img src="{{comment.user.profile_pic}}" alt="">
+            <div class="avatar-container"><img src="{% static avatars|get_forum_item:comment.user.id %}" style="border: 3px solid {{ tier_colours|get_forum_item:comment.user.id }}"/></div>
+            <div class="AnotherUser"><a href="{% url 'profile' comment.user.id %}">{% if comment.user.username is not None %}
+                                                        {{comment.user.username|title}}
+                                                    {% else %}
+                                                        {{comment.user.first_name}} {{comment.user.last_name}}
+                                                    {% endif %}</a> </div>
+            <div> {{ user_levels|get_forum_item:comment.user.id }}
+                {% if user_tier_names|get_forum_item:comment.user.id != "" %}
+                    ({{ user_tier_names|get_forum_item:comment.user.id|title }} tier)
+                {% endif %}
+            </div>
             <div> Posts: <u> {{comment.user.num_posts}} </u> </div>
-            <div> Points: <u> {{comment.user.points}} </u> </div>
+            <div> Points: <u> {{points|get_forum_item:comment.user.id}} </u> </div>
         </div>
 
-
-    <div class="content">
+    <div class="content" style="position: relative">
+        {% if comment.media %}
+            <p><img class = "media" src="{{ comment.media.url }}" style="max-width: 20%"></p>
+        {% endif %}
         {{comment.content}}
-
         <br>
 
-        <div class="comment">
-            <button onclick="showReply('comment{{comment.id}}')"> Reply </button>
-        </div>
+        {% if comment.user == user %}
+            <div class="actions" style="position: absolute; bottom: 0; right: 0">
 
+                <div class="comment" style="display: inline-block;">
+                    <a href="">
+                        <button>Share</button>
+                    </a>
+                </div>
+
+                <div class="comment" style="display: inline-block;">
+                    <a href="">
+                        <button style="margin-left: 10px">Edit</button>
+                    </a>
+                </div>
+
+                <div class="comment" style="display: inline-block;">
+                    <button class="delete-button" data-bs-toggle="modal" data-bs-target="#delete_modal" data-object-type="comment" data-object-id="{{ comment.id }}" style="margin-left: 10px">Delete</button>
+                </div>
+
+            </div>
+        {% endif %}
     </div>
 </div>
 
@@ -99,15 +157,16 @@
 {% else %}
 
 {% if request.user.is_authenticated %}
-<form action="." method="POST">
+<form action="." method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-
     <div class="comment-area hide" id="comment{{comment.id}}">
-    <textarea name="reply" id="" placeholder="Add reply......"></textarea>
-    <input type="submit" value="Submit" name="reply-form">
-    <input type="hidden" name="comment-id" value="{{comment.id}}">
-</div>
-</div>
+        <textarea name="reply" id="" placeholder="Add reply......"></textarea>
+        <input type="submit" value="Submit" name="reply-form">
+        <input type="hidden" name="comment-id" value="{{comment.id}}">
+    </div>
+    <div>
+        <input type="file" name="media" accept="image/*" id="id_media">
+    </div>
 </form>
 
 {% else %}
@@ -128,22 +187,109 @@
 
     <div class="body">
         <div class="authors">
-            <div class="AnotherUser"><a href="#"> {{reply.user.username|title}} </a> </div>
-            <div> Role </div>
-            <img src="{{comment.user.profile_pic}}" alt="">
+            <div class="avatar-container"><img src="{% static avatars|get_forum_item:reply.user.id %}" style="border: 3px solid {{ tier_colours|get_forum_item:reply.user.id }}"/></div>
+            <div class="AnotherUser"><a href="{% url 'profile' reply.user.id %}"> {% if reply.user.username is not None %}
+                                                    {{reply.user.username|title}}
+                                                  {% else %}
+                                                     {{reply.user.first_name}} {{reply.user.last_name}}
+                                                  {% endif %}</a> </div>
+            <div> {{ user_levels|get_forum_item:reply.user.id }}
+                {% if user_tier_names|get_forum_item:reply.user.id != "" %}
+                    ({{ user_tier_names|get_forum_item:reply.user.id|title }} tier)
+                {% endif %}
+            </div>
             <div> Posts: <u> {{reply.user.num_posts}} </u> </div>
-            <div> Points: <u> {{reply.user.points}} </u> </div>
+            <div> Points: <u> {{points|get_forum_item:reply.user.id}} </u> </div>
         </div>
 
 
-    <div class="content">
+    <div class="content" style="position: relative">
+        {% if reply.media %}
+            <p><img class = "media" src="{{ reply.media.url }}" style="max-width: 20%"></p>
+        {% endif %}
         {{reply.content}}
 
         <br>
+
+        {% if reply.user == user %}
+            <div class="actions" style="position: absolute; bottom: 0; right: 0">
+
+                <div class="comment" style="display: inline-block;">
+                    <a href="">
+                        <button>Share</button>
+                    </a>
+                </div>
+
+                <div class="comment" style="display: inline-block;">
+                    <a href="">
+                        <button style="margin-left: 10px">Edit</button>
+                    </a>
+                </div>
+
+                <div class="comment" style="display: inline-block;">
+                    <button class="delete-button" data-bs-toggle="modal" data-bs-target="#delete_modal" data-object-type="reply" data-object-id="{{ reply.id }}" style="margin-left: 10px">Delete</button>
+                </div>
+
+            </div>
+        {% endif %}
+
         </div>
     </div>
 </div>
 
 {% endfor %}
 {% endfor %}
+
+    <!-- modal used as delete post, comment or reply confirmation -->
+    <div class="modal fade" id="delete_modal" tabindex="-1" aria-labelledby="delete_modal_label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="delete_modal_label"></h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="body_first_line"></p>
+                    <p id="body_second_line"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancel</button>
+                    <a class="delete-link" href="">
+                        <button type="button" class="btn btn-danger">Delete</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('.delete-button').click(function() {
+                var objectType = $(this).data('object-type');
+                var objectId = $(this).data('object-id');
+                var deleteLink = $('.delete-link');
+                var deleteModalLabel = $('#delete_modal_label');
+                var deleteModalBodyFirst = $('#body_first_line');
+                var deleteModalBodySecond = $('#body_second_line');
+
+                if (objectType === 'post') {
+                    deleteLink.attr('href', '/delete_post/' + objectId);
+                    deleteModalLabel.text('Delete Post');
+                    deleteModalBodyFirst.text('Are you sure you want to delete this post?');
+                    deleteModalBodySecond.text('This post will not be recoverable if you proceed.');
+                } else if (objectType === 'comment') {
+                    deleteLink.attr('href', '/delete_comment/' + objectId);
+                    deleteModalLabel.text('Delete Comment');
+                    deleteModalBodyFirst.text('Are you sure you want to delete this comment?');
+                    deleteModalBodySecond.text('This comment will not be recoverable if you proceed.');
+                } else if (objectType === 'reply') {
+                    deleteLink.attr('href', '/delete_reply/' + objectId);
+                    deleteModalLabel.text('Delete Reply');
+                    deleteModalBodyFirst.text('Are you sure you want to delete this reply?');
+                    deleteModalBodySecond.text('This reply will not be recoverable if you proceed.');
+                }
+
+            });
+        });
+    </script>
 {% endblock content %}

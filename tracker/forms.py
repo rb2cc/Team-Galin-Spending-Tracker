@@ -36,7 +36,7 @@ class SignUpForm(forms.ModelForm):
         )]
     )
     password_confirmation = forms.CharField(
-        label='', widget=forms.PasswordInput(attrs={'placeholder': 'Password Comfirmation'}))
+        label='', widget=forms.PasswordInput(attrs={'placeholder': 'Password Confirmation'}))
 
     def clean(self):
         """Clean the data and generate messages for any errors."""
@@ -152,4 +152,4 @@ class EditOverallForm(forms.ModelForm):
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ["title", "content", "forum_categories"]
+        fields = ["title", "content", "forum_categories", "media"]

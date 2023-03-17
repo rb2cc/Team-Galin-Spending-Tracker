@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Expenditure, Category, Challenge, UserChallenge, Level, UserLevel, Achievement, UserAchievement, Activity
+from .models import User, Expenditure, Category, Challenge, UserChallenge, Level, UserLevel, Achievement, UserAchievement, Activity, Avatar
 from .models import Author, Post, Forum_Category, Comment, Reply
 
 
@@ -61,3 +61,4 @@ admin.site.register(Author)
 admin.site.register(Post)
 admin.site.register(Comment)
 admin.site.register(Reply)
+admin.site.register(Avatar)

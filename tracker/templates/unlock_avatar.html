@@ -5,7 +5,7 @@
 <div class='container'>
     <div class='row'>
         <div class = 'card' style="margin: auto; max-width: 350px; text-align: center; padding: 20px">
-            <h1>{{ file_name|cut:".svg"|title }}</h1>
+            <h2>{{ name|title }}</h2>
             <p>This item is locked. You can unlock this item by reaching {{ tier|title }} tier.</p>
             <img src="{% static 'avatar/' %}{{ category }}/{{ file_name }}" style="width: 100%;" />
             <p>Get points to reach new levels by using the spending tracker, participating in challenges and getting achievements.</p>

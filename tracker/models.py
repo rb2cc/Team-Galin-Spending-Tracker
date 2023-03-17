@@ -58,8 +58,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     available_categories = models.ManyToManyField('Category', symmetrical = False, related_name = 'users')
-    username = models.CharField(max_length=50, blank=True)
-    points = models.IntegerField(default=0)
+    username = models.CharField(max_length=50, blank=True, unique=True, null = True)
     trees = models.IntegerField(default=0)
 
     objects = UserManager()
@@ -222,6 +221,7 @@ class Reply(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
+    media = models.ImageField(editable=True, upload_to='images', blank=True)
 
     def __str__(self):
         return self.content[:100]
@@ -235,6 +235,7 @@ class Comment(models.Model):
     content = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
     replies = models.ManyToManyField(Reply, blank=True)
+    media = models.ImageField(editable=True, upload_to='images', blank=True)
 
     def __str__(self):
         return self.content[:100]
@@ -250,6 +251,7 @@ class Post(models.Model):
     approved = models.BooleanField(default=True)
     hit_count_generic = GenericRelation(HitCount, object_id_field='object_pk',related_query_name='hit_count_generic_relation')
     comments = models.ManyToManyField(Comment, blank=True)
+    media = models.ImageField(editable=True, upload_to='images', blank=True)
     # closed = models.BooleanField(default=False)
     # state = models.CharField(max_length=40, default="zero")
 
@@ -257,6 +259,9 @@ class Post(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
+        if Post.objects.filter(slug=self.slug).exists():
+            timestamp = timezone.now().strftime("%Y%m%d-%H%M%S")
+            self.slug = f"{self.slug}-{timestamp}"
         super(Post, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -273,8 +278,15 @@ class Post(models.Model):
 
     @property
     def last_reply(self):
-        return self.comments.latest("date")
+        try:
+            return self.comments.latest("date")
+        except Comment.DoesNotExist:
+            return None
 
+class Avatar(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    file_name = models.CharField(max_length=255)
+    current_template = models.CharField(max_length=255)
 
 class Tree(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -282,7 +294,7 @@ class Tree(models.Model):
     x_position = models.IntegerField()
     y_position = models.IntegerField()
 
-    
+
 
 
 
