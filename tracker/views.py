@@ -28,6 +28,7 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.exceptions import ObjectDoesNotExist
 
+
 from .utils import update_views
 
 from django.http import JsonResponse
@@ -327,6 +328,10 @@ def bin_category(request, id):
         # category.delete()
         category.is_binned = True
         category.save()
+    expenditures_of_category=Expenditure.objects.filter(is_binned=False,category=category)
+    for expenditure in expenditures_of_category:
+        expenditure.is_binned = True
+        expenditure.save()
     user_activity = Activity.objects.create(user=request.user, image = "images/delete.png", name = f'You\'ve deleted \"{category_name}\" category')
     overall = Category.objects.filter(is_overall = True).get(users__id=request.user.id)
     overall.week_limit -= diff
@@ -388,6 +393,10 @@ def recover_category(request):
             overall = overall = Category.objects.filter(is_overall = True).get(users__id=request.user.id)
             overall.week_limit += category.week_limit
             overall.save(force_update = True)
+            expenditures_of_category=Expenditure.objects.filter(is_binned=True, category=category)
+            for expenditure in expenditures_of_category:
+                expenditure.is_binned = False
+                expenditure.save()
             # Activity.objects.create(user=request.user, image = "images/recover.png", name = f'You\'ve recovered \"{expenditure.title}\" expenditure from the bin')
             return redirect('category_bin')
         except Expenditure.DoesNotExist:
@@ -402,6 +411,11 @@ def delete_category(request):
             category_pk = request.POST['radio_pk']
             category = Category.objects.get(pk=category_pk)
             category.delete()
+            all_expenditures=Expenditure.objects.filter(is_binned=False)
+            for expenditure in all_expenditures:
+                expenditure.category = None
+                expenditure.is_binned = True
+                expenditure.save()
             # Activity.objects.create(user=request.user, image = "images/delete.png", name = f'You\'ve deleted \"{expenditure_title}\" expenditure')
             return redirect('category_bin')
         except Expenditure.DoesNotExist:

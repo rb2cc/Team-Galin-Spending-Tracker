@@ -15,6 +15,9 @@
             <div class = "row">
                 <h6><a href="edit_category/{{ overall.id }}">⚙️</a></h6>
             </div>
+            <div>
+                <a href="{% url 'category_bin' %}">Category Bin</a> 
+            </div>
         </div>
     </div>
     {% for category in categories %}
@@ -23,15 +26,41 @@
                 <h5 class="card-title">{{ category.name }}</h5>
                 <p class="card-text">Weekly Limit: {{ category.week_limit }}</p>
                 <div class = "row">
-                    {% comment %} <div class="filter_search">  {% endcomment %}
-                        <h6><a href="edit_category/{{ category.id }}">⚙️</a></h6>
                         <div class="action_button" >
+                            <label>
+                                {% comment %} <input class="action_button" type="radio" name="radio_pk" data-bs-toggle="modal" data-bs-target="#bin_category_modal" value = {{ category.id }} > 🗑  {% endcomment %}
+                                <input value="🗑" type="button" data-bs-toggle="modal" data-bs-target="#edit_category_modal{{ forloop.counter }}"> edit test      
+                            </label>
+                        <a href="edit_category/{{ category.id }}">⚙️</a>
+                        <!-- edit modal -->
+                        <!-- modal used as edit confirmation -->
+                        <div class="modal fade" id="edit_category_modal{{ forloop.counter }}" tabindex="-1" aria-labelledby="edit_category_modal_label" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="edit_category_modal_label">Edit Category</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                        <div class="modal-body">
+                                            <form method="post" enctype='multipart/form-data'>
+                                                {% csrf_token %}
+                                                {% include 'partials/bootstrap_form.html' with form=form %}
+                                                <input type="submit" value="Update" class='btn btn-primary'>
+                                            </form>
+                                        </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancel</button>
+                                        <h6><a href="bin_category/{{ category.id }}" class="btn btn-danger">Bin</a></h6>
+                                        {% comment %} <button type="submit" class="btn btn-danger"  form="category_form" formaction = "../delete" method="POST">Bin</button> {% endcomment %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                             <label>
                                 {% comment %} <input class="action_button" type="radio" name="radio_pk" data-bs-toggle="modal" data-bs-target="#bin_category_modal" value = {{ category.id }} > 🗑  {% endcomment %}
                                 <input value="🗑" type="button" data-bs-toggle="modal" data-bs-target="#bin_category_modal{{ forloop.counter }}"> 🗑        
                             </label>
                         </div>
-                    {% comment %} </div> {% endcomment %}
                         <!-- bin modal -->
                         <!-- modal used as bin confirmation -->
                         <div class="modal fade" id="bin_category_modal{{ forloop.counter }}" tabindex="-1" aria-labelledby="bin_category_modal_label" aria-hidden="true">
@@ -42,8 +71,9 @@
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                         <div class="modal-body">
-                                            <p>Are you sure you want to move this category into the bin?</p>
-                                            <p>You may recover or fully delete this category inside the bin page</p>
+                                            <h4><p>Are you sure you want to move this category into the bin?</p></h4>
+                                            <p>*You may recover or fully delete this category in the category bin page</p>
+                                            <p>*All expenditures under this category will be moved to the expenditure bin</p>
                                         </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancel</button>
@@ -57,7 +87,6 @@
             </div>
         </div>
     {% endfor %}
-    
 </div>
 
 {% endblock %}

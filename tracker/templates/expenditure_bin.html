@@ -29,25 +29,30 @@
                             <td width="90px">£{{ binned.expense }}</td>
                             <td width="130px">{{ binned.date_created }}</td>
                             <td width="680px">{{ binned.description }}</td>
-                            {% if binned.image %}
-                            <!-- This code can show full images.
-                                <td style="max-width:0px"><img src="media/{{ spending.image }} " alt="image"></td>
-                            -->  
-                                <td><a href="{{ binned.image.url }}">View</a></td>
+                            <td >
+                                <input value="❕" class="image_button" type="button" data-bs-toggle="modal" data-bs-target="#image_warn_modal">
+                            </td>
+                            {% if not binned.category.is_binned %}
+                                <td style="background-color: #efe8fa;">
+                                    <div class="action_button" >
+                                        <label>
+                                            <input class="action_button" type="radio" name="radio_pk" data-bs-toggle="modal" data-bs-target="#recover_modal" value = {{ binned.id }} > ♻️ 
+                                        </label>
+                                    </div>
+                                </td>
                             {% else %}
-                                <td><a> None </a></td>
+                                <td style="background-color: #efe8fa;">
+                                    <div class="action_button" >
+                                        <label>
+                                            <input class="action_button" type="radio" name="radio_pk" data-bs-toggle="modal" data-bs-target="#warn_modal" > ♻️ 
+                                        </label>
+                                    </div>
+                                </td>
                             {% endif %}
                             <td style="background-color: #efe8fa;">
                                 <div class="action_button" >
                                     <label>
-                                        <input class="action_button" type="radio" name="radio_pk" data-bs-toggle="modal" data-bs-target="#recover_modal" value = {{ binned.id }} > Recover 
-                                    </label>
-                                </div>
-                            </td>
-                            <td style="background-color: #efe8fa;">
-                                <div class="action_button" >
-                                    <label>
-                                        <input class="action_button" type="radio" name="radio_pk" data-bs-toggle="modal" data-bs-target="#delete_modal" value = {{ binned.id }} > 🗑 
+                                        <input class="action_button" type="radio" name="radio_pk" data-bs-toggle="modal" data-bs-target="#delete_modal" value = {{ binned.id }} > ☠️
                                     </label>
                                 </div>
                             </td>
@@ -68,8 +73,8 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <p>Are you sure you want to delete this expenditure?</p>
-          <p>You will not be able to recover this expenditure after deletion.</p>
+          <h4><p>Are you sure you want to delete this expenditure?</p></h4>
+          <p>*You will not be able to recover this expenditure after deletion.</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancel</button>
@@ -79,7 +84,7 @@
     </div>
 </div>
 <!-- recover modal -->
-<!-- modal used as delete confirmation -->
+<!-- modal used as recover confirmation -->
 <div class="modal fade" id="recover_modal" tabindex="-1" aria-labelledby="recover_modal_label" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -88,14 +93,50 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <p>Are you sure you want to recover this expenditure?</p> 
-          <p>This expenditure will be moved back into your main expenditure list</p>
+          <h4><p>Are you sure you want to recover this expenditure?</p></h4> 
+          <p>*This expenditure will be moved back into your main expenditure list</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancel</button>
           <button type="submit" class="btn btn-success"  form="expenditure_form" formaction = "../recover_expenditure" method="POST">Recover</button>
         </div>
       </div>
+    </div>
+</div>
+<!-- warn modal -->
+<!-- modal used to warn users -->
+<div class="modal fade" id="warn_modal" tabindex="-1" aria-labelledby="warn_modal_label" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="warn_modal_label">Recover Expenditure</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <h4><p>You cannot recover this expenditure</p></h4> 
+          <p>*This expenditure's category is currently in the bin</p>
+          <p>*Recovering the category will recover this expenditure</p>
+          <a href="{% url 'category_bin' %}">Category Bin</a> 
+        </div>
+        <div class="modal-footer">
+        </div>
+      </div>
+    </div>
+</div>
+<!-- image warn modal -->
+<!-- modal used to warn user -->
+<div class="modal fade" id="image_warn_modal" tabindex="-1" aria-labelledby="image_warn_modal_label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="image_warn_modal_label">Viewing Image</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h4>You cannot view binned expenditure images</h4>
+                <p>*Recover this expenditure to view the image</p>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

@@ -63,7 +63,7 @@
                             <td width="680px">{{ spending.description }}</td>
                             {% if spending.image %}
                                 <td >
-                                    <input value="👀" class="image_button" type="button" data-bs-toggle="modal" data-bs-target="#image_modal{{ forloop.counter }}">
+                                    <input value="❕" class="image_button" type="button" data-bs-toggle="modal" data-bs-target="#image_modal{{ forloop.counter }}">
                                 </td>
                                     <!-- image modal -->
                                     <!-- modal used to view images -->
@@ -82,7 +82,7 @@
                                         </div>
                                     </div>
                             {% else %}
-                                <td>None</td>
+                                <td><input value="❔" class="image_button_locked" type="button"></td>
                             {% endif %}
                             <td style="background-color: #efe8fa;"><a class = "btn btn-sm clear" href="{% url 'update_expenditure' spending.id %}"> ⚙️ </a></td>
                             <td style="background-color: #efe8fa;">
@@ -109,8 +109,8 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <p>Are you sure you want to move this expenditure into the bin?</p>
-          <p>You may recover or fully delete this expenditure inside the bin page</p>
+          <h4><p>Are you sure you want to move this expenditure into the bin?</p></h4>
+          <p>*You may recover or fully delete this expenditure in the expenditure bin page</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancel</button>
