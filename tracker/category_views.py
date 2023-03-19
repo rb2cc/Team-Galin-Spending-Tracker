@@ -126,6 +126,10 @@ def category_progress(request, offset):
     overall_colour = _get_colour(overall_percent)
     val_dict = {k:_make_percent(v, k, user) for k, v in val_dict.items()}
     val_dict = {k:(v, _get_colour(v)) for k, v in val_dict.items()}
+    prev_week = offset + 1
+    next_week = offset -1
+    if next_week < 0:
+        next_week = 0
     return render(request, 'category_progress.html', {
         'cat_map':val_dict,
         'overall_percent':overall_percent,
@@ -133,4 +137,6 @@ def category_progress(request, offset):
         'offset':offset,
         'start':week_start,
         'end':week_end,
+        'prev':prev_week,
+        'next':next_week,
     })
