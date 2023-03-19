@@ -1026,6 +1026,9 @@ def admin_dashboard(request):
                         user.is_staff = True
                         user.save()
                     return redirect('admin_dashboard')
+                else:
+                    messages.info(request, 'Unsuccessful creation of user, please try again ensuring email is valid and passwords match.')
+                    return redirect('admin_dashboard')
 
             # IF CREATE CATEGORY BUTTON CLICKED
             if 'create_category' in request.POST:
@@ -1035,12 +1038,18 @@ def admin_dashboard(request):
                     category.is_global = True
                     category.save()
                     return redirect('admin_dashboard')
+                else:
+                    messages.info(request, 'Unsuccessful creation of category.')
+                    return redirect('admin_dashboard')
 
             # IF CREATE CHALLENGE BUTTON CLICKED
             if 'create_challenge' in request.POST:
                 form = AddChallengeForm(request.POST)
                 if form.is_valid():
                     challenge = form.save()
+                    return redirect('admin_dashboard')
+                else:
+                    messages.info(request, 'Unsuccessful creation of challenge')
                     return redirect('admin_dashboard')
 
             if 'create_achievement' in request.POST:
@@ -1050,13 +1059,15 @@ def admin_dashboard(request):
                     achievement.badge = "badges/custom.png"
                     achievement.save()
                     return redirect('admin_dashboard')
+                else:
+                    messages.info(request, 'Unsuccessful creation of achievement')
+                    return redirect('admin_dashboard')
 
         else:
             # DEFAULT TABLE TO LOAD ON PAGE
-            user_table = 'user_table.html'
             user_list = User.objects.all().order_by('id')
             if not request.user.is_superuser:
-                user_list = User.objects.filter(is_staff = False)
+                user_list = User.objects.filter(is_staff = False).order_by('id')
             user_paginator = Paginator(user_list, 8)
             user_page_number = request.GET.get('page')
             user_page = user_paginator.get_page(user_page_number)
@@ -1082,7 +1093,6 @@ def admin_dashboard(request):
             achievement_form = AddAchievementForm()
 
     else:
-        print("ENTERED ELSE")
         return redirect('landing_page')
 
     context = {
@@ -1091,7 +1101,6 @@ def admin_dashboard(request):
         'category_page': category_page,
         'challenge_page': challenge_page,
         'achievement_page': achievement_page,
-        'user_table': user_table,
         'user_form': user_form,
         'category_form': category_form,
         'challenge_form': challenge_form,
@@ -1102,7 +1111,7 @@ def admin_dashboard(request):
 def user_table(request):
   user_list = User.objects.all().order_by('id')
   if not request.user.is_superuser:
-      user_list = User.objects.filter(is_staff = False)
+      user_list = User.objects.filter(is_staff = False).order_by('id')
   user_paginator = Paginator(user_list, 8)
   user_page_number = request.GET.get('page')
   user_page = user_paginator.get_page(user_page_number)
@@ -1169,6 +1178,8 @@ def delete(request):
 
         else:
             return redirect('admin_dashboard')
+    else:
+        return redirect('admin_dashboard')
 
 
 def user_promote(request):
@@ -1185,6 +1196,8 @@ def user_promote(request):
 
         except User.DoesNotExist:
             return redirect('admin_dashboard')
+    else:
+        return redirect('admin_dashboard')
 
 def user_demote(request):
     if request.method == "POST":
@@ -1203,6 +1216,8 @@ def user_demote(request):
 
         except User.DoesNotExist:
             return redirect('admin_dashboard')
+    else:
+        return redirect('admin_dashboard')
 
 
 # def display_expenditures(request):

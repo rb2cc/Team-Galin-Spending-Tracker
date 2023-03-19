@@ -10,8 +10,7 @@ class DeleteViewTestCase(TestCase):
 
     def setUp(self):
         self.c = Client()
-        superuser = User.objects.create_superuser(email='superuser@email.com', password='Password123')
-        self.c.login(email='superuser@email.com', password='Password123')
+        self.superuser = User.objects.create_superuser(email='superuser@email.com', password='Password123')
         self.url = reverse('delete')
         self.user = User.objects.get(email = 'galin@email.com')
         self.category = Category.objects.create(name = 'Category', week_limit = 10)
@@ -21,7 +20,13 @@ class DeleteViewTestCase(TestCase):
     def test_delete_url(self):
         self.assertEqual(self.url, '/delete')
 
+    def test_get_request(self):
+        self.c.login(email='superuser@email.com', password='Password123')
+        response = self.c.get(self.url)
+        self.assertRedirects(response, reverse('admin_dashboard'))
+
     def test_delete_view_deletes_user(self):
+        self.c.login(email='superuser@email.com', password='Password123')
         before_count = User.objects.count()
         response = self.c.post(self.url, {'user_pk': self.user.pk})
         after_count = User.objects.count()
@@ -29,6 +34,7 @@ class DeleteViewTestCase(TestCase):
         self.assertRedirects(response, reverse('admin_dashboard'))
 
     def test_delete_user_does_not_exist(self):
+        self.c.login(email='superuser@email.com', password='Password123')
         before_count = User.objects.count()
         response = self.c.post(self.url, {'user_pk': 9999})
         after_count = User.objects.count()
@@ -36,6 +42,7 @@ class DeleteViewTestCase(TestCase):
         self.assertRedirects(response, reverse('admin_dashboard'))
 
     def test_delete_view_deletes_category(self):
+        self.c.login(email='superuser@email.com', password='Password123')
         before_count = Category.objects.count()
         response = self.c.post(self.url, {'category_pk': self.category.pk})
         after_count = Category.objects.count()
@@ -43,6 +50,7 @@ class DeleteViewTestCase(TestCase):
         self.assertRedirects(response, reverse('admin_dashboard'))
 
     def test_delete_category_does_not_exist(self):
+        self.c.login(email='superuser@email.com', password='Password123')
         before_count = Category.objects.count()
         response = self.c.post(self.url, {'category_pk': 9999})
         after_count = Category.objects.count()
@@ -50,6 +58,7 @@ class DeleteViewTestCase(TestCase):
         self.assertRedirects(response, reverse('admin_dashboard'))
 
     def test_delete_view_deletes_challenge(self):
+        self.c.login(email='superuser@email.com', password='Password123')
         before_count = Challenge.objects.count()
         response = self.c.post(self.url, {'challenge_pk': self.challenge.pk})
         after_count = Challenge.objects.count()
@@ -57,6 +66,7 @@ class DeleteViewTestCase(TestCase):
         self.assertRedirects(response, reverse('admin_dashboard'))
 
     def test_delete_challenge_does_not_exist(self):
+        self.c.login(email='superuser@email.com', password='Password123')
         before_count = Challenge.objects.count()
         response = self.c.post(self.url, {'challenge_pk': 9999})
         after_count = Challenge.objects.count()
@@ -64,6 +74,7 @@ class DeleteViewTestCase(TestCase):
         self.assertRedirects(response, reverse('admin_dashboard'))
 
     def test_delete_view_deletes_achievement(self):
+        self.c.login(email='superuser@email.com', password='Password123')
         before_count = Achievement.objects.count()
         response = self.c.post(self.url, {'achievement_pk': self.achievement.pk})
         after_count = Achievement.objects.count()
@@ -71,8 +82,14 @@ class DeleteViewTestCase(TestCase):
         self.assertRedirects(response, reverse('admin_dashboard'))
 
     def test_delete_achievement_does_not_exist(self):
+        self.c.login(email='superuser@email.com', password='Password123')
         before_count = Achievement.objects.count()
         response = self.c.post(self.url, {'achievement_pk': 9999})
         after_count = Achievement.objects.count()
         self.assertEqual(after_count, before_count)
+        self.assertRedirects(response, reverse('admin_dashboard'))
+
+    def test_bad_delete(self):
+        self.c.login(email='superuser@email.com', password='Password123')
+        response = self.c.post(self.url, data = {'non_existent_pk': 1})
         self.assertRedirects(response, reverse('admin_dashboard'))
