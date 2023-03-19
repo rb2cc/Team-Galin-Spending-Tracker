@@ -25,3 +25,23 @@
 {% endfor %}
 </table>
 </form>
+
+<div id="challenge-pagination">
+<nav aria-label="Page navigation example">
+  <ul class="pagination pagination-sm">
+    {% if challenge_page.has_previous %}
+    <li class="page-item" ><a class="page-link" href="?page={{ challenge_page.previous_page_number }}&view=Challenges" style="color: #525252;">&larr;</a></li>
+        <li class="page-item"><a class="page-link" href="?page=1&view=Challenges" style="color: #525252;">1</a></li>
+    {% endif %}
+
+    <li class="page-item disabled"><a href='#' class="page-link" style="color: #9c9a9a;">
+      Page {{ challenge_page.number }} of {{ challenge_page.paginator.num_pages }}
+    </a></li>
+
+    {% if challenge_page.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ challenge_page.paginator.num_pages }}&view=Challenges" style="color: #525252;">{{ challenge_page.paginator.num_pages }}</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ challenge_page.next_page_number }}&view=Challenges" style="color: #525252;d">&rarr;</a></li></li>
+    {% endif %}
+  </ul>
+</nav>
+</div>

@@ -26,11 +26,12 @@
 </table>
 </form>
 
+<div id="user-pagination">
 <nav aria-label="Page navigation example">
   <ul class="pagination pagination-sm">
     {% if user_page.has_previous %}
-    <li class="page-item" ><a class="page-link" href="?page={{ user_page.previous_page_number }}" style="color: #525252;">&larr;</a></li>
-        <li class="page-item"><a class="page-link" href="?page=1" style="color: #525252;">1</a></li>
+    <li class="page-item" ><a class="page-link" href="?page={{ user_page.previous_page_number }}&view=Users" style="color: #525252;">&larr;</a></li>
+        <li class="page-item"><a class="page-link" href="?page=1&view=Users" style="color: #525252;">1</a></li>
     {% endif %}
 
     <li class="page-item disabled"><a href='#' class="page-link" style="color: #9c9a9a;">
@@ -38,8 +39,9 @@
     </a></li>
 
     {% if user_page.has_next %}
-        <li class="page-item"><a class="page-link" href="?page={{ user_page.paginator.num_pages }}" style="color: #525252;">{{ user_page.paginator.num_pages }}</a></li>
-        <li class="page-item"><a class="page-link" href="?page={{ user_page.next_page_number }}" style="color: #525252;d">&rarr;</a></li></li>
+        <li class="page-item"><a class="page-link" href="?page={{ user_page.paginator.num_pages }}&view=Users" style="color: #525252;">{{ user_page.paginator.num_pages }}</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ user_page.next_page_number }}&view=Users" style="color: #525252;d">&rarr;</a></li></li>
     {% endif %}
   </ul>
 </nav>
+</div>

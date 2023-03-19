@@ -4,14 +4,14 @@ from tracker.models import User, Category, Challenge, Achievement
 import datetime
 
 """Unit tests for the admin_dashboard view"""
-class DeleteViewTestCase(TestCase):
+class AdminDashboardViewTestCase(TestCase):
 
     fixtures = ['tracker/tests/fixtures/default_user.json']
 
     def setUp(self):
         self.c = Client()
-        superuser = User.objects.create_superuser(email='superuser@email.com', password='Password123')
-        self.c.login(email='superuser@email.com', password='Password123')
+        self.superuser = User.objects.create_superuser(email='superuser@email.com', password='Password123')
+
         self.url = reverse('admin_dashboard')
         self.user = User.objects.get(email = 'galin@email.com')
         self.category = Category.objects.create(name = 'Category', week_limit = 10)
@@ -20,3 +20,8 @@ class DeleteViewTestCase(TestCase):
 
     def test_delete_url(self):
         self.assertEqual(self.url, '/admin_dashboard/')
+
+    def test_non_staff_trying_to_access_page(self):
+        self.c.login(email='galin@email.com', password='Password123')
+        # response = self.c.get(self.url, follow=True)
+        # self.assertRedirects(response, reverse('landing_page'))

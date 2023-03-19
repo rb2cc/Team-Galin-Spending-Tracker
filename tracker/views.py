@@ -1014,6 +1014,7 @@ def superuser_dashboard(request):
     return render(request, 'superuser_dashboard.html', {'form': form, 'page': page})
 
 def admin_dashboard(request):
+    view = request.GET.get('view', 'Users')
     if (request.user.is_staff == True):
         if request.method == 'POST':
             # IF CREATE USER BUTTON CLICKED
@@ -1056,46 +1057,74 @@ def admin_dashboard(request):
             user_list = User.objects.all().order_by('id')
             if not request.user.is_superuser:
                 user_list = User.objects.filter(is_staff = False)
-            user_paginator = Paginator(user_list, 5)
+            user_paginator = Paginator(user_list, 8)
             user_page_number = request.GET.get('page')
             user_page = user_paginator.get_page(user_page_number)
+
+            category_list = Category.objects.all().order_by('id')
+            category_paginator = Paginator(category_list, 8)
+            category_page_number = request.GET.get('page')
+            category_page = category_paginator.get_page(category_page_number)
+
+            challenge_list = Challenge.objects.all().order_by('id')
+            challenge_paginator = Paginator(challenge_list, 8)
+            challenge_page_number = request.GET.get('page')
+            challenge_page = challenge_paginator.get_page(challenge_page_number)
+
+            achievement_list = Achievement.objects.all().order_by('id')
+            achievement_paginator = Paginator(achievement_list, 8)
+            achievement_page_number = request.GET.get('page')
+            achievement_page = achievement_paginator.get_page(achievement_page_number)
 
             user_form = CreateUserForm()
             category_form = AddCategoryForm()
             challenge_form = AddChallengeForm()
             achievement_form = AddAchievementForm()
+
     else:
+        print("ENTERED ELSE")
         return redirect('landing_page')
 
-    return render(request, 'admin_dashboard.html', {'user_page': user_page,'user_table': user_table,
-        'user_form': user_form, 'category_form': category_form, 'challenge_form': challenge_form, 'achievement_form': achievement_form})
+    context = {
+        'view': view,
+        'user_page': user_page,
+        'category_page': category_page,
+        'challenge_page': challenge_page,
+        'achievement_page': achievement_page,
+        'user_table': user_table,
+        'user_form': user_form,
+        'category_form': category_form,
+        'challenge_form': challenge_form,
+        'achievement_form': achievement_form}
+
+    return render(request, 'admin_dashboard.html', context)
 
 def user_table(request):
   user_list = User.objects.all().order_by('id')
   if not request.user.is_superuser:
       user_list = User.objects.filter(is_staff = False)
-  user_paginator = Paginator(user_list, 5)
+  user_paginator = Paginator(user_list, 8)
   user_page_number = request.GET.get('page')
   user_page = user_paginator.get_page(user_page_number)
   return render(request, 'user_table.html', {'user_page': user_page})
 
 def category_table(request):
   category_list = Category.objects.all().order_by('id')
-  category_paginator = Paginator(category_list, 5)
+  category_paginator = Paginator(category_list, 8)
   category_page_number = request.GET.get('page')
   category_page = category_paginator.get_page(category_page_number)
   return render(request, 'category_table.html', {'category_page': category_page})
 
 def challenge_table(request):
   challenge_list = Challenge.objects.all().order_by('id')
-  challenge_paginator = Paginator(challenge_list, 5)
+  challenge_paginator = Paginator(challenge_list, 8)
   challenge_page_number = request.GET.get('page')
   challenge_page = challenge_paginator.get_page(challenge_page_number)
   return render(request, 'challenge_table.html', {'challenge_page': challenge_page})
 
 def achievement_table(request):
   achievement_list = Achievement.objects.all().order_by('id')
-  achievement_paginator = Paginator(achievement_list, 5)
+  achievement_paginator = Paginator(achievement_list, 8)
   achievement_page_number = request.GET.get('page')
   achievement_page = achievement_paginator.get_page(achievement_page_number)
   return render(request, 'achievement_table.html', {'achievement_page': achievement_page})

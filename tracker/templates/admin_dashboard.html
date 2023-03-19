@@ -5,9 +5,17 @@
       <div class="col-9">
 
       {# TABLE #}
-      <h1 id="tableHeader">Users</h1>
+      <h2 id="tableHeader">{{ view }}</h2>
       <div id="template">
-        {% include user_table %}
+        {% if view == 'Categories' %}
+          {% include 'category_table.html' %}
+        {% elif view == 'Challenges' %}
+          {% include 'challenge_table.html' %}
+        {% elif view == 'Achievements' %}
+          {% include 'achievement_table.html' %}
+        {% else %}
+          {% include 'user_table.html' %}
+        {% endif %}
       </div>
 
 
@@ -22,10 +30,10 @@
 
         <label for="view_select">Select view in table: </label>
         <select class="form-select" name="view_select" id="view_select" onchange="loadTable()">
-          <option value="1" selected>Users</option>
-          <option value="2">Categories</option>
-          <option value="3">Challenges</option>
-          <option value="4">Achievements</option>
+          <option value="1" {% if view == 'Users' %} selected {% endif %}>Users</option>
+          <option value="2" {% if view == 'Categories' %} selected {% endif %}>Categories</option>
+          <option value="3" {% if view == 'Challenges' %} selected {% endif %}>Challenges</option>
+          <option value="4" {% if view == 'Achievements' %} selected {% endif %}>Achievements</option>
         </select>
 
         <button type="button" id="delete" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</button>
@@ -166,29 +174,47 @@
     {# JS #}
     <script type="text/javascript">
 
+    {% if request.user.is_superuser %}
+    document.addEventListener('DOMContentLoaded', function() {
+      var table_header = document.getElementById("tableHeader").innerHTML
+      if (table_header != "Users") {
+        document.getElementById("promote_button").disabled = true;
+        document.getElementById("demote_button").disabled = true;
+      }
+    })
+    {% endif %}
+
     function loadTable() {
       var select_value = document.getElementById("view_select").value;
       var table_header = document.getElementById("tableHeader");
       if (select_value == 1) {
         var url = "{% url 'user_table' %}";
         table_header.innerHTML = "Users";
+        {% if request.user.is_superuser %}
         document.getElementById("promote_button").disabled = false;
         document.getElementById("demote_button").disabled = false;
+        {% endif %}
       } else if (select_value == 2) {
           var url = "{% url 'category_table' %}";
           table_header.innerHTML = "Categories";
+          {% if request.user.is_superuser %}
           document.getElementById("promote_button").disabled = true;
           document.getElementById("demote_button").disabled = true;
+          {% endif %}
       } else if (select_value == 3) {
           var url = "{% url 'challenge_table' %}";
           table_header.innerHTML = "Challenges";
+          {% if request.user.is_superuser %}
           document.getElementById("promote_button").disabled = true;
           document.getElementById("demote_button").disabled = true;
+          {% endif %}
       } else if (select_value == 4) {
           var url = "{% url 'achievement_table' %}";
           table_header.innerHTML = "Achievements";
+          {% if request.user.is_superuser %}
           document.getElementById("promote_button").disabled = true;
           document.getElementById("demote_button").disabled = true;
+          {% endif %}
       }
       else {
         return;
@@ -201,7 +227,6 @@
         }
       });
     }
-
 
 
     </script>
