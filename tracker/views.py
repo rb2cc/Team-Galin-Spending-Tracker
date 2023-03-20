@@ -382,7 +382,7 @@ def edit_category(request, id):
                     activity_name = f'You\'ve changed \"{category.name}\" category week limit from {category_week_limit} to {category.week_limit}'
 
                     Activity.objects.create(user=request.user, image = "images/edit.png", name = activity_name)
-                diff = before_limit - category.week_limit       
+                diff = before_limit - category.week_limit
 
                 overall = Category.objects.filter(is_overall = True).get(users__id=current_user.id)
                 overall.week_limit -= diff
@@ -1589,4 +1589,3 @@ def user_demote(request):
 # def display_expenditures(request):
 #     expenditures = Expenditure.objects.all()
 #     return render(request, 'expenditure_list.html', {'expenditures':expenditures})
-
