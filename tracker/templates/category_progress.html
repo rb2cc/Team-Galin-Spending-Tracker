@@ -2,12 +2,13 @@
 {% block content %}
 <div class="container">
     <div class="col">
-        <h1><a href="{% url 'category_progress' offset=prev %}">←</a></h1>
-    </div>
-    <div class="col">
         <div class="row">
             <div class = "card" style="padding: 10px; margin-bottom: 20px;">
-                <h1 style="text-align: center;">Week: {{ start }} until {{ end }}</h1>
+                <div style="display: flex;">
+                    <span style="float: left; margin: 0;"><a href="{% url 'category_progress' offset=prev %}">←</a></span>
+                    <p style="text-align: center;margin: auto;font-weight: bold;">Week: {{ start }} until {{ end }}</p>
+                    <span style="float: right; margin: 0;"><a href="{% url 'category_progress' offset=next %}">→</a></span>
+                </div>
             </div>
             <div class = "card" style="margin: auto; padding: 20px; padding-bottom: 30px; margin-bottom: 20px;">
                 <h1 style="text-align: center">Overall</h1>
@@ -24,9 +25,6 @@
                 </div>
             {% endfor %}
         </div>
-    </div>
-    <div class="col">
-        <h1><a href="{% url 'category_progress' offset=next %}">→</a></h1>
     </div>
 </div>
 {% endblock %}
