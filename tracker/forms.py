@@ -6,7 +6,7 @@ from .models import User, Post
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm, PasswordResetForm
 
 
-from .models import User, Expenditure, Category
+from .models import User, Expenditure, Category, Challenge, Achievement
 
 
 class LogInForm(forms.Form):
@@ -59,6 +59,50 @@ class SignUpForm(forms.ModelForm):
         )
         return user
 
+class CreateUserForm(forms.ModelForm):
+    """Form enabling superuser to create user."""
+
+    class Meta:
+        """Form options."""
+
+        model = User
+        fields = ['first_name', 'last_name']
+
+    first_name = forms.CharField(label='', widget=forms.TextInput(attrs={'placeholder': 'First Name'}))
+    last_name = forms.CharField(label='', widget=forms.TextInput(attrs={'placeholder': 'Last Name'}))
+    email = forms.CharField(label='', validators=[validate_email] , widget=forms.TextInput(attrs={'placeholder': 'Email'}))
+    new_password = forms.CharField(
+        label='',
+        widget=forms.PasswordInput(attrs={'placeholder': 'Password'}),
+        validators=[RegexValidator(
+            regex=r'^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).*$',
+            message='Password must contain an uppercase character, a lowercase character, a number.'
+        )]
+    )
+    password_confirmation = forms.CharField(
+        label='', widget=forms.PasswordInput(attrs={'placeholder': 'Password Confirmation'}))
+    # will_be_admin = forms.BooleanField(label='Create user as admin?', widget=forms.CheckboxInput(choices='yes'), required=False)
+
+    def clean(self):
+        """Clean the data and generate messages for any errors."""
+
+        super().clean()
+        new_password = self.cleaned_data.get('new_password')
+        password_confirmation = self.cleaned_data.get('password_confirmation')
+        if new_password != password_confirmation:
+            self.add_error('password_confirmation', 'Confirmation does not match password.')
+
+    def save(self):
+        """Create a new user."""
+
+        super().save(commit=False)
+        user = User.objects.create_user(
+            self.cleaned_data.get('email'),
+            first_name=self.cleaned_data.get('first_name'),
+            last_name=self.cleaned_data.get('last_name'),
+            password=self.cleaned_data.get('new_password'),
+        )
+        return user
 
 
 class EditUserForm(UserChangeForm):
@@ -93,14 +137,15 @@ class ExpenditureForm(forms.ModelForm):
     description = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
     expense = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
     title = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
-        
+
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("r")
         super(ExpenditureForm, self).__init__(*args, **kwargs)
 
         #initialises the category queryset so it only shows categories the user is subscribed to (fixes glitch)
         self.fields['category'].queryset = Category.objects.filter(users__id=self.request.user.id)
-        
+
+
     # description = forms.CharField(label="Description", widget=forms.CharField(attrs={'size':100}))
     # field_order=['title', 'description', 'expense']
 
@@ -109,6 +154,7 @@ class UserPasswordResetForm(PasswordResetForm):
         super(UserPasswordResetForm, self).__init__(*args, **kwargs)
     email = forms.EmailField(label='', widget=forms.EmailInput(attrs={'placeholder': 'Email',}))
 
+
 class AddCategoryForm(forms.ModelForm):
     """Form enabling users to create custom categories"""
     class Meta:
@@ -116,8 +162,9 @@ class AddCategoryForm(forms.ModelForm):
         model = Category
         fields = ['name', 'week_limit']
 
-    name = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
-    week_limit = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
+    name = forms.CharField(label='', widget=forms.TextInput(attrs={'style':'width:100%; height:10%', 'placeholder': 'Category Name'}))
+    week_limit = forms.CharField(label='', widget=forms.TextInput(attrs={'style':'width:100%; height:10%', 'placeholder': 'Weekly Limit'}))
+
 
 class ReportForm(forms.Form):
     start_date = forms.DateField(label='Start Date', widget=forms.TextInput(attrs={'type': 'date'}))
@@ -139,7 +186,7 @@ class EditOverallForm(forms.ModelForm):
         if int(limit) < sum:
             raise ValidationError({"week_limit":"The overall limit cannot be less than the sum of other categories."})
         return cleaned_data
-        
+
 
     class Meta:
         """Form options"""
@@ -153,3 +200,29 @@ class PostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = ["title", "content", "forum_categories", "media"]
+
+
+class AddChallengeForm(forms.ModelForm):
+    """Form enabling users to create custom challenges"""
+    class Meta:
+        """Form options."""
+        model = Challenge
+        fields = ['name', 'description', 'points', 'start_date', 'end_date']
+
+    name = forms.CharField(label='', widget=forms.TextInput(attrs={'style':'width:100%; height:10%;', 'placeholder': 'Challenge Name'}))
+    description = forms.CharField(label='', widget=forms.Textarea(attrs={'rows':3, 'placeholder': 'Description'}))
+    points = forms.IntegerField(label='', widget=forms.TextInput(attrs={'style':'width:100%; height:10%', 'placeholder': 'Number Of Points'}))
+    start_date = forms.DateField(label='Start Date', widget=forms.NumberInput(attrs={'style':'width:100%; height:10%', 'placeholder': 'Start Date', 'type': 'date'}))
+    end_date = forms.DateField(label='End Date', widget=forms.NumberInput(attrs={'style':'width:100%; height:10%', 'placeholder': 'Start Date', 'type': 'date'}))
+
+class AddAchievementForm(forms.ModelForm):
+    """Form enabling users to create custom challenges"""
+    class Meta:
+        """Form options."""
+        model = Achievement
+        fields = ['name', 'description', 'criteria']
+
+    name = forms.CharField(label='', widget=forms.TextInput(attrs={'style':'width:100%; height:10%;', 'placeholder': 'Achievement Name'}))
+    description = forms.CharField(label='', widget=forms.Textarea(attrs={'rows':4, 'placeholder': 'Description'}))
+    criteria = forms.CharField(label='', widget=forms.Textarea(attrs={'rows':4, 'placeholder': 'Criteria'}))
+
