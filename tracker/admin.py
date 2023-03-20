@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Expenditure, Category, Challenge, UserChallenge, Level, UserLevel, Achievement, UserAchievement, Activity
+from .models import User, Expenditure, Category, Challenge, UserChallenge, Level, UserLevel, Achievement, UserAchievement, Activity, Avatar
 from .models import Author, Post, Forum_Category, Comment, Reply
 
 admin.site.site_header = 'Admin Dashboard'
@@ -14,8 +14,8 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     """Configuration fo the admin interface for categories."""
-    list_display = ('name', 'week_limit', 'is_global', 'is_overall')
-    fields = ('name', 'week_limit', 'is_global', 'is_overall')
+    list_display = ('name', 'week_limit', 'is_global', 'is_overall', 'is_binned')
+    fields = ('name', 'week_limit', 'is_global', 'is_overall', 'is_binned')
 
 @admin.register(Expenditure)
 class ExpenditureAdmin(admin.ModelAdmin):
@@ -64,4 +64,5 @@ admin.site.register(Author)
 admin.site.register(Post)
 admin.site.register(Comment)
 admin.site.register(Reply)
+admin.site.register(Avatar)
 

@@ -5,16 +5,18 @@
     <div class='row'>
         {% if user_achievements %}
             <div class = 'card' style="margin: auto; padding: 20px">
-                <h1 style="text-align: center">My Achievements</h1>
+                <h2 style="text-align: center">My Achievements</h2>
                 <div class="row">
                     {% for user_achievement in user_achievements %}
-                        <div class="col-md-3" style="display: inline-block">
-                            <div class="card-body" style="text-align: center">
+                        <div class="col-md-3" style="display: inline-block; position: relative">
+                            <div class="card-body" style="text-align: center; padding-bottom: 30px;">
                                 <img src="{% static user_achievement.achievement.badge %}">
                                 <h5 class="card-title">{{ user_achievement.achievement.name }}</h5>
                                 <p class="card-text">Description: {{ user_achievement.achievement.description }}</p>
                                 <p class="card-text">Date earned: {{ user_achievement.date_earned }}</p>
-                                <a class="btn btn-primary btn-sm" href="{% url 'share_achievement' user_achievement.id %}">Share</a>
+                                <div class="share-btn" style="position: absolute; bottom: 0; left: 0; right: 0; margin: 0 auto; width: 80%">
+                                    <a class="btn btn-primary btn-sm" href="{% url 'share_achievement' user_achievement.id %}">Share</a>
+                                </div>
                             </div>
                         </div>
                     {% endfor %}

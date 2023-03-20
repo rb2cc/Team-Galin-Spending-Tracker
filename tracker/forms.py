@@ -199,7 +199,8 @@ class EditOverallForm(forms.ModelForm):
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ["title", "content", "forum_categories"]
+        fields = ["title", "content", "forum_categories", "media"]
+
 
 class AddChallengeForm(forms.ModelForm):
     """Form enabling users to create custom challenges"""
@@ -224,3 +225,4 @@ class AddAchievementForm(forms.ModelForm):
     name = forms.CharField(label='', widget=forms.TextInput(attrs={'style':'width:100%; height:10%;', 'placeholder': 'Achievement Name'}))
     description = forms.CharField(label='', widget=forms.Textarea(attrs={'rows':4, 'placeholder': 'Description'}))
     criteria = forms.CharField(label='', widget=forms.Textarea(attrs={'rows':4, 'placeholder': 'Criteria'}))
+

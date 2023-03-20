@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.hashers import make_password
 import random
 from faker import Faker
-from tracker.models import Category, User, Expenditure, Achievement, Challenge
+from tracker.models import Category, User, Expenditure, Achievement, Challenge, Forum_Category
 import datetime
 from django.utils.timezone import make_aware
 
@@ -123,7 +123,22 @@ class Command(BaseCommand):
                     'name': 'Avatar master',
                     'description': 'Create an avatar',
                     'badge': 'avatar_master.png'
-                }
+                },
+                {
+                    'name': 'Planting pioneer',
+                    'description': 'Plant 1 tree in Galin Environmental Project',
+                    'badge': 'custom.png'
+                },
+                {
+                    'name': 'Forest friend',
+                    'description': 'Plant 10 trees in Galin Environmental Project',
+                    'badge': 'custom.png'
+                },
+                {
+                    'name': 'Green guardian',
+                    'description': 'Plant 100 trees in Galin Environmental Project',
+                    'badge': 'custom.png'
+                },
             ]
 
         challenges = [
@@ -215,3 +230,9 @@ class Command(BaseCommand):
                 start_date=challenge['start_date'],
                 end_date=challenge['end_date']
             )
+
+
+        Forum_Category.objects.create(title = "Rent",
+                                      slug = "1",
+                                      description = "Rent")
+

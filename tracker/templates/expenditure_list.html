@@ -62,8 +62,8 @@
                             <td width="130px">{{ spending.date_created }}</td>
                             <td width="680px">{{ spending.description }}</td>
                             {% if spending.image %}
-                                <td>
-                                    <input class="image_button" type="button" name="radio_pk" data-bs-toggle="modal" data-bs-target="#image_modal{{ forloop.counter }}">
+                                <td >
+                                    <input value="❕" class="image_button" type="button" data-bs-toggle="modal" data-bs-target="#image_modal{{ forloop.counter }}">
                                 </td>
                                     <!-- image modal -->
                                     <!-- modal used to view images -->
@@ -82,13 +82,13 @@
                                         </div>
                                     </div>
                             {% else %}
-                                <td>None</td>
+                                <td><input value="❔" class="image_button_locked" type="button"></td>
                             {% endif %}
                             <td style="background-color: #efe8fa;"><a class = "btn btn-sm clear" href="{% url 'update_expenditure' spending.id %}"> ⚙️ </a></td>
                             <td style="background-color: #efe8fa;">
                                 <div class="action_button" >
                                     <label>
-                                        <input class="action_button" type="radio" name="radio_pk" data-bs-toggle="modal" data-bs-target="#bin_modal" value = {{ spending.id }} > 🗑 
+                                        <input class="action_button" type="radio" name="radio_pk" data-bs-toggle="modal" data-bs-target="#bin_modal" value = {{ spending.id }} > 🗑
                                     </label>
                                 </div>
                             </td>
@@ -103,20 +103,20 @@
 <!-- modal used as bin confirmation -->
 <div class="modal fade" id="bin_modal" tabindex="-1" aria-labelledby="bin_modal_label" aria-hidden="true">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="bin_modal_label">Move Expenditure to Bin</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="bin_modal_label">Move Expenditure to Bin</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to move this expenditure into the bin?</p>
+                <p>You may recover or fully delete this expenditure inside the bin page</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-danger"  form="expenditure_form" formaction = "../bin_expenditure" method="POST">Bin</button>
+            </div>
         </div>
-        <div class="modal-body">
-          <p>Are you sure you want to move this expenditure into the bin?</p>
-          <p>You may recover or fully delete this expenditure inside the bin page</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-danger"  form="expenditure_form" formaction = "../bin_expenditure" method="POST">Bin</button>
-        </div>
-      </div>
     </div>
 </div>
 

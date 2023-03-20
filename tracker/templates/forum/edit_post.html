@@ -1,0 +1,16 @@
+{% extends 'base_content.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<h1 style="text-align:center; margin-block:50px; color:rgb(255, 255, 255)"> Edit your post </h1>
+
+<form method="POST" style="margin-left:150px;" enctype="multipart/form-data">
+
+{% csrf_token %}
+
+{% include 'partials/bootstrap_form.html' with form=form %}
+
+    <input type="submit" value="Update" style="margin-block:50px">
+</form>
+
+{% endblock %}

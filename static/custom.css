@@ -254,11 +254,19 @@ input[type=password] {
 
 
 .image_button {
-  border-radius: 12px;
+  border-radius: 9px;
   border-color: darkslateblue;
   background-color: #8765f0;
   width: 23px;
   height: 23px;
+}
+.image_button_locked{
+  border-radius: 9px;
+  border-color: darkslateblue;
+  background-color: grey;
+  width: 23px;
+  height: 23px;
+  opacity: 0.4;
 }
 
 .image {
@@ -641,7 +649,7 @@ footer{
 }
 
 .body .authors img{
-  max-width: 50px;
+  max-width: 80px;
   max-height: 80px;
 }
 
