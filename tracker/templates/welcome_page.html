@@ -1,0 +1,33 @@
+{% extends 'base_content_welcome.html' %}
+{% block content %}
+{% comment %} <style>
+    div {
+        animation: fadeInAnimation ease 0.2s;
+        animation-iteration-count: 1;
+        animation-fill-mode: forwards;
+    }
+    @keyframes fadeInAnimation {
+        0% {
+            opacity: 0;
+        }
+        100% {
+            opacity: 1;
+        }
+    }
+</style> {% endcomment %}
+    <div class="container vh-100">
+        <div class="row h-100">
+            <div class="my-auto">
+                <div class="card welcome-card">
+                    <p></p><p></p>
+                    <p class="cover-text" style="font-weight:bold; text-align:center">Galin Spending Tracker</p>
+                    <p>Welcome</p>
+                    <p>Spending made easy with Galin</p>
+                    {% comment %} <p>Galin keeps your spending organised and within budget</p> {% endcomment %}
+                    <a class="btn btn-primary"> About </a>
+                    <a class="btn btn-primary" href="{% url 'log_in' %}"> Login </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

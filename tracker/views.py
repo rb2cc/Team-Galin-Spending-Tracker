@@ -38,6 +38,9 @@ import json
 # Create your views here.
 
 def home(request):
+    return render(request, 'welcome_page.html')
+
+def log_in(request):
     if request.method == 'POST':
         form = LogInForm(request.POST)
         if form.is_valid():
@@ -49,8 +52,7 @@ def home(request):
                 return redirect('landing_page')
         messages.add_message(request, messages.ERROR, "The credentials provided were invalid")
     form = LogInForm()
-    return render(request, 'home.html', {'form': form})
-
+    return render(request, 'log_in.html', {'form': form})
 
 def sign_up(request):
     if request.method == 'POST':
@@ -87,10 +89,8 @@ def log_out(request):
     logout(request)
     return redirect('home')
 
-
 def user_test(user):
     return user.is_anonymous == False
-
 
 @user_passes_test(user_test, login_url='log_out')
 def landing_page(request):

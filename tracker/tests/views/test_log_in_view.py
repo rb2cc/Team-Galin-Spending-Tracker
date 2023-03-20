@@ -10,16 +10,16 @@ class LogInViewTestCase(TestCase, LogInTester):
     fixtures = ['tracker/tests/fixtures/default_user.json']
 
     def setUp(self):
-        self.url = reverse('home')
+        self.url = reverse('log_in')
         self.user = User.objects.get(email = 'james@example.org')
 
     def test_log_in_url(self):
-        self.assertEqual(self.url, '/')
+        self.assertEqual(self.url, '/log_in/')
 
     def test_get_log_in(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'home.html')
+        self.assertTemplateUsed(response, 'log_in.html')
         form = response.context['form']
         self.assertTrue(isinstance(form, LogInForm))
         self.assertFalse(form.is_bound)
@@ -30,7 +30,7 @@ class LogInViewTestCase(TestCase, LogInTester):
         form_input = {'email':'james@example.org', 'password':'WrongPassword123'}
         response = self.client.post(self.url, form_input)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'home.html')
+        self.assertTemplateUsed(response, 'log_in.html')
         form = response.context['form']
         self.assertTrue(isinstance(form, LogInForm))
         self.assertFalse(form.is_bound)
@@ -55,7 +55,7 @@ class LogInViewTestCase(TestCase, LogInTester):
         form_input = {'email':'james@example.org', 'password':'Lu123'}
         response = self.client.post(self.url, form_input, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'home.html')
+        self.assertTemplateUsed(response, 'log_in.html')
         form = response.context['form']
         self.assertTrue(isinstance(form, LogInForm))
         self.assertFalse(form.is_bound)
@@ -70,6 +70,6 @@ class LogInViewTestCase(TestCase, LogInTester):
         log_out_url = reverse('log_out')
         response = self.client.get(log_out_url, follow=True)
         self.assertFalse(self._is_logged_in())
-        self.assertRedirects(response, self.url, status_code=302, target_status_code=200)
-        self.assertTemplateUsed(response, 'home.html')
+        self.assertRedirects(response, reverse('home'), status_code=302, target_status_code=200)
+        self.assertTemplateUsed(response, 'welcome_page.html')
 

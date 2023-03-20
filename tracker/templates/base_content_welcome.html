@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block body %}
+<video playsinline autoplay muted loop poster="cake.jpg">
+    <source src="static/videos/hongKong.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+<div id="cover-gif">
+    <div class='container vh-100'>
+    {% include 'partials/messages.html' %}
+    {% block content %}
+    {% endblock %}
+    </div>
+</div>
+{% endblock %}
