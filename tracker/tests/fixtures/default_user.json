@@ -9,5 +9,17 @@
         "password": "pbkdf2_sha256$390000$rQeiRUka76xYUx7EdTbCSZ$nF/BP/ICEtN0ujiog+MVAv8+odRp5FQPXtUpLU60KNk=",
         "is_active": true
       }
+    },
+    {
+      "model": "tracker.user",
+      "pk": 8,
+      "fields": {
+        "email": "galin@email.com",
+        "first_name": "Galin",
+        "last_name": "Mihaylov",
+        "password": "pbkdf2_sha256$390000$rQeiRUka76xYUx7EdTbCSZ$nF/BP/ICEtN0ujiog+MVAv8+odRp5FQPXtUpLU60KNk=",
+        "is_active": true
+      }
     }
+
   ]
