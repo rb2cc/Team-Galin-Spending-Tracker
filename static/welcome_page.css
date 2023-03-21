@@ -1,0 +1,57 @@
+.welcome-card {
+    background-color: rgb(9, 7, 7, 0.5);
+    margin-left: auto;
+    margin-right: auto;
+    width: 430px;
+    height: 450px;
+    padding-top: 40px;
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-bottom: 30px;
+    border-radius: 10px;
+    /* background: url('images/bg-01.jpg') no-repeat center; */
+    font-weight:bold; 
+    text-align:center;
+    color: white;
+}
+  
+  .btn-welcome {
+    background: url('images/btn-p.jpg') no-repeat;
+    margin-top: 20px;
+    width: 100%;
+    border-radius: 50px 50px 50px 50px;
+    color:rgb(255, 255, 255);
+  }
+
+  .video-container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%; 
+    overflow: hidden;
+  }
+  .video-container video {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    object-fit: cover;
+  }
+
+  .sub-welcome-card {
+    background-color: rgba(223, 211, 211, 0);
+    margin: 40px;
+    width: 350px;
+    height: 300px;
+    padding-top: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 10px;
+    color: white;
+  }
+  .row-darken {
+    margin-top: 30px;
+    background-color: rgba(9, 7, 7, 0.5);
+    position: absolute;
+    width: 100%;
+  }
