@@ -10,6 +10,8 @@ class LogInViewTestCase(TestCase, LogInTester):
     fixtures = ['tracker/tests/fixtures/default_user.json']
 
     def setUp(self):
+        self.superuser = User.objects.create_superuser(email='superuser@email.com', password='Password123')
+        self.staff = User.objects.create_user(email='staff@email.com', password='Password123', is_staff = True)
         self.url = reverse('home')
         self.user = User.objects.get(email = 'james@example.org')
 
@@ -49,6 +51,22 @@ class LogInViewTestCase(TestCase, LogInTester):
         messages_list = list(response.context['messages'])
         self.assertEqual(len(messages_list),0)
 
+    def test_successful_staff_log_in(self):
+        form_input = {'email':'staff@email.com', 'password':'Password123'}
+        response = self.client.post(self.url, form_input, follow=True)
+        self.assertTrue(self._is_logged_in())
+        response_url = reverse('admin_dashboard')
+        self.assertRedirects(response, response_url, status_code=302, target_status_code=200)
+        self.assertTemplateUsed(response, 'admin_dashboard.html')
+
+    def test_successful_superuser_log_in(self):
+        form_input = {'email':'superuser@email.com', 'password':'Password123'}
+        response = self.client.post(self.url, form_input, follow=True)
+        self.assertTrue(self._is_logged_in())
+        response_url = reverse('admin_dashboard')
+        self.assertRedirects(response, response_url, status_code=302, target_status_code=200)
+        self.assertTemplateUsed(response, 'admin_dashboard.html')
+
     def test_valid_log_in_by_inactive_user(self):
         self.user.is_active = False
         self.user.save()
@@ -72,4 +90,3 @@ class LogInViewTestCase(TestCase, LogInTester):
         self.assertFalse(self._is_logged_in())
         self.assertRedirects(response, self.url, status_code=302, target_status_code=200)
         self.assertTemplateUsed(response, 'home.html')
-

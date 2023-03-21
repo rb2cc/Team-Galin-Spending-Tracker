@@ -14,6 +14,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
+        User.objects.create_superuser(email = "admin@email.com", password = "Password123") # creating admin account
+
         password_data = make_password('Password123')
 
         foodCategory = Category.objects.create(
@@ -53,6 +55,13 @@ class Command(BaseCommand):
             last_name = "Lu",
         )
         james.available_categories.add(foodCategoryLocal,travelCategoryLocal, overallCategory)
+
+        galin = User.objects.create(
+            email = "galin@email.com",
+            password = password_data,
+            first_name = "Galin",
+            last_name = "Mihaylov",
+        )
 
         for _ in range(0,100):
             Expenditure.objects.create(
@@ -232,6 +241,8 @@ class Command(BaseCommand):
                 end_date=challenge['end_date']
             )
 
+
         Forum_Category.objects.create(title = "Rent",
                                       slug = "1",
                                       description = "Rent")
+
