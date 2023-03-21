@@ -1,9 +1,9 @@
 from django.test import TestCase, Client
 from django.urls import reverse
-from tracker.models import User, Post, Comment, Reply, Forum_Category
+from tracker.models import User, Post, Comment, Reply, Forum_Category, UserLevel, Level
 
 
-class DeletePostViewTests(TestCase):
+class DeleteReplyViewTests(TestCase):
 
     fixtures = ['tracker/tests/fixtures/default_user.json']
 
@@ -17,22 +17,18 @@ class DeletePostViewTests(TestCase):
         self.post.forum_categories.add(self.forum_category)
         self.post.comments.add(self.comment)
         self.comment.replies.add(self.reply)
-        self.url = reverse('delete_post', kwargs={'id': self.post.id})
+        self.level = Level.objects.create(name='level', description='description', required_points=10)
+        self.userlevel = UserLevel.objects.create(user=self.user, level=self.level, points=20)
+        self.url = reverse('delete_reply', kwargs={'id': self.reply.id})
 
-    def test_user_can_delete_own_post(self):
+    def test_user_can_delete_own_reply(self):
         self.client.login(email='galin@email.com', password='Password123')
         response = self.client.get(self.url)
-        self.assertRedirects(response, reverse('forum_home'))
-        self.assertFalse(Post.objects.filter(id=self.post.id).exists())
+        self.assertRedirects(response, self.post.get_url())
+        self.assertFalse(Reply.objects.filter(id=self.reply.id).exists())\
 
-    def test_deleting_post_also_deletes_comments_and_replies(self):
+    def test_attempting_to_delete_non_existent_reply(self):
         self.client.login(email='galin@email.com', password='Password123')
-        response = self.client.get(self.url)
-        self.assertFalse(Comment.objects.filter(id=self.comment.id).exists())
-        self.assertFalse(Reply.objects.filter(id=self.reply.id).exists())
-
-    def test_attempting_to_delete_non_existent_post(self):
-        self.client.login(email='galin@email.com', password='Password123')
-        non_existent_post_url = reverse('delete_post', kwargs={'id': self.post.id + 1})
-        response = self.client.get(non_existent_post_url)
+        non_existent_reply_url = reverse('delete_reply', kwargs={'id': self.reply.id + 1})
+        response = self.client.get(non_existent_reply_url)
         self.assertRedirects(response, reverse('forum_home'))

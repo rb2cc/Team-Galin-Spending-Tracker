@@ -31,7 +31,7 @@ class DeleteCommentViewTests(TestCase):
         response = self.client.get(self.url)
         self.assertFalse(Reply.objects.filter(id=self.reply.id).exists())
 
-    def test_attempting_to_delete_non_existent_comment_does_not_raise_error(self):
+    def test_attempting_to_delete_non_existent_comment(self):
         self.client.login(email='galin@email.com', password='Password123')
         non_existent_comment_url = reverse('delete_comment', kwargs={'id': self.comment.id + 1})
         response = self.client.get(non_existent_comment_url)
