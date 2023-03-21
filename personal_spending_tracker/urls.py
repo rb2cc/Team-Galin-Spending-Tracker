@@ -32,6 +32,7 @@ urlpatterns = [
     path('log_out/', views.log_out, name='log_out'),
     path('sign_up/', views.sign_up, name='sign_up'),
     path('landing_page/', views.landing_page, name='landing_page'),
+    path('notifications/', views.notifications, name='notifications'),
 
     #paths concerning password reset
     path('change_password', auth_views.PasswordChangeView.as_view(

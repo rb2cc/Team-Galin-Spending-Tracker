@@ -1,0 +1,57 @@
+
+{% extends 'base_content.html' %}
+{% block content %}
+
+<div class="container">
+    <h1 title="title" style="color:aliceblue;font-size:20px;"> Notifications: </h1>
+    <br>
+
+    {% if not notifications %}
+      <p> No notifications. </p>  
+    {% endif %}
+
+    {% for notification in notifications %}
+     <div class="notification" id="notification{{notification.id}}">
+        <p>  
+            {% if notification.notification_type == 'comment' %}
+                <a class="notification" href="/detail/{{notification.slugg}}/">
+                <strong> {{notification.created_by.username}} </strong> added a comment to your post. <br>
+                <small> {{notification.created_at|timesince}} ago</small>
+                <input type="hidden" name="noti-id" value="{{notification.id}}">
+            </a>
+            <form action="." method="post">
+                {% csrf_token %}
+                <input type="submit" value="Mark As Read" name="noti-form">
+                <input type="hidden" name="noti-id" value="{{notification.id}}">
+            </form>
+                {%elif notification.notification_type == 'reply'%}
+                <a class="notification" href="/detail/{{notification.slugg}}/">
+                    <strong> {{notification.created_by.username}} </strong> replied to your post. <br>
+                    <small> {{notification.created_at|timesince}} ago</small>
+                    <input type="hidden" name="noti-id" value="{{notification.id}}">
+                </a>
+                <form action="." method="post">
+                    {% csrf_token %}
+                    <input type="submit" value="Mark As Read" name="noti-form">
+                    <input type="hidden" name="noti-id" value="{{notification.id}}">
+                </form>
+                {%elif notification.notification_type == 'achievement'%}
+                <a class="notification" href="{% url 'my_achievements' %}">
+                    Well Done! You have completed the <strong> {{notification.achievement_type}} </strong> . <br>
+                    <small> {{notification.created_at|timesince}} ago</small>
+                    <input type="hidden" name="noti-id" value="{{notification.id}}">
+                </a>
+                <form action="." method="post">
+                    {% csrf_token %}
+                    <input type="submit" value="Mark As Read" name="noti-form">
+                    <input type="hidden" name="noti-id" value="{{notification.id}}">
+                </form>
+                {% endif %}
+        </p>
+    </div>
+    {% endfor %}
+
+
+</div>
+
+{% endblock content %}
