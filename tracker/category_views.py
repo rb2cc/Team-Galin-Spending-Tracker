@@ -171,7 +171,7 @@ def delete_category(request):
             category_pk = request.POST['radio_pk']
             category = Category.objects.get(pk=category_pk)
             category.delete()
-            all_expenditures=Expenditure.objects.filter(is_binned=False)
+            all_expenditures=Expenditure.objects.filter(category=category)
             for expenditure in all_expenditures:
                 expenditure.category = None
                 expenditure.is_binned = True
