@@ -2,7 +2,7 @@
 {% load hitcount_tags %}
 {% block content %}
 
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
 <header>
     <!---Search Box--->
     <form action="{% url 'search_result' %}" role="form" method="GET">
@@ -69,8 +69,10 @@
                         <span>Started by <b><a href="{% url 'profile' post.user.id %}"> {% if post.user.username is not None %}
                                                             {{post.user.username|title}}
                                                           {% else %}
-                                                            {{post.user.first_name}} {{post.user.last_name}}{% endif %}</a></b></span>
+                                                            {{post.user.first_name}} {{post.user.last_name}}{% endif %}</a></b>
+                                                          {{ post.date|time_since_custom }}</span>
                         </div>
+
                         <div class="replies">
                             {{post.num_comments}} comments <br> {% get_hit_count for post %} views
                         </div>
