@@ -1,11 +1,13 @@
 from .forms import AddCategoryForm, EditOverallForm
-from .models import User, Category, Activity, UserAchievement, Expenditure
+from .models import User, Category, Activity, UserAchievement, Expenditure, Achievement
 from django.shortcuts import redirect, render
 from .views import activity_points
 
 from  datetime import date
 from dateutil.relativedelta import relativedelta, MO, SU
 from django.utils import timezone
+from django.db import IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 # def category_list(request):
 #     user_id = request.user.id
