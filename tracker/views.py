@@ -1,7 +1,7 @@
 
 from .forms import SignUpForm, LogInForm, EditUserForm, ReportForm, PostForm, CreateUserForm
 from django.contrib.auth.forms import UserChangeForm
-from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel, Activity, Post, Forum_Category, Comment, Reply, Avatar
+from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel, Activity, Post, Forum_Category, Comment, Reply, Avatar, Notification
 from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm, EditOverallForm, AddChallengeForm, AddAchievementForm
 
 
@@ -20,7 +20,7 @@ from django.views.generic import TemplateView
 from datetime import date, timedelta, datetime
 from django.utils import timezone
 from django.utils.datastructures import MultiValueDictKeyError
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.db import IntegrityError
 from math import floor
 from urllib.parse import urlencode, unquote
@@ -45,6 +45,9 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Tree
 import json
+
+from .utils import create_notification, create_achievement_notification
+from .send_emails import Emailer
 
 
 # Create your views here.
@@ -86,10 +89,13 @@ def sign_up(request):
                     UserAchievement.objects.create(user=request.user, achievement = Achievement.objects.get(name="New user"))
                 except ObjectDoesNotExist:
                     pass
-                Activity.objects.create(user=request.user, image = "images/user.png", name = "You've created an account on Galin's Spending Tracker")
-                Activity.objects.create(user=request.user, image = "badges/new_user.png", name = "You've earned \"New user\" achievement")
+                sign_up_achievement_1 = Activity.objects.create(user=request.user, image = "images/user.png", name = "You've created an account on Galin's Spending Tracker")
+                sign_up_achievement_2 =Activity.objects.create(user=request.user, image = "badges/new_user.png", name = "You've earned \"New user\" achievement")
                 overall = Category.objects.create(name="Overall", week_limit=overall_count, is_overall = True)
                 user.available_categories.add(overall)
+                create_achievement_notification(request, request.user, "achievement", sign_up_achievement_1.name)
+                create_achievement_notification(request, request.user, "achievement", sign_up_achievement_2.name)
+                Emailer.send_register_email("Account Registration", request.user.email, request.user.first_name)
                 return redirect('landing_page')
             else:
                 messages.add_message(request, messages.ERROR, "This email has already been registered")
@@ -349,12 +355,11 @@ def posts(request, slug):
         "posts": posts,
         "forum": category,
         "title": "Posts",
-
     }
 
     return render(request, 'forum/posts.html', context)
 
-# @login_required(login_url=reverse_lazy("login"))
+# Displays details of a forum posts -> Post, comments and replies.)
 def detail(request, slug):
     post = get_object_or_404(Post, slug=slug)
     posts = Post.objects.all()
@@ -365,19 +370,35 @@ def detail(request, slug):
     user_levels = {}
     user_tier_names = {}
 
-    if "comment-form" in request.POST:
-        comment = request.POST.get("comment")
-        media = request.FILES.get("media")
-        new_comment, created = Comment.objects.get_or_create(user=author, content=comment, media=media)
-        post.comments.add(new_comment.id)
 
-    if "reply-form" in request.POST:
-        reply = request.POST.get("reply")
-        media = request.FILES.get("media")
-        comment_id = request.POST.get("comment-id")
-        comment_obj = Comment.objects.get(id=comment_id)
-        new_reply, created = Reply.objects.get_or_create(user=author, content=reply, media=media)
-        comment_obj.replies.add(new_reply.id)
+    if request.user.is_authenticated: 
+        if "comment-form" in request.POST:
+            comment = request.POST.get("comment")
+            media = request.FILES.get("media")
+            new_comment, created = Comment.objects.get_or_create(user=author, content=comment, media=media)
+            post.comments.add(new_comment.id)
+            create_forum_activity(request, "made", post, new_comment)
+            check_forum_user_achievements(request)
+
+            if(request.user != post.user):
+                create_notification(request, post.user, 'comment', slug)
+
+        if "reply-form" in request.POST:
+            reply = request.POST.get("reply")
+            media = request.FILES.get("media")
+            comment_id = request.POST.get("comment-id")
+            comment_obj = Comment.objects.get(id=comment_id)
+            new_reply, created = Reply.objects.get_or_create(user=author, content=reply, media=media)
+            comment_obj.replies.add(new_reply.id)
+            create_forum_activity(request, "left", post, comment_obj, new_reply)
+            check_forum_user_achievements(request)
+
+            if(request.user != comment_obj.user):
+                create_notification(request, comment_obj.user, 'reply', slug)
+
+    else:
+        messages.info(request, 'You need to be logged in to post')
+        return redirect("home")
 
     for comment in post.comments.all():
         points, avatars, tier_colours, user_levels, user_tier_names = get_forum_user_info(points, avatars, tier_colours, user_levels, user_tier_names, comment)
@@ -398,6 +419,20 @@ def detail(request, slug):
     }
     update_views(request, post)
     return render(request, 'forum/detail.html', context)
+
+
+# Moves to notification page and updates notifications.
+
+@login_required
+def notifications(request):
+
+    if "noti-form" in request.POST:
+        noti_id = request.POST.get("noti-id")
+        noti_obj = Notification.objects.get(id=noti_id)
+        noti_obj.is_read = True
+        noti_obj.save()
+    
+    return render(request, 'notifications.html')
 
 def get_forum_user_info(points, avatars, tier_colours, user_levels, user_tier_names, forum_object):
     user_level = UserLevel.objects.get(user=forum_object.user)
@@ -430,7 +465,9 @@ def create_post(request):
             new_post.user = author
             new_post.save()
             form.save_m2m()
-            return redirect("forum_home")
+            create_forum_activity(request, "created", new_post)
+            check_forum_user_achievements(request)
+            return redirect(new_post.get_url())
     context.update({
         "form": form,
         "title": "Create New Post"
@@ -444,6 +481,7 @@ def delete_post(request, id):
         for comment in comments:
             comment.replies.all().delete()
         comments.all().delete()
+        create_forum_activity(request, "deleted", post)
         post.delete()
     except Post.DoesNotExist:
         pass
@@ -453,12 +491,14 @@ def edit_post(request, id):
     try:
         post = Post.objects.get(id=id)
         if request.method == "POST":
-            form = PostForm(request.POST, instance=post)
+            form = PostForm(request.POST, request.FILES, instance=post)
             if form.is_valid():
                 post = form.save(commit=False)
+                post.edited_at = timezone.now()
                 post.save()
                 form.save_m2m()
-                return redirect('forum_home')
+                create_forum_activity(request, "edited", post)
+                return redirect(post.get_url())
         else:
             form = PostForm(instance=post)
     except Post.DoesNotExist:
@@ -470,32 +510,108 @@ def delete_comment(request, id):
         comment = Comment.objects.get(id=id)
         post = Post.objects.get(comments=comment)
         post.comments.remove(comment)
-        post_slug = post.slug
         comment.replies.all().delete()
+        create_forum_activity(request, "deleted", post, comment)
         comment.delete()
-        return redirect(reverse('detail', args=[post_slug]))
+        return redirect(post.get_url())
     except Comment.DoesNotExist:
         pass
     return redirect('forum_home')
 
 def edit_comment(request, id):
-    return
+    try:
+        comment = Comment.objects.get(id=id)
+        post = Post.objects.get(comments=comment)
+        if request.method == "POST":
+            content = request.POST.get("content")
+            media = request.FILES.get("media")
+            media_clear = request.POST.get("media-clear")
+            if media:
+                comment.media = media
+            elif media_clear:
+                comment.media.delete()
+                comment.media = None
+            comment.content = content
+            comment.edited_at = timezone.now()
+            comment.save()
+            create_forum_activity(request, "edited", post, comment)
+            return redirect(post.get_url())
+    except Comment.DoesNotExist:
+        return redirect('forum_home')
 
 def delete_reply(request, id):
     try:
         reply = Reply.objects.get(id=id)
         comment = Comment.objects.get(replies=reply)
         comment.replies.remove(reply)
-        reply.delete()
         post = Post.objects.get(comments=comment)
-        post_slug = post.slug
-        return redirect(reverse('detail', args=[post_slug]))
+        create_forum_activity(request, "deleted", post, comment, reply)
+        reply.delete()
+        return redirect(post.get_url())
     except Reply.DoesNotExist:
         pass
     return redirect('forum_home')
 
 def edit_reply(request, id):
-    return
+    try:
+        reply = Reply.objects.get(id=id)
+        comment = Comment.objects.get(replies=reply)
+        post = Post.objects.get(comments=comment)
+        if request.method == "POST":
+            content = request.POST.get("content")
+            media = request.FILES.get("media")
+            media_clear = request.POST.get("media-clear")
+            if media:
+                reply.media = media
+            elif media_clear:
+                reply.media.delete()
+                reply.media = None
+            reply.content = content
+            reply.edited_at = timezone.now()
+            reply.save()
+            create_forum_activity(request, "edited", post, comment, reply)
+            return redirect(post.get_url())
+    except Reply.DoesNotExist:
+        return redirect('forum_home')
+
+def create_forum_activity(request, action, post, *args):
+    category_names = [category.title for category in post.forum_categories.all()]
+    forum_name = "forums" if len(category_names) > 1 else "forum"
+
+    if len(args) == 1:
+        activity_name = f'You\'ve {action} \"{args[0].content}\" comment on the \"{post.title}\" post in {", ".join(category_names)} {forum_name}'
+    elif len(args) == 2:
+        activity_name = f'You\'ve {action} \"{args[1].content}\" reply on the \"{post.title}\" post in {", ".join(category_names)} {forum_name}'
+    else:
+        activity_name = f'You\'ve {action} \"{post.title}\" post in {", ".join(category_names)} {forum_name}'
+
+    points = 15 if action in ["created", "made", "left"] else 0
+    user_activity = Activity.objects.create(user=request.user, image="images/forum.png",
+                                             name=activity_name, points=points)
+    if points != 0:
+        activity_points(request, user_activity.points)
+
+def check_forum_user_achievements(request):
+    post_count = Post.objects.filter(user=request.user).count()
+    reply_count = Reply.objects.filter(user=request.user).count()
+    comment_count = Comment.objects.filter(user=request.user).count()
+    total = post_count + reply_count + comment_count
+    forum_achievements = {1: ("Junior forumite", 10), 10: ("Active contributor", 50), 100: ("Forum veteran", 100)}
+
+    if total in forum_achievements:
+        achievement_name, points = forum_achievements[total]
+        try:
+            try:
+                UserAchievement.objects.create(user=request.user,
+                                               achievement=Achievement.objects.get(name=achievement_name))
+            except ObjectDoesNotExist:
+                pass
+            user_activity = Activity.objects.create(user=request.user, image="badges/forum.png",
+                                                        name=f"You've earned \"{achievement_name}\" achievement",
+                                                        points=points)
+            activity_points(request, user_activity.points)
+        except IntegrityError:
+            pass
 
 def latest_posts(request):
     posts = Post.objects.all().filter(approved=True)[:10]
@@ -504,6 +620,8 @@ def latest_posts(request):
         "title": "Latest 10 Posts"
     }
     return render(request, "forum/latest_posts.html", context)
+
+# Returns the results of a forum search.
 
 def search_result(request):
     query = request.GET.get('q')
@@ -564,10 +682,12 @@ def complete_challenge(request, challenge_id):
             if user_challenges_count == 1:
                 UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Wise spender"))
                 user_activity = Activity.objects.create(user=request.user, image = "badges/wise_spender.png", name = "You've earned \"Wise spender\" achievement", points = 15)
+                create_achievement_notification(request, request.user, "achievement", UserAchievement.achievement)
                 activity_points(request, user_activity.points)
             elif user_challenges_count == 10:
                 UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Superstar"))
                 user_activity = Activity.objects.create(user=request.user, image = "badges/super_star.png", name = "You've earned \"Superstar\" achievement", points = 150)
+                create_achievement_notification(request, request.user, "achievement", UserAchievement.achievement)
                 activity_points(request, user_activity.points)
         except ObjectDoesNotExist:
             pass
@@ -612,13 +732,13 @@ def update_user_level(user):
         num_levels = floor((total_points - last_level_points)/100)
 
         for i in range(1, num_levels + 2):
-        	name = f'Level {last_level_number+i}'
-        	description = f'Description of level {last_level_number+i}'
-        	required_points = last_level_points + (i * 100)
-        	new_level = Level.objects.create(name=name, description=description, required_points=required_points)
-        	if (user_level.level.id < new_level.id):
-        	    Activity.objects.create(user=user, image = "images/level_up.png", name = f'You\'ve leveled up to {new_level.name}')
-        	new_level.save()
+            name = f'Level {last_level_number+i}'
+            description = f'Description of level {last_level_number+i}'
+            required_points = last_level_points + (i * 100)
+            new_level = Level.objects.create(name=name, description=description, required_points=required_points)
+            if (user_level.level.id < new_level.id):
+                Activity.objects.create(user=user, image = "images/level_up.png", name = f'You\'ve leveled up to {new_level.name}')
+            new_level.save()
 
         current_level = Level.objects.get(name = f"Level {floor(total_points / 100) + 1}")
         user_level.level = current_level
@@ -628,8 +748,8 @@ def share_avatar(request):
     svg = "avatar"
     name = "My avatar"
     description = "Avatar created in Galin's Spending Tracker"
-    url = request.build_absolute_uri(reverse('my_avatar'))
-    text = "Here is my avatar created in Galin's Spending Tracker"
+    url = request.build_absolute_uri(reverse('profile', args=[str(request.user.id)]))
+    text = "Check out my avatar created in Galin's Spending Tracker"
     return share(request, svg, name, description, url, text)
 
 def share_challenge(request, id):
@@ -644,23 +764,51 @@ def share_achievement(request, id):
     user_achievement = UserAchievement.objects.get(id=id)
     name = user_achievement.achievement.name
     description = user_achievement.achievement.description
-    url = request.build_absolute_uri(reverse('achievement_list'))
+    url = request.build_absolute_uri(reverse('profile', args=[str(request.user.id)]))
     text = f"I've earned the \"{name}\" achievement on Galin's Spending Tracker"
     return share(request, user_achievement, name, description, url, text)
 
 def share_post(request, id):
     post = Post.objects.get(id=id)
     name = post.title
+    post_user = User.objects.get(id=post.user.id)
+    if post_user.username:
+        user_name = post_user.username
+    else:
+        user_name = post_user.first_name + " " + post_user.last_name
     description = "Forum post on Galin's Spending Tracker"
     url = request.build_absolute_uri(post.get_url())
-    text = f"Check out my \"{name}\" post on Galin's Spending Tracker"
+    text = f"Check out \"{name}\" post by {user_name} on Galin's Spending Tracker"
     return share(request, post, name, description, url, text)
 
 def share_comment(request, id):
-    return
+    comment = Comment.objects.get(id=id)
+    post = Post.objects.get(comments=comment)
+    name = comment.content
+    comment_user = User.objects.get(id=comment.user.id)
+    if comment_user.username:
+        user_name = comment_user.username
+    else:
+        user_name = comment_user.first_name + " " + comment_user.last_name
+    description = "Forum comment on Galin's Spending Tracker"
+    url = request.build_absolute_uri(post.get_url())
+    text = f"Check out \"{name}\" comment by {user_name} on \"{post.title}\" post in Galin's Spending Tracker"
+    return share(request, comment, name, description, url, text)
 
 def share_reply(request, id):
-    return
+    reply = Reply.objects.get(id=id)
+    comment = Comment.objects.get(replies=reply)
+    post = Post.objects.get(comments=comment)
+    name = reply.content
+    reply_user = User.objects.get(id=reply.user.id)
+    if reply_user.username:
+        user_name = reply_user.username
+    else:
+        user_name = reply_user.first_name + " " + reply_user.last_name
+    description = "Forum reply on Galin's Spending Tracker"
+    url = request.build_absolute_uri(post.get_url())
+    text = f"Check out \"{name}\" reply by {user_name} on \"{post.title}\" post in Galin's Spending Tracker"
+    return share(request, reply, name, description, url, text)
 
 def share(request, user_object, name, description, url, text):
     facebook_params = {
@@ -673,28 +821,35 @@ def share(request, user_object, name, description, url, text):
         'text': text
     }
     share_urls = {
-        'Facebook': 'https://www.facebook.com/dialog/share?' + urlencode(facebook_params),
-        'Twitter': 'https://twitter.com/share?' + urlencode(twitter_params),
-        'Forum': request.build_absolute_uri(reverse('create_post'))
+        'facebook': 'https://www.facebook.com/dialog/share?' + urlencode(facebook_params),
+        'twitter': 'https://twitter.com/share?' + urlencode(twitter_params),
+        'forum': request.build_absolute_uri(reverse('create_post'))
     }
 
     if isinstance(user_object, UserAchievement):
-        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'achievement'})
+        media = user_object.achievement.badge
+        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'achievement', 'media': media})
     elif isinstance(user_object, UserChallenge):
         return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'challenge'})
     elif isinstance(user_object, str):
         user_tier_colour = get_user_tier_colour(request.user)
         try:
-            avatar = 'avatar/' + Avatar.objects.get(user=request.user).file_name
-            avatar_path = os.path.join(settings.STATICFILES_DIRS[0], avatar)
+            media = 'avatar/' + Avatar.objects.get(user=request.user).file_name
+            avatar_path = os.path.join(settings.STATICFILES_DIRS[0], media)
             if not os.path.exists(avatar_path):
-                avatar = 'avatar/default_avatar.png'
+                media = 'avatar/default_avatar.png'
         except Avatar.DoesNotExist:
-            avatar = 'avatar/default_avatar.png'
-        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'avatar', 'user_tier_colour': user_tier_colour, 'avatar': avatar})
+            media = 'avatar/default_avatar.png'
+        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'avatar', 'user_tier_colour': user_tier_colour, 'media': media})
     elif isinstance(user_object, Post):
         media = user_object.media
         return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'post', 'media': media})
+    elif isinstance(user_object, Comment):
+        media = user_object.media
+        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'comment', 'media': media})
+    elif isinstance(user_object, Reply):
+        media = user_object.media
+        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'reply', 'media': media})
 
 def handle_share(request):
     type = unquote(request.GET.get('type'))
@@ -729,6 +884,7 @@ def my_activity(request):
         user_activity = Activity.objects.filter(user=request.user).order_by('-time')[:int(num_items)]
     return render(request, 'my_activity.html', {'user_activity': user_activity})
 
+@login_required
 @cache_control(no_store=True)
 def my_avatar(request):
     locked_items = get_locked_items(request)
@@ -780,6 +936,7 @@ def my_avatar(request):
         # create random avatar with the filled query dictionary passed in the request
         create_avatar(request)
         check_required_items(request)
+        create_avatar_activity(request)
 
     return render(request, 'my_avatar.html', {'components': components, 'colours': colours, 'locked_items': locked_items, 'tier_info': tier_info, 'user_tier_colour': user_tier_colour})
 
@@ -984,6 +1141,27 @@ def check_forum_instance(type, value):
         type = "reply"
     return type
 
+
+@register.filter
+def time_since_custom(time):
+    timedelta = timezone.now() - time
+    elapsed_time = int(timedelta.total_seconds())
+    if elapsed_time < 60:
+        time_since = f"{elapsed_time} second{'s' if elapsed_time != 1 else ''} ago"
+    elif elapsed_time < 3600:
+        time_since = f"{elapsed_time // 60} minute{'s' if elapsed_time // 60 != 1 else ''} ago"
+    elif elapsed_time < 86400:
+        time_since = f"{elapsed_time // 3600} hour{'s' if elapsed_time // 3600 != 1 else ''} ago"
+    elif elapsed_time < 604800:
+        time_since = f"{elapsed_time // 86400} day{'s' if elapsed_time // 86400 != 1 else ''} ago"
+    elif elapsed_time < 2592000:
+        time_since = f"{elapsed_time // 604800} week{'s' if elapsed_time // 604800 != 1 else ''} ago"
+    elif elapsed_time < 31536000:
+        time_since = f"{elapsed_time // 2592000} month{'s' if elapsed_time // 2592000 != 1 else ''} ago"
+    else:
+        time_since = f"{elapsed_time // 31536000} year{'s' if elapsed_time // 31536000 != 1 else ''} ago"
+    return time_since
+
 def create_forum_avatar(request, id):
     query_dict = request.GET.copy()
     query_dict['user'] = id
@@ -1182,7 +1360,7 @@ def check_tree_achievements(request, treeNum):
                                                achievement=Achievement.objects.get(name=achievement_name))
             except ObjectDoesNotExist:
                 pass
-            user_activity = Activity.objects.create(user=request.user, image="badges/custom.png",
+            user_activity = Activity.objects.create(user=request.user, image="badges/tree.png",
                                                     name=f"You've earned \"{achievement_name}\" achievement",
                                                     points=points)
             activity_points(request, user_activity.points)

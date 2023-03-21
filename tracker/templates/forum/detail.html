@@ -38,11 +38,22 @@
                             {% if post.media %}
                                 <p><img class="media" src="{{ post.media.url }}" style="max-width: 20%"></p>
                             {% endif %}
-                            {{post.content|safe}}
+                            {% if post.edited_at %}
+                                <div style="padding-bottom: 40px">{{post.content|safe}}</div>
+                            {% else %}
+                                <div style="padding-bottom: 30px">{{post.content|safe}}</div>
+                            {% endif %}
                             <br>
+                            <div class="post-meta" style="position: absolute; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-between">
+                                <span class="time-since" style="color: gray; align-self: flex-end">
+                                    Posted {{ post.date|time_since_custom }}
+                                    {% if post.edited_at %}
+                                        <br>
+                                        Edited {{ post.edited_at|time_since_custom }}
+                                    {% endif %}
+                                </span>
 
-                            {% if post.user == user %}
-                                <div class="actions" style="position: absolute; bottom: 0; right: 0">
+                                <div class="actions" style="display:flex">
 
                                     <div class="comment" style="display: inline-block;">
                                         <a href="{% url 'share_post' post.id %}">
@@ -50,19 +61,19 @@
                                         </a>
                                     </div>
 
-                                    <div class="comment" style="display: inline-block;">
-                                        <a href="{% url 'edit_post' post.id %}">
-                                            <button style="margin-left: 10px">Edit</button>
-                                        </a>
-                                    </div>
+                                    {% if post.user == user %}
+                                        <div class="comment" style="display: inline-block;">
+                                            <a href="{% url 'edit_post' post.id %}">
+                                                <button style="margin-left: 10px">Edit</button>
+                                            </a>
+                                        </div>
 
-                                    <div class="comment" style="display: inline-block;">
-                                        <button class="delete-button" data-bs-toggle="modal" data-bs-target="#delete_modal" data-object-type="post" data-object-id="{{ post.id }}" style="margin-left: 10px">Delete</button>
-                                    </div>
-
+                                        <div class="comment" style="display: inline-block;">
+                                            <button class="delete-button" data-bs-toggle="modal" data-bs-target="#delete_modal" data-object-type="post" data-object-id="{{ post.id }}" style="margin-left: 10px">Delete</button>
+                                        </div>
+                                    {% endif %}
                                 </div>
-                            {% endif %}
-
+                            </div>
                         </div>
                     </div>
 
@@ -81,7 +92,7 @@
                                     <input type="submit" value="Submit" name="comment-form">
                                 </div>
                                 <div>
-                                    <input type="file" name="media" accept="image/*" id="id_media">
+                                    <input type="file" name="media" accept="image/*">
                                 </div>
                             </form>
 
@@ -92,10 +103,11 @@
                         {% endif %}
                     {% endif %}
                 </div>
+        </div>
 
 <!---Show Comments--->
 {% for comment in post.comments.all %}
-<div class="comments-container">
+<div id="comment-container-{{ comment.id }}" class="comments-container">
     <!-- <div class="head">
         <div class="authors"> Author </div>
         <div class="content"> Commnts </div>
@@ -118,36 +130,86 @@
             <div> Points: <u> {{points|get_forum_item:comment.user.id}} </u> </div>
         </div>
 
-    <div class="content" style="position: relative">
-        {% if comment.media %}
-            <p><img class = "media" src="{{ comment.media.url }}" style="max-width: 20%"></p>
-        {% endif %}
-        {{comment.content}}
-        <br>
+        <div class="content" style="display: block; position: relative">
+            {% if comment.media %}
+                <p><img class = "media" src="{{ comment.media.url }}" style="max-width: 20%"></p>
+            {% endif %}
+            {% if comment.edited_at %}
+                <div style="padding-bottom: 40px">{{comment.content}}</div>
+            {% else %}
+                <div style="padding-bottom: 30px">{{comment.content}}</div>
+            {% endif %}
+            <br>
 
-        {% if comment.user == user %}
-            <div class="actions" style="position: absolute; bottom: 0; right: 0">
+            <div class="comment-meta" style="position: absolute; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-between">
+                <span class="time-since" style="color: gray; align-self: flex-end">
+                    Commented {{ comment.date|time_since_custom }}
+                    {% if comment.edited_at %}
+                        <br>
+                        Edited {{ comment.edited_at|time_since_custom }}
+                    {% endif %}
+                </span>
 
-                <div class="comment" style="display: inline-block;">
-                    <a href="">
-                        <button>Share</button>
-                    </a>
+                <div class="actions" style="display: flex">
+
+                    <div class="comment" style="display: inline-block;">
+                        <a href="{% url 'share_comment' comment.id %}">
+                            <button>Share</button>
+                        </a>
+                    </div>
+
+                    {% if comment.user == user %}
+                        <div class="comment" style="display: inline-block;">
+                            <button onclick="toggleEditCommentForm({{ comment.id }})" style="margin-left: 10px">Edit</button>
+                        </div>
+
+                        <div class="comment" style="display: inline-block;">
+                            <button class="delete-button" data-bs-toggle="modal" data-bs-target="#delete_modal" data-object-type="comment" data-object-id="{{ comment.id }}" style="margin-left: 10px">Delete</button>
+                        </div>
+                    {% endif %}
                 </div>
-
-                <div class="comment" style="display: inline-block;">
-                    <a href="">
-                        <button style="margin-left: 10px">Edit</button>
-                    </a>
-                </div>
-
-                <div class="comment" style="display: inline-block;">
-                    <button class="delete-button" data-bs-toggle="modal" data-bs-target="#delete_modal" data-object-type="comment" data-object-id="{{ comment.id }}" style="margin-left: 10px">Delete</button>
-                </div>
-
             </div>
-        {% endif %}
+        </div>
+
+        <div id="edit-comment-form-section" style="display: none">
+            <form id="edit-comment-form-{{ comment.id }}" class="edit-comment-form" action="{% url 'edit_comment' comment.id %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="comment-area">
+                    <textarea name="content" placeholder="Edit comment......">{{ comment.content }}</textarea>
+                    <input type="submit" value="Update" name="comment-form">
+                </div>
+                {% if comment.media %}
+                    <label>Media:</label>
+                    Currently: <a href="{{ comment.media.url }}" >{{comment.media.url}}</a>
+                    <input type="checkbox" name="media-clear" id="media-clear_id">
+                    <label for="media-clear_id">Clear</label>
+                    <br>
+                    Change:
+                {% endif %}
+                <div>
+                    <input type="file" name="media" accept="image/*">
+                </div>
+            </form>
+        </div>
+
     </div>
 </div>
+
+<script>
+    function toggleEditCommentForm(commentId) {
+        const commentContainer = document.getElementById(`comment-container-${commentId}`);
+        const commentContent = commentContainer.querySelector('.content');
+        const editCommentForm = commentContainer.querySelector('#edit-comment-form-section');
+
+        commentContent.style.display = "none";
+        editCommentForm.style.display = "block";
+        editCommentForm.style.position = "relative";
+        editCommentForm.style.top = "0";
+        editCommentForm.style.left = "0";
+        editCommentForm.style.width = "100%";
+        editCommentForm.style.height = "100%";
+    }
+</script>
 
 <!---Reply Input--->
 {% if post.closed == True %}
@@ -160,12 +222,12 @@
 <form action="." method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="comment-area hide" id="comment{{comment.id}}">
-        <textarea name="reply" id="" placeholder="Add reply......"></textarea>
+        <textarea name="reply" placeholder="Add reply......"></textarea>
         <input type="submit" value="Submit" name="reply-form">
         <input type="hidden" name="comment-id" value="{{comment.id}}">
     </div>
     <div>
-        <input type="file" name="media" accept="image/*" id="id_media">
+        <input type="file" name="media" accept="image/*">
     </div>
 </form>
 
@@ -179,7 +241,7 @@
 
 <!--- Reply Section -->
 {% for reply in comment.replies.all %}
-<div class="comments-container" style="width: 95%; margin-left: 5%">
+<div id="reply-container-{{ reply.id }}" class="comments-container" style="width: 95%; margin-left: 5%">
     <!-- <div class="head">
         <div class="authors"> Author </div>
         <div class="content"> Commnts </div>
@@ -203,39 +265,86 @@
         </div>
 
 
-    <div class="content" style="position: relative">
-        {% if reply.media %}
-            <p><img class = "media" src="{{ reply.media.url }}" style="max-width: 20%"></p>
-        {% endif %}
-        {{reply.content}}
+        <div class="content" style="display: block; position: relative">
+            {% if reply.media %}
+                <p><img class = "media" src="{{ reply.media.url }}" style="max-width: 20%"></p>
+            {% endif %}
+            {% if reply.edited_at %}
+                <div style="padding-bottom: 40px">{{reply.content}}</div>
+            {% else %}
+                <div style="padding-bottom: 30px">{{reply.content}}</div>
+            {% endif %}
+            <br>
 
-        <br>
+            <div class="reply-meta" style="position: absolute; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-between">
+                <span class="time-since" style="color: gray; align-self: flex-end">
+                    Replied {{ reply.date|time_since_custom }}
+                    {% if reply.edited_at %}
+                        <br>
+                        Edited {{ reply.edited_at|time_since_custom }}
+                    {% endif %}
+                </span>
 
-        {% if reply.user == user %}
-            <div class="actions" style="position: absolute; bottom: 0; right: 0">
+                <div class="actions" style="display: flex">
 
-                <div class="comment" style="display: inline-block;">
-                    <a href="">
-                        <button>Share</button>
-                    </a>
+                    <div class="comment" style="display: inline-block;">
+                        <a href="{% url 'share_reply' reply.id %}">
+                            <button>Share</button>
+                        </a>
+                    </div>
+
+                    {% if reply.user == user %}
+                        <div class="comment" style="display: inline-block;">
+                            <button onclick="toggleEditReplyForm({{ reply.id }})" style="margin-left: 10px">Edit</button>
+                        </div>
+
+                        <div class="comment" style="display: inline-block;">
+                            <button class="delete-button" data-bs-toggle="modal" data-bs-target="#delete_modal" data-object-type="reply" data-object-id="{{ reply.id }}" style="margin-left: 10px">Delete</button>
+                        </div>
+                    {% endif %}
                 </div>
-
-                <div class="comment" style="display: inline-block;">
-                    <a href="">
-                        <button style="margin-left: 10px">Edit</button>
-                    </a>
-                </div>
-
-                <div class="comment" style="display: inline-block;">
-                    <button class="delete-button" data-bs-toggle="modal" data-bs-target="#delete_modal" data-object-type="reply" data-object-id="{{ reply.id }}" style="margin-left: 10px">Delete</button>
-                </div>
-
             </div>
-        {% endif %}
-
         </div>
+
+        <div id="edit-reply-form-section" style="display: none">
+            <form id="edit-reply-form-{{ reply.id }}" class="edit-reply-form" action="{% url 'edit_reply' reply.id %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="comment-area">
+                    <textarea name="content" placeholder="Edit reply......">{{ reply.content }}</textarea>
+                    <input type="submit" value="Update" name="reply-form">
+                </div>
+                {% if reply.media %}
+                    <label>Media:</label>
+                    Currently: <a href="{{ reply.media.url }}" >{{reply.media.url}}</a>
+                    <input type="checkbox" name="media-clear" id="reply-media-clear_id">
+                    <label for="reply-media-clear_id">Clear</label>
+                    <br>
+                    Change:
+                {% endif %}
+                <div>
+                    <input type="file" name="media" accept="image/*">
+                </div>
+            </form>
+        </div>
+
     </div>
 </div>
+
+<script>
+    function toggleEditReplyForm(replyId) {
+        const replyContainer = document.getElementById(`reply-container-${replyId}`);
+        const replyContent = replyContainer.querySelector('.content');
+        const editReplyForm = replyContainer.querySelector('#edit-reply-form-section');
+
+        replyContent.style.display = "none";
+        editReplyForm.style.display = "block";
+        editReplyForm.style.position = "relative";
+        editReplyForm.style.top = "0";
+        editReplyForm.style.left = "0";
+        editReplyForm.style.width = "100%";
+        editReplyForm.style.height = "100%";
+    }
+</script>
 
 {% endfor %}
 {% endfor %}

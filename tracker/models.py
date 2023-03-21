@@ -14,6 +14,7 @@ from hitcount.models import HitCountMixin, HitCount
 from django_resized import ResizedImageField
 from tinymce.models import HTMLField
 from django.contrib.auth import get_user_model
+import random
 
 # Create your models here.
 
@@ -42,6 +43,14 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_staff', True)
         return self._create_user(email, password, **extra_fields)
+    
+# Helper function to generate random username.    
+def random_username():
+    return "Anon" + str(random.randint(1000, 9999999))
+
+# Random number generator for forum titles.
+def random_slug_number():
+    return str(random.randint(1000, 999999999999))
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -58,7 +67,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     available_categories = models.ManyToManyField('Category', symmetrical = False, related_name = 'users')
-    username = models.CharField(max_length=50, blank=True, unique=True, null = True)
+    username = models.CharField(max_length=50, default=random_username, blank=True)
     trees = models.IntegerField(default=0)
 
     objects = UserManager()
@@ -170,6 +179,32 @@ class Activity(models.Model):
 
 # Creation of forums models
 
+
+# Notification model for notifying users of various changes in the web application.
+
+class Notification(models.Model):
+    COMMENT = 'comment'
+    REPLY = 'reply'
+    ACHIEVEMENT = 'achievement'
+    CHOICES = (
+        (COMMENT, 'comment'),
+        (REPLY, ' reply'),
+        (ACHIEVEMENT, 'achievement')
+    )
+
+    to_user = models.ForeignKey(User, related_name='notifications', on_delete=models.CASCADE)
+    notification_type = models.CharField(max_length=20, choices=CHOICES)
+    is_read = models.BooleanField(default=False)
+    extra_id = models.IntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, related_name="created", on_delete=models.CASCADE)
+    slugg = models.SlugField(max_length=20, null=True)
+    achievement_type = models.CharField(max_length=100, null=True)
+
+
+    class Meta:
+        ordering = ['-created_at'] 
+
 User = get_user_model()
 
 class Author(models.Model):
@@ -223,6 +258,7 @@ class Reply(models.Model):
     content = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
     media = models.ImageField(editable=True, upload_to='images', blank=True)
+    edited_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.content[:100]
@@ -237,6 +273,7 @@ class Comment(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     replies = models.ManyToManyField(Reply, blank=True)
     media = models.ImageField(editable=True, upload_to='images', blank=True)
+    edited_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.content[:100]
@@ -253,6 +290,7 @@ class Post(models.Model):
     hit_count_generic = GenericRelation(HitCount, object_id_field='object_pk',related_query_name='hit_count_generic_relation')
     comments = models.ManyToManyField(Comment, blank=True)
     media = models.ImageField(editable=True, upload_to='images', blank=True)
+    edited_at = models.DateTimeField(null=True, blank=True)
     # closed = models.BooleanField(default=False)
     # state = models.CharField(max_length=40, default="zero")
 
@@ -260,9 +298,9 @@ class Post(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
-        if Post.objects.filter(slug=self.slug).exists():
-            timestamp = timezone.now().strftime("%Y%m%d-%H%M%S")
-            self.slug = f"{self.slug}-{timestamp}"
+            if Post.objects.filter(slug=self.slug).exists():
+                timestamp = timezone.now().strftime("%Y%m%d-%H%M%S")
+                self.slug = f"{self.slug}-{timestamp}"
         super(Post, self).save(*args, **kwargs)
 
     def __str__(self):

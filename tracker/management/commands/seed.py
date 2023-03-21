@@ -96,7 +96,7 @@ class Command(BaseCommand):
                 },
                 {
                     'name': 'First share',
-                    'description': 'Share first post on Facebook or Twitter',
+                    'description': 'Share first post on Facebook, Twitter or Forum',
                     'badge': 'first_share.png'
                 },
                 {
@@ -105,9 +105,19 @@ class Command(BaseCommand):
                     'badge': 'super_star.png'
                 },
                 {
-                    'name': 'First forum post',
-                    'description': 'Make your first forum post',
-                    'badge': 'first_forum.png'
+                    'name': 'Junior forumite',
+                    'description': 'Make your first forum post/reply/comment',
+                    'badge': 'forum.png'
+                },
+                {
+                    'name': 'Active contributor',
+                    'description': 'Make 10 forum posts/replies/comments',
+                    'badge': 'forum.png'
+                },
+                {
+                    'name': 'Forum veteran',
+                    'description': 'Make 100 forum posts/replies/comments',
+                    'badge': 'forum.png'
                 },
                 {
                     'name': 'New user',
@@ -127,17 +137,17 @@ class Command(BaseCommand):
                 {
                     'name': 'Planting pioneer',
                     'description': 'Plant 1 tree in Galin Environmental Project',
-                    'badge': 'custom.png'
+                    'badge': 'tree.png'
                 },
                 {
                     'name': 'Forest friend',
                     'description': 'Plant 10 trees in Galin Environmental Project',
-                    'badge': 'custom.png'
+                    'badge': 'tree.png'
                 },
                 {
                     'name': 'Green guardian',
                     'description': 'Plant 100 trees in Galin Environmental Project',
-                    'badge': 'custom.png'
+                    'badge': 'tree.png'
                 },
             ]
 
@@ -216,14 +226,14 @@ class Command(BaseCommand):
 
         for achievement in achievements:
             badge_path = "badges/" + achievement['badge']
-            achievement_obj = Achievement.objects.create(
+            Achievement.objects.create(
                 name=achievement['name'],
                 description=achievement['description'],
                 badge=badge_path
             )
 
         for challenge in challenges:
-            challenge_obj = Challenge.objects.create(
+            Challenge.objects.create(
                 name=challenge['name'],
                 description=challenge['description'],
                 points=challenge['points'],
