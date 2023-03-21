@@ -785,9 +785,9 @@ def share(request, user_object, name, description, url, text):
         'text': text
     }
     share_urls = {
-        'Facebook': 'https://www.facebook.com/dialog/share?' + urlencode(facebook_params),
-        'Twitter': 'https://twitter.com/share?' + urlencode(twitter_params),
-        'Forum': request.build_absolute_uri(reverse('create_post'))
+        'facebook': 'https://www.facebook.com/dialog/share?' + urlencode(facebook_params),
+        'twitter': 'https://twitter.com/share?' + urlencode(twitter_params),
+        'forum': request.build_absolute_uri(reverse('create_post'))
     }
 
     if isinstance(user_object, UserAchievement):

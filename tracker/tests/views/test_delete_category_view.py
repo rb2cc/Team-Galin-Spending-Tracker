@@ -8,7 +8,7 @@ class DeleteCategoryViewTestCase(TestCase):
     def setUp(self):
         self.c = Client()
         self.url = reverse('delete_category')
-        self.user = User.objects.create(email='user@email.com', password='Password123')
+        self.user = User.objects.create_user(email='user@email.com', password='Password123')
         self.category = Category.objects.create(name = 'Category', week_limit = 10, is_binned=True)
 
     def test_url(self):
