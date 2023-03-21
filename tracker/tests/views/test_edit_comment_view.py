@@ -1,9 +1,10 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from tracker.models import User, Post, Comment, Reply, Forum_Category, UserLevel, Level
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 
-class EditPostViewTests(TestCase):
+class EditCommentViewTests(TestCase):
 
     fixtures = ['tracker/tests/fixtures/default_user.json']
 
@@ -17,54 +18,48 @@ class EditPostViewTests(TestCase):
         self.post.forum_categories.add(self.forum_category)
         self.post.comments.add(self.comment)
         self.comment.replies.add(self.reply)
+        self.url = reverse('edit_comment', kwargs={'id': self.comment.id})
         self.level = Level.objects.create(name='level', description='description', required_points=10)
         self.userlevel = UserLevel.objects.create(user=self.user, level=self.level, points=20)
-        self.url = reverse('edit_post', kwargs={'id': self.post.id})
 
-    def test_edit_post_url(self):
-        self.assertEqual(self.url, '/edit_post/1')
-
-    def test_correct_context(self):
-        self.client.login(email='galin@email.com', password='Password123')
-        response = self.client.get(self.url)
-        self.assertIn('form', response.context)
-
-    def test_edit_post_view_uses_correct_template(self):
-        self.client.login(email='galin@email.com', password='Password123')
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'forum/edit_post.html')
-
-    def test_post_request_with_valid_data_updates_post(self):
+    def test_post_request_with_valid_data_updates_comment(self):
         self.client.login(email='galin@email.com', password='Password123')
         data = {
-            'title': 'Edited Title',
             'content': 'Edited Content',
-            'forum_categories': self.forum_category.id,
-            'media': ''
         }
         response = self.client.post(self.url, data)
-        self.assertRedirects(response, Post.objects.get(title='Edited Title', user=self.user).get_url())
-        self.post.refresh_from_db()
-        self.assertEqual(self.post.title, 'Edited Title')
-        self.assertEqual(self.post.content, 'Edited Content')
+        self.comment.refresh_from_db()
+        self.assertEqual(self.comment.content, 'Edited Content')
+        self.assertRedirects(response, self.post.get_url())
 
-    def test_post_request_with_invalid_data_does_not_update_post(self):
+    def test_post_request_with_media_updates_comment(self):
+        media_file = SimpleUploadedFile("test_image.txt", b"test content", content_type="text/plain")
         self.client.login(email='galin@email.com', password='Password123')
         data = {
-            'title': '',
-            'content': '',
-            'forum_categories': self.forum_category.id,
-            'media': ''
+            'content': 'Edited Content',
+            'media': media_file,
         }
         response = self.client.post(self.url, data)
-        self.assertEqual(response.status_code, 200)
-        self.post.refresh_from_db()
-        self.assertEqual(self.post.title, 'Test Post')
-        self.assertEqual(self.post.content, 'Test content')
+        self.comment.refresh_from_db()
+        self.assertEqual(self.comment.content, 'Edited Content')
+        self.assertIsNotNone(self.comment.media)
+        self.assertRedirects(response, self.post.get_url())
 
-    def test_post_does_not_exist(self):
+    def test_post_request_with_media_clear_updates_comment(self):
+        media_file = SimpleUploadedFile("test_image.txt", b"test content", content_type="text/plain")
+        self.comment.media = media_file
         self.client.login(email='galin@email.com', password='Password123')
-        non_existent_post_url = reverse('edit_post', kwargs={'id': self.post.id + 1})
-        response = self.client.post(non_existent_post_url)
+        data = {
+            'content': 'Edited Content',
+            'media-clear': 'a',
+        }
+        response = self.client.post(self.url, data)
+        self.comment.refresh_from_db()
+        self.assertEqual(self.comment.content, 'Edited Content')
+        self.assertRedirects(response, self.post.get_url())
+
+    def test_comment_does_not_exist(self):
+        self.client.login(email='galin@email.com', password='Password123')
+        non_existent_comment_url = reverse('edit_comment', kwargs={'id': self.comment.id + 1})
+        response = self.client.post(non_existent_comment_url)
         self.assertRedirects(response, reverse('forum_home'))

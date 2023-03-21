@@ -1,6 +1,6 @@
 from django.test import TestCase, Client
 from django.urls import reverse
-from tracker.models import User, Post, Comment, Forum_Category
+from tracker.models import User, Post, Comment, Forum_Category, UserLevel, Level
 from tracker.forms import PostForm
 
 class CreatePostViewTests(TestCase):
@@ -11,6 +11,8 @@ class CreatePostViewTests(TestCase):
         self.client = Client()
         self.user = User.objects.get(email='galin@email.com')
         self.forum_category = Forum_Category.objects.create(title='Test Category', slug='test-category', description='Description')
+        self.level = Level.objects.create(name='level', description='description', required_points=10)
+        self.userlevel = UserLevel.objects.create(user=self.user, level=self.level, points=20)
         self.url = reverse('create_post')
 
     def test_create_post_url(self):
@@ -43,8 +45,9 @@ class CreatePostViewTests(TestCase):
             'media': ''
         }
         response = self.client.post(self.url, data)
+
         self.assertTrue(Post.objects.filter(title='Test Title', content='Test Content', user=self.user).exists())
-        self.assertRedirects(response, reverse('forum_home'))
+        self.assertRedirects(response, Post.objects.get(title='Test Title', user=self.user).get_url())
 
     def test_post_request_with_invalid_data_does_not_create_new_post(self):
         self.client.login(email='galin@email.com', password='Password123')

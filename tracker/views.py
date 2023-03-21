@@ -371,7 +371,7 @@ def detail(request, slug):
     user_tier_names = {}
 
 
-    if request.user.is_authenticated: 
+    if request.user.is_authenticated:
         if "comment-form" in request.POST:
             comment = request.POST.get("comment")
             media = request.FILES.get("media")
@@ -431,7 +431,7 @@ def notifications(request):
         noti_obj = Notification.objects.get(id=noti_id)
         noti_obj.is_read = True
         noti_obj.save()
-    
+
     return render(request, 'notifications.html')
 
 def get_forum_user_info(points, avatars, tier_colours, user_levels, user_tier_names, forum_object):
