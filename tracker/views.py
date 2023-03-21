@@ -397,6 +397,7 @@ def detail(request, slug):
                 create_notification(request, comment_obj.user, 'reply', slug)
 
     else:
+        messages.info(request, 'You need to be logged in to post')
         return redirect("home")
 
     for comment in post.comments.all():
