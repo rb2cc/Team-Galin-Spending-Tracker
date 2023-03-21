@@ -223,6 +223,7 @@ class Reply(models.Model):
     content = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
     media = models.ImageField(editable=True, upload_to='images', blank=True)
+    edited_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.content[:100]
@@ -237,6 +238,7 @@ class Comment(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     replies = models.ManyToManyField(Reply, blank=True)
     media = models.ImageField(editable=True, upload_to='images', blank=True)
+    edited_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.content[:100]
@@ -253,6 +255,7 @@ class Post(models.Model):
     hit_count_generic = GenericRelation(HitCount, object_id_field='object_pk',related_query_name='hit_count_generic_relation')
     comments = models.ManyToManyField(Comment, blank=True)
     media = models.ImageField(editable=True, upload_to='images', blank=True)
+    edited_at = models.DateTimeField(null=True, blank=True)
     # closed = models.BooleanField(default=False)
     # state = models.CharField(max_length=40, default="zero")
 
@@ -260,9 +263,9 @@ class Post(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
-        if Post.objects.filter(slug=self.slug).exists():
-            timestamp = timezone.now().strftime("%Y%m%d-%H%M%S")
-            self.slug = f"{self.slug}-{timestamp}"
+            if Post.objects.filter(slug=self.slug).exists():
+                timestamp = timezone.now().strftime("%Y%m%d-%H%M%S")
+                self.slug = f"{self.slug}-{timestamp}"
         super(Post, self).save(*args, **kwargs)
 
     def __str__(self):

@@ -146,7 +146,6 @@ def category_progress(request, offset):
 
 def bin_category(request, id):
     category = Category.objects.get(id = id)
-    category_name = category.name
     diff = category.week_limit
     if category.is_global:
         request.user.available_categories.remove(category)
@@ -158,7 +157,7 @@ def bin_category(request, id):
     for expenditure in expenditures_of_category:
         expenditure.is_binned = True
         expenditure.save()
-    Activity.objects.create(user=request.user, image = "images/delete.png", name = f'You\'ve deleted \"{category_name}\" category')
+    Activity.objects.create(user=request.user, image = "images/delete.png", name = f'You\'ve put \"{category.name}\" category with all its expenditures in the bin')
     overall = Category.objects.filter(is_overall = True).get(users__id=request.user.id)
     overall.week_limit -= diff
     overall.save(force_update = True)
@@ -172,11 +171,14 @@ def delete_category(request):
             category = Category.objects.get(pk=category_pk)
             category.delete()
             all_expenditures=Expenditure.objects.filter(category=category)
-            # for expenditure in all_expenditures:
-            #     expenditure.category = None
-            #     expenditure.is_binned = True
-            #     expenditure.save()
-            # Activity.objects.create(user=request.user, image = "images/delete.png", name = f'You\'ve deleted \"{expenditure_title}\" expenditure')
+            category_name = category.name
+            category.delete()
+            all_expenditures=Expenditure.objects.filter(category=category)
+            for expenditure in all_expenditures:
+                expenditure.category = None
+                expenditure.is_binned = True
+                expenditure.save()
+            Activity.objects.create(user=request.user, image = "images/delete.png", name = f'You\'ve deleted \"{category_name}\" category with all its expenditures')
             return redirect('category_bin')
         except Expenditure.DoesNotExist:
             return redirect('category_bin')
@@ -198,7 +200,7 @@ def recover_category(request):
             for expenditure in expenditures_of_category:
                 expenditure.is_binned = False
                 expenditure.save()
-            # Activity.objects.create(user=request.user, image = "images/recover.png", name = f'You\'ve recovered \"{expenditure.title}\" expenditure from the bin')
+            Activity.objects.create(user=request.user, image = "images/recover.png", name = f'You\'ve recovered \"{category.name}\" category with all its expenditures from the bin')
             return redirect('category_bin')
         except Expenditure.DoesNotExist:
             return redirect('category_bin')

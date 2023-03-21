@@ -16,6 +16,8 @@ class LandingPageViewTest(TestCase):
             email='testuser@example.com',
             password='testpassword'
         )
+        self.superuser = User.objects.create_superuser(email='superuser@email.com', password='Password123')
+        self.staff = User.objects.create_user(email='staff@email.com', password='Password123', is_staff = True)
         self.category = Category.objects.create(name='Test Category',week_limit=100)
         self.user.available_categories.add(self.category)
         self.user.save()
@@ -63,7 +65,3 @@ class LandingPageViewTest(TestCase):
         self.assertEqual(len(daily_expense_list), 7)
         self.assertEqual(date_list[6], date_created)
         self.assertEqual(daily_expense_list[6], 300)
-
-
-
-
