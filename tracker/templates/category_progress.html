@@ -1,0 +1,30 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<div class="container">
+    <div class="col">
+        <div class="row">
+            <div class = "card" style="padding: 10px; margin-bottom: 20px;">
+                <div style="display: flex;">
+                    <span style="float: left; margin: 0;"><a href="{% url 'category_progress' offset=prev %}">←</a></span>
+                    <p style="text-align: center;margin: auto;font-weight: bold;">Week: {{ start }} until {{ end }}</p>
+                    <span style="float: right; margin: 0;"><a href="{% url 'category_progress' offset=next %}">→</a></span>
+                </div>
+            </div>
+            <div class = "card" style="margin: auto; padding: 20px; padding-bottom: 30px; margin-bottom: 20px;">
+                <h1 style="text-align: center">Overall</h1>
+                <div class="progress" style="height: 20px">
+                    <div class="progress-bar" role="progressbar" style="width: {{ overall_percent }}%; background-color: {{ overall_colour }}">{{ overall_percent }}%</div> 
+                </div>
+            </div>
+            {% for category, value in cat_map.items %}
+                <div class = "card" style="margin: auto; padding: 20px; padding-bottom: 30px; margin-bottom: 20px;">
+                    <h1 style="text-align: center">{{ category }}</h1>
+                    <div class="progress" style="height: 20px">
+                        <div class="progress-bar" role="progressbar" style="width: {{ value.0 }}%; background-color: {{ value.1 }}">{{ value.0 }}%</div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
