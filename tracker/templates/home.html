@@ -1,12 +1,21 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block body %}
 <div id="cover-image">
     <div class="container vh-100">
-        <div class="row h-100">
-            <div class="my-auto">
+        <div class="row h-100 " style="padding-top: 75px">
+                <div class="info-card " >
+                    <h2 class="info">Spending made easy with Galin</h2>
+                    <h4 class="info bi bi-piggy-bank-fill"> Keep track</h4>
+                        <p style="padding-left: 30px;">Create categories to organise your spendings and keep track of when you are approaching a weekly spending limit</p>
+                    <h4 class="info bi bi-book-half"> Learn</h4>
+                        <p style="padding-left: 30px;">Learn how to spend smarter, or even start a discussion with other people using the community forum</p>
+                    <h4 class="info bi bi-tree-fill"> Help the environment</h4>
+                        <p style="padding-left: 30px;">The Galin Environmental Project allows you to help the environment by planting trees as you build healthier spending habits</p>
+                </div>
                 <div class="card cover-card">
                     <p></p><p></p>
-                    <p class="cover-text" style="font-weight:bold; text-align:center">Galin Spending Tracker</p>
+                    <p class="cover-text bi bi-wallet" style="font-weight:bold; text-align:center"> Galin Spending Tracker</p>
                     <p></p><p></p>
                     <form action = "{% url 'home' %}" method="post">
                         {% csrf_token %}
@@ -14,10 +23,10 @@
                         {% include 'partials/messages.html' %}
                         <input type="submit" value="Log in" class='btn btn-primary'>
                     </form>
-                    <div style="text-align:center; position:fixed; left:0; right:0; top:64%"> <a href = '{% url 'sign_up' %}'>Register↗</a> </div>
-                    <div style="text-align:center; position:fixed; left:0; right:0; top:68%"> <a href = '{% url 'reset_password' %}'>Reset Password↗</a> </div>
+                    <a style="text-align: center; padding-top:15px;" href = '{% url 'reset_password' %}'>Forgot your password?↗</a> 
+                    <p style="text-align:center; padding-top:100px;">Don't have an account?</p>
+                    <a style="text-align:center;" href = '{% url 'sign_up' %}'>Register↗</a>
                 </div>
-            </div>
         </div>
     </div>
 </div>

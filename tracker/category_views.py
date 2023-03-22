@@ -171,11 +171,6 @@ def delete_category(request):
             category = Category.objects.get(pk=category_pk)
             category_name = category.name
             category.delete()
-            all_expenditures=Expenditure.objects.filter(category=category)
-            for expenditure in all_expenditures:
-                expenditure.category = None
-                expenditure.is_binned = True
-                expenditure.save()
             Activity.objects.create(user=request.user, image = "images/delete.png", name = f'You\'ve deleted \"{category_name}\" category with all its expenditures')
             return redirect('category_bin')
         except Expenditure.DoesNotExist:
