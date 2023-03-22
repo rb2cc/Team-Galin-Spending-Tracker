@@ -1479,7 +1479,7 @@ def admin_dashboard(request):
             user_page_number = request.GET.get('page')
             user_page = user_paginator.get_page(user_page_number)
 
-            category_list = Category.objects.all().order_by('id')
+            category_list = Category.objects.filter(is_global=True).order_by('id')
             category_paginator = Paginator(category_list, 8)
             category_page_number = request.GET.get('page')
             category_page = category_paginator.get_page(category_page_number)
@@ -1525,7 +1525,7 @@ def user_table(request):
   return render(request, 'user_table.html', {'user_page': user_page})
 
 def category_table(request):
-  category_list = Category.objects.all().order_by('id')
+  category_list = Category.objects.filter(is_global=True).order_by('id')
   category_paginator = Paginator(category_list, 8)
   category_page_number = request.GET.get('page')
   category_page = category_paginator.get_page(category_page_number)

@@ -245,4 +245,3 @@ class Command(BaseCommand):
         Forum_Category.objects.create(title = "Rent",
                                       slug = "1",
                                       description = "Rent")
-
