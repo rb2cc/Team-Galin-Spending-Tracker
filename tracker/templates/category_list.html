@@ -27,10 +27,6 @@
                 <p class="card-text">Weekly Limit: {{ category.week_limit }}</p>
                 <div class = "row">
                         <div class="action_button" >
-                            <label>
-                                {% comment %} <input class="action_button" type="radio" name="radio_pk" data-bs-toggle="modal" data-bs-target="#bin_category_modal" value = {{ category.id }} > 🗑  {% endcomment %}
-                                <input value="🗑" type="button" data-bs-toggle="modal" data-bs-target="#edit_category_modal{{ forloop.counter }}"> edit test      
-                            </label>
                         <a href="edit_category/{{ category.id }}">⚙️</a>
                         <!-- edit modal -->
                         <!-- modal used as edit confirmation -->

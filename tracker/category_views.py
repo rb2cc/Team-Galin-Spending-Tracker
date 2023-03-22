@@ -2,13 +2,14 @@ from .forms import AddCategoryForm, EditOverallForm
 from .models import User, Category, Activity, UserAchievement, Expenditure, Achievement
 from django.shortcuts import redirect, render
 from .views import activity_points
-
 from  datetime import date
 from dateutil.relativedelta import relativedelta, MO, SU
 from django.utils import timezone
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
+from .helpers import login_prohibited, admin_prohibited, user_prohibited, anonymous_prohibited, anonymous_prohibited_with_id
 
+@anonymous_prohibited
 def category_list(request):
     user_id = request.user.id
     if request.method == 'POST':
@@ -39,6 +40,7 @@ def category_list(request):
     overall = Category.objects.filter(users__id=user_id).get(is_overall=True)
     return render(request, 'category_list.html', {'categories':categoryList, 'form':form, 'overall':overall})
 
+@anonymous_prohibited_with_id
 def remove_category(request, id):
     category = Category.objects.get(id = id)
     category_name = category.name
@@ -53,6 +55,7 @@ def remove_category(request, id):
     overall.save(force_update = True)
     return redirect('category_list')
 
+@anonymous_prohibited_with_id
 def edit_category(request, id):
     current_user = request.user
     category = Category.objects.get(id = id)
@@ -143,7 +146,8 @@ def category_progress(request, offset):
         'prev':prev_week,
         'next':next_week,
     })
-
+    
+@anonymous_prohibited_with_id
 def bin_category(request, id):
     category = Category.objects.get(id = id)
     diff = category.week_limit
@@ -164,6 +168,7 @@ def bin_category(request, id):
     return redirect('category_list')
 
 #Gets id field of the selected expenditure delete button and deletes the object from the database
+@anonymous_prohibited
 def delete_category(request):
     if request.method == "POST":
         try:
@@ -179,6 +184,7 @@ def delete_category(request):
             return redirect('category_bin')
 
 #Gets id field of the selected expenditure recover button and changes the is_binned field from true to false
+@anonymous_prohibited
 def recover_category(request):
     if request.method == "POST":
         try:
@@ -201,6 +207,7 @@ def recover_category(request):
             return redirect('category_bin')
 
 #Gets all expenditures under the filter of being binned
+@anonymous_prohibited
 def binned_category_list(request):
     binned_list = Category.objects.filter(users__id=request.user.id).filter(is_overall=False, is_binned=True).order_by('name')
     return render(request, 'category_bin.html', {'binned_categories': binned_list})

@@ -4,21 +4,25 @@ from .views import activity_points
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.utils.datastructures import MultiValueDictKeyError
+from .helpers import login_prohibited, admin_prohibited, user_prohibited, anonymous_prohibited, anonymous_prohibited_with_id
 
 #Gets all expenditures under the filters of belonging to the current user, is not binned and ordered by latest date
 #Returns both expenditure data and category data which is filtered by what user the category belongs to
+@anonymous_prohibited
 def expenditure_list(request):
     spending_list = Expenditure.objects.filter(user=request.user, is_binned=False, category__is_binned=False).order_by('-date_created')
     categories = Category.objects.filter(users__id=request.user.id, is_binned=False, is_overall=False)
     return render(request, 'expenditure_list.html', {'spendings': spending_list, 'categories': categories})
 
 #Gets all expenditures under the filter of being binned
+@anonymous_prohibited
 def binned_expenditure_list(request):
     binned_list = Expenditure.objects.filter(user=request.user, is_binned=True).order_by('-date_created')
     categories = Category.objects.filter(users__id=request.user.id)
     return render(request, 'expenditure_bin.html', {'binned_spendings': binned_list, 'categories': categories})
 
 #Gets id field of the selected expenditure radio button and changes the is_binned field from false to true
+@anonymous_prohibited
 def bin_expenditure(request):
     if request.method == "POST":
         try:
@@ -34,6 +38,7 @@ def bin_expenditure(request):
             return redirect('expenditure_list')
 
 #Gets id field of the selected expenditure recover button and changes the is_binned field from true to false
+@anonymous_prohibited
 def recover_expenditure(request):
     if request.method == "POST":
         try:
@@ -49,6 +54,7 @@ def recover_expenditure(request):
             return redirect('expenditure_bin')
         
 #Gets id field of the selected expenditure delete button and deletes the object from the database
+@anonymous_prohibited
 def delete_expenditure(request):
     if request.method == "POST":
         try:
@@ -64,6 +70,7 @@ def delete_expenditure(request):
             return redirect('expenditure_bin')
 
 #Gets selected expenditure object and returns its form allowing changing of its fields and saves the changes
+@anonymous_prohibited_with_id
 def update_expenditure(request, id):
     expenditure = Expenditure.objects.get(id = id)
     previous_title = expenditure.title
@@ -82,6 +89,7 @@ def update_expenditure(request, id):
     return render(request, 'update_expenditure.html', {'form' : form, 'categories':categories} )
 
 #Reloads page to display expenditures that contain the text input from the search bar in their title field
+@anonymous_prohibited
 def filter_by_title(request):
     query = request.GET.get("q")
     categories = Category.objects.filter(users__id=request.user.id)
@@ -93,6 +101,7 @@ def filter_by_title(request):
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
 
 #Reloads page to display expenditures that are of the category the user selected from the dropdown box
+@anonymous_prohibited
 def filter_by_category(request):
     query = request.GET.get("q")
     categories = Category.objects.filter(users__id=request.user.id)
@@ -105,6 +114,7 @@ def filter_by_category(request):
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
 
 #Reloads page to display expenditures after filtering them with a miscellaneous characteristic
+@anonymous_prohibited
 def filter_by_miscellaneous(request):
     query = request.GET.get("q")
     categories = Category.objects.filter(users__id=request.user.id)

@@ -3,10 +3,6 @@ from .forms import SignUpForm, LogInForm, EditUserForm, ReportForm, PostForm, Cr
 from django.contrib.auth.forms import UserChangeForm
 from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel, Activity, Post, Forum_Category, Comment, Reply, Avatar, Notification
 from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm, EditOverallForm, AddChallengeForm, AddAchievementForm
-
-
-
-
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import redirect, render, get_object_or_404
@@ -14,9 +10,6 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from django.urls import reverse, reverse_lazy
 from django.views import generic
 from django.views.generic import TemplateView
-
-
-
 from datetime import date, timedelta, datetime
 from django.utils import timezone
 from django.utils.datastructures import MultiValueDictKeyError
@@ -24,34 +17,29 @@ from django.db.models import Q, Count
 from django.db import IntegrityError
 from math import floor
 from urllib.parse import urlencode, unquote
-
 import math
 import os
 from django.conf import settings
 import re
 from django.template.defaulttags import register
 from django.views.decorators.cache import cache_control
-
 from django.http import HttpResponse, QueryDict, HttpResponseRedirect
-
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.exceptions import ObjectDoesNotExist
-
 from .utils import update_views
 import hashlib
 import random
-
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Tree
 import json
-
 from .utils import create_notification, create_achievement_notification
 from .send_emails import Emailer
-
+from .helpers import login_prohibited, admin_prohibited, user_prohibited, anonymous_prohibited, anonymous_prohibited_with_id
 
 # Create your views here.
 
+@login_prohibited
 def home(request):
     if request.method == 'POST':
         form = LogInForm(request.POST)
@@ -69,7 +57,7 @@ def home(request):
     form = LogInForm()
     return render(request, 'home.html', {'form': form})
 
-
+@login_prohibited
 def sign_up(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
@@ -108,10 +96,8 @@ def log_out(request):
     logout(request)
     return redirect('home')
 
-
 def user_test(user):
     return user.is_anonymous == False
-
 
 @user_passes_test(user_test, login_url='log_out')
 def landing_page(request):
@@ -126,7 +112,6 @@ def landing_page(request):
             activity_points(request, user_activity.points)
             return redirect('landing_page')
     else:
-
 
         form = ExpenditureForm(r=request)
     objectList = Expenditure.objects.filter(user=request.user, is_binned=False)
@@ -144,7 +129,6 @@ def landing_page(request):
             activity_points(request, user_activity.points)
         except IntegrityError:
             pass
-
 
     '''Data for chart display'''
     current_date = date.today()
@@ -1368,6 +1352,7 @@ def check_tree_achievements(request, treeNum):
         except IntegrityError:
             pass
 
+@anonymous_prohibited_with_id
 def profile(request, id):
     profile_user = User.objects.get(id=id)
     user_level = UserLevel.objects.get(user=profile_user)
@@ -1399,7 +1384,8 @@ def profile(request, id):
     }
     return render(request, 'profile.html', context)
 
-
+@user_prohibited
+@anonymous_prohibited
 def superuser_dashboard(request):
     if request.method == 'POST':
         form = CreateUserForm(request.POST)
