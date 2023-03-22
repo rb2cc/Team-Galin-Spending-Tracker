@@ -1176,6 +1176,7 @@ def report(request):
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
         else:
+            print('MSDIKAMDKASMDKASMDK')
             start_date = None
             end_date = None
     else:
@@ -1611,11 +1612,8 @@ def user_demote(request):
             if 'user_pk' in request.POST:
                 user_pk = request.POST['user_pk']
                 u = User.objects.get(pk = user_pk)
-                if u.is_staff == False:
-                    messages.info(request, 'This is a test')
-                else:
-                    u.is_staff = False
-                    u.save()
+                u.is_staff = False
+                u.save()
                 return redirect('admin_dashboard')
             else:
                 return redirect('admin_dashboard')

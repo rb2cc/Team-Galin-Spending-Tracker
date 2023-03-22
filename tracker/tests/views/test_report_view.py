@@ -47,3 +47,5 @@ class ReportViewTestCase(TestCase):
         self.assertIn(self.expenditure, response.context['expenditures'])
         self.assertEqual(response.context['start_date'], start_date)
         self.assertEqual(response.context['end_date'], end_date)
+
+    

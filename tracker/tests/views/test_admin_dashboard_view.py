@@ -18,7 +18,7 @@ class AdminDashboardViewTestCase(TestCase):
 
     def test_admin_dashboard_url(self):
         self.assertEqual(self.url, '/admin_dashboard/')
-    
+
     def test_non_staff_trying_to_access_page(self):
         login = self.c.login(email='non-staff@email.com', password='Password123')
         response = self.c.get(self.url)
@@ -122,7 +122,7 @@ class AdminDashboardViewTestCase(TestCase):
         self.assertTrue(Achievement.objects.filter(name='Achievement').exists())
         self.assertRedirects(response, self.url)
 
-    def test_creating_achievement(self):
+    def test_creating_bad_achievement(self):
         self.c.login(email='staff@email.com', password='Password123')
         response = self.c.post(self.url, data = {
             'create_achievement': '',
