@@ -35,6 +35,7 @@ class ProfileViewTests(TestCase):
         self.assertIn('user_posts', response.context)
 
     def test_with_reached_tiers(self):
+        self.client.login(email='galin@email.com', password='Password123')
         self.userlevel.delete()
         userlevel = UserLevel.objects.create(user=self.user, level=self.level, points=10000)
         response = self.client.get(self.url)
