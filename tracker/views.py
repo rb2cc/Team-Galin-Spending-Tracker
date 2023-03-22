@@ -100,6 +100,7 @@ def user_test(user):
     return user.is_anonymous == False
 
 @user_passes_test(user_test, login_url='log_out')
+@anonymous_prohibited
 def landing_page(request):
     if request.method == 'POST':
         form=ExpenditureForm(request.POST, request.FILES, r=request)
@@ -407,7 +408,7 @@ def detail(request, slug):
 
 # Moves to notification page and updates notifications.
 
-@login_required
+@anonymous_prohibited
 def notifications(request):
 
     if "noti-form" in request.POST:
@@ -621,10 +622,12 @@ def search_result(request):
     }
     return render(request, 'forum/search.html', context)
 
+@anonymous_prohibited
 def challenge_list(request):
     challenges = Challenge.objects.all()
     return render(request, 'challenge_list.html', {'challenges': challenges})
 
+@anonymous_prohibited
 def achievement_list(request):
     achievements = Achievement.objects.all()
     return render(request, 'achievement_list.html', {'achievements': achievements})
@@ -853,7 +856,7 @@ def handle_share(request):
         pass
     return redirect(share_url)
 
-@login_required
+@anonymous_prohibited
 def my_achievements(request):
     user_achievements = UserAchievement.objects.filter(user=request.user)
     return render(request, 'my_achievements.html', {'user_achievements': user_achievements})
@@ -868,7 +871,7 @@ def my_activity(request):
         user_activity = Activity.objects.filter(user=request.user).order_by('-time')[:int(num_items)]
     return render(request, 'my_activity.html', {'user_activity': user_activity})
 
-@login_required
+@anonymous_prohibited
 @cache_control(no_store=True)
 def my_avatar(request):
     locked_items = get_locked_items(request)
@@ -1152,6 +1155,7 @@ def create_forum_avatar(request, id):
     request.GET = query_dict
     return create_avatar(request)
 
+@anonymous_prohibited
 def report(request):
     user = request.user
     if request.method == 'POST':
@@ -1302,6 +1306,7 @@ def save_item_position(request):
         return JsonResponse({'success': True})
     return JsonResponse({'success': False})
 
+@anonymous_prohibited
 def garden(request):
     currentUser = request.user
     user_level = UserLevel.objects.get(user=currentUser)
