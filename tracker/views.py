@@ -1,7 +1,7 @@
 
 from .forms import SignUpForm, LogInForm, EditUserForm, ReportForm, PostForm, CreateUserForm
 from django.contrib.auth.forms import UserChangeForm
-from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel, Activity, Post, Forum_Category, Comment, Reply, Avatar
+from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel, Activity, Post, Forum_Category, Comment, Reply, Avatar, Notification
 from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm, EditOverallForm, AddChallengeForm, AddAchievementForm
 
 
@@ -46,6 +46,9 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Tree
 import json
 
+from .utils import create_notification, create_achievement_notification
+from .send_emails import Emailer
+
 
 # Create your views here.
 
@@ -86,10 +89,13 @@ def sign_up(request):
                     UserAchievement.objects.create(user=request.user, achievement = Achievement.objects.get(name="New user"))
                 except ObjectDoesNotExist:
                     pass
-                Activity.objects.create(user=request.user, image = "images/user.png", name = "You've created an account on Galin's Spending Tracker")
-                Activity.objects.create(user=request.user, image = "badges/new_user.png", name = "You've earned \"New user\" achievement")
+                sign_up_achievement_1 = Activity.objects.create(user=request.user, image = "images/user.png", name = "You've created an account on Galin's Spending Tracker")
+                sign_up_achievement_2 =Activity.objects.create(user=request.user, image = "badges/new_user.png", name = "You've earned \"New user\" achievement")
                 overall = Category.objects.create(name="Overall", week_limit=overall_count, is_overall = True)
                 user.available_categories.add(overall)
+                create_achievement_notification(request, request.user, "achievement", sign_up_achievement_1.name)
+                create_achievement_notification(request, request.user, "achievement", sign_up_achievement_2.name)
+                Emailer.send_register_email("Account Registration", request.user.email, request.user.first_name)
                 return redirect('landing_page')
             else:
                 messages.add_message(request, messages.ERROR, "This email has already been registered")
@@ -353,7 +359,7 @@ def posts(request, slug):
 
     return render(request, 'forum/posts.html', context)
 
-# @login_required(login_url=reverse_lazy("login"))
+# Displays details of a forum posts -> Post, comments and replies.)
 def detail(request, slug):
     post = get_object_or_404(Post, slug=slug)
     posts = Post.objects.all()
@@ -364,23 +370,35 @@ def detail(request, slug):
     user_levels = {}
     user_tier_names = {}
 
-    if "comment-form" in request.POST:
-        comment = request.POST.get("comment")
-        media = request.FILES.get("media")
-        new_comment, created = Comment.objects.get_or_create(user=author, content=comment, media=media)
-        post.comments.add(new_comment.id)
-        create_forum_activity(request, "made", post, new_comment)
-        check_forum_user_achievements(request)
 
-    if "reply-form" in request.POST:
-        reply = request.POST.get("reply")
-        media = request.FILES.get("media")
-        comment_id = request.POST.get("comment-id")
-        comment_obj = Comment.objects.get(id=comment_id)
-        new_reply, created = Reply.objects.get_or_create(user=author, content=reply, media=media)
-        comment_obj.replies.add(new_reply.id)
-        create_forum_activity(request, "left", post, comment_obj, new_reply)
-        check_forum_user_achievements(request)
+    if request.user.is_authenticated:
+        if "comment-form" in request.POST:
+            comment = request.POST.get("comment")
+            media = request.FILES.get("media")
+            new_comment, created = Comment.objects.get_or_create(user=author, content=comment, media=media)
+            post.comments.add(new_comment.id)
+            create_forum_activity(request, "made", post, new_comment)
+            check_forum_user_achievements(request)
+
+            if(request.user != post.user):
+                create_notification(request, post.user, 'comment', slug)
+
+        if "reply-form" in request.POST:
+            reply = request.POST.get("reply")
+            media = request.FILES.get("media")
+            comment_id = request.POST.get("comment-id")
+            comment_obj = Comment.objects.get(id=comment_id)
+            new_reply, created = Reply.objects.get_or_create(user=author, content=reply, media=media)
+            comment_obj.replies.add(new_reply.id)
+            create_forum_activity(request, "left", post, comment_obj, new_reply)
+            check_forum_user_achievements(request)
+
+            if(request.user != comment_obj.user):
+                create_notification(request, comment_obj.user, 'reply', slug)
+
+    else:
+        messages.info(request, 'You need to be logged in to post')
+        return redirect("home")
 
     for comment in post.comments.all():
         points, avatars, tier_colours, user_levels, user_tier_names = get_forum_user_info(points, avatars, tier_colours, user_levels, user_tier_names, comment)
@@ -401,6 +419,20 @@ def detail(request, slug):
     }
     update_views(request, post)
     return render(request, 'forum/detail.html', context)
+
+
+# Moves to notification page and updates notifications.
+
+@login_required
+def notifications(request):
+
+    if "noti-form" in request.POST:
+        noti_id = request.POST.get("noti-id")
+        noti_obj = Notification.objects.get(id=noti_id)
+        noti_obj.is_read = True
+        noti_obj.save()
+
+    return render(request, 'notifications.html')
 
 def get_forum_user_info(points, avatars, tier_colours, user_levels, user_tier_names, forum_object):
     user_level = UserLevel.objects.get(user=forum_object.user)
@@ -589,6 +621,8 @@ def latest_posts(request):
     }
     return render(request, "forum/latest_posts.html", context)
 
+# Returns the results of a forum search.
+
 def search_result(request):
     query = request.GET.get('q')
     results = Post.objects.filter(title__icontains=query)
@@ -648,10 +682,12 @@ def complete_challenge(request, challenge_id):
             if user_challenges_count == 1:
                 UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Wise spender"))
                 user_activity = Activity.objects.create(user=request.user, image = "badges/wise_spender.png", name = "You've earned \"Wise spender\" achievement", points = 15)
+                create_achievement_notification(request, request.user, "achievement", UserAchievement.achievement)
                 activity_points(request, user_activity.points)
             elif user_challenges_count == 10:
                 UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Superstar"))
                 user_activity = Activity.objects.create(user=request.user, image = "badges/super_star.png", name = "You've earned \"Superstar\" achievement", points = 150)
+                create_achievement_notification(request, request.user, "achievement", UserAchievement.achievement)
                 activity_points(request, user_activity.points)
         except ObjectDoesNotExist:
             pass

@@ -2,7 +2,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from tracker.models import User, Category
 
-"""Unit tests for the recover_category view"""
+"""Unit tests for the delete_category view"""
 class DeleteCategoryViewTestCase(TestCase):
 
     def setUp(self):

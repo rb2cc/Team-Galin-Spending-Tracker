@@ -14,6 +14,7 @@ from hitcount.models import HitCountMixin, HitCount
 from django_resized import ResizedImageField
 from tinymce.models import HTMLField
 from django.contrib.auth import get_user_model
+import random
 
 # Create your models here.
 
@@ -42,6 +43,14 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_staff', True)
         return self._create_user(email, password, **extra_fields)
+    
+# Helper function to generate random username.    
+def random_username():
+    return "Anon" + str(random.randint(1000, 9999999))
+
+# Random number generator for forum titles.
+def random_slug_number():
+    return str(random.randint(1000, 999999999999))
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -58,7 +67,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     available_categories = models.ManyToManyField('Category', symmetrical = False, related_name = 'users')
-    username = models.CharField(max_length=50, blank=True, unique=True, null = True)
+    username = models.CharField(max_length=50, default=random_username, blank=True)
     trees = models.IntegerField(default=0)
 
     objects = UserManager()
@@ -169,6 +178,32 @@ class Activity(models.Model):
     points = models.IntegerField(default=0)
 
 # Creation of forums models
+
+
+# Notification model for notifying users of various changes in the web application.
+
+class Notification(models.Model):
+    COMMENT = 'comment'
+    REPLY = 'reply'
+    ACHIEVEMENT = 'achievement'
+    CHOICES = (
+        (COMMENT, 'comment'),
+        (REPLY, ' reply'),
+        (ACHIEVEMENT, 'achievement')
+    )
+
+    to_user = models.ForeignKey(User, related_name='notifications', on_delete=models.CASCADE)
+    notification_type = models.CharField(max_length=20, choices=CHOICES)
+    is_read = models.BooleanField(default=False)
+    extra_id = models.IntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, related_name="created", on_delete=models.CASCADE)
+    slugg = models.SlugField(max_length=20, null=True)
+    achievement_type = models.CharField(max_length=100, null=True)
+
+
+    class Meta:
+        ordering = ['-created_at'] 
 
 User = get_user_model()
 

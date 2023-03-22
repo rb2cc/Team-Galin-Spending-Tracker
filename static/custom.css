@@ -703,3 +703,14 @@ footer{
   margin-top: 50px;
 }
 
+/* --------------------------- Notifications page. ------------------*/
+
+.notification{
+  color:aliceblue;
+  font-weight: bolder;
+  text-decoration: none;
+}
+
+.notification:hover, .notification:active, .notification:focus {
+  color:goldenrod;
+}

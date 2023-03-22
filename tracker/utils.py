@@ -1,5 +1,8 @@
 from hitcount.utils import get_hitcount_model
 from hitcount.views import HitCountMixin
+from .models import Notification
+
+# Utility method to update views on forum posts.
 
 def update_views(request, object):
     context = {}
@@ -14,3 +17,10 @@ def update_views(request, object):
         hitcontext["hit_message"] = hit_count_response.hit_message
         hitcontext["total_hits"] = hits
 
+# Utility method that creates notification to raise notifications.
+
+def create_notification(request, to_user, notification_type, slugg):
+    notification = Notification.objects.create(to_user=to_user, notification_type=notification_type, created_by=request.user, slugg=slugg)
+
+def create_achievement_notification(request, to_user, notification_type, achievement_type):
+    notification = Notification.objects.create(to_user=to_user, notification_type=notification_type, created_by=request.user, achievement_type=achievement_type)
