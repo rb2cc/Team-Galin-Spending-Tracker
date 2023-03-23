@@ -47,7 +47,7 @@ def category_progress_notification_cron_job():
         if overall_percent >= 90 and not user.has_email_sent:
             user.has_email_sent = True
             user.save()
-            Emailer.send_spending_limit_notification("Spending Limits", "reubenatendido@gmail.com", user.first_name)
+            Emailer.send_spending_limit_notification("Spending Limits", user.email, user.first_name)
         elif overall_percent < 90 and  user.has_email_sent:
             user.has_email_sent = False
             user.save()
