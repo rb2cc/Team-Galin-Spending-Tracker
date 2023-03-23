@@ -233,6 +233,59 @@ class Emailer:
             server.starttls()
             server.login(sender_email, password_email)
             server.sendmail(sender_email, receiver_email, msg.as_string())
+            
+
+
+    def send_spending_limit_notification(subject, receiver_email, name):
+     # Create the base text message
+        msg = EmailMessage()
+        msg["Subject"] = subject
+        msg["From"] = formataddr(("Team Galin Money Saver.", f"{sender_email}"))
+        msg["To"] = receiver_email
+        msg["BCC"] = sender_email
+
+        msg.set_content(
+            f"""\
+            Hi {name},
+
+            You are nearing the spending limit of one of your categories.
+
+            Please visit out website to check on your spending.
+
+            We are here to support you.
+
+            Kind regards,
+
+            Team Galin Money Saver.
+            """
+    )
+
+    # Add html version. This converts the messagee into a multipart/alternative
+    # container, with the original message as the first part and th new html
+    # message as the second part.
+
+        msg.add_alternative(
+            f"""\
+                <html>
+                <body>
+                <p> Hi {name}, </p>
+                <p> You are nearing the spending limit of one of your categories. </p>
+                <p> <strong> Please visit out website to check on your spending. </strong> </p>
+                <p> We are here to support you. </p>
+                <p> Kind regards, </p>
+                <p> Team Galin Money Saver. </p>
+                </body>
+                </html>
+                """,
+
+                subtype = "html",
+        )
+
+
+        with smtplib.SMTP(EMAIL_SERVER, PORT) as server:
+            server.starttls()
+            server.login(sender_email, password_email)
+            server.sendmail(sender_email, receiver_email, msg.as_string())
 
 
 
