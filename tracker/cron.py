@@ -19,6 +19,10 @@ def category_progress_notification_cron_job():
     
     def _make_percent(num, cat_name, user):
                 denom = Category.objects.filter(users__id = user.id).get(name=cat_name).week_limit
+                percent = (100 * (float(num)/float(denom)))
+                if percent > 100:
+                    return 100
+                return percent
 
     for user in User.objects.filter(is_staff=False, is_superuser=False):
         
@@ -40,11 +44,13 @@ def category_progress_notification_cron_job():
         overall = Category.objects.filter(users__id = user.id, is_overall=True)
         overall_percent = _make_percent(overall_spend, overall.get(name="Overall"), user)
 
-        if overall_percent > 90: #and if flag = False
-            # set flag to true
-            Emailer.send_spending_limit_notification("Spending Limits", user.email , user.first_name)
-        elif overall_percent <= 90: #and if flag = True
+        if overall_percent >= 90 and not user.has_email_sent:
+            user.has_email_sent = True
+            user.save()
+            Emailer.send_spending_limit_notification("Spending Limits", "reubenatendido@gmail.com", user.first_name)
+        elif overall_percent < 90 and  user.has_email_sent:
+            user.has_email_sent = False
+            user.save()
+        else: 
             pass
-            # set flag to false
-        else:
-            pass
+
