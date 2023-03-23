@@ -63,6 +63,8 @@ class Command(BaseCommand):
             last_name = "Mihaylov",
         )
 
+        galin.available_categories.add(foodCategoryLocal,travelCategoryLocal, overallCategory)
+
         for _ in range(0,100):
             Expenditure.objects.create(
                 category = foodCategoryLocal,
