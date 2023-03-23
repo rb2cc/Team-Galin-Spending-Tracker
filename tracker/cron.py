@@ -4,8 +4,10 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta, MO, SU
 from .send_emails import Emailer
 
-#Function that gets all expenditures that have is_binned field = True and deletes them all
 def delete_binned_objects_cron_job():
+    
+    """Cron job function that will go through expenditures and categories with is_binned=True and deletes them all"""
+    
     binned_expenditures = Expenditure.objects.filter(is_binned=True)
     binned_categories = Category.objects.filter(is_binned=True)
     
@@ -17,6 +19,9 @@ def delete_binned_objects_cron_job():
         
 def category_progress_notification_cron_job():
     
+    """Cron job function that will send an email to the user when one of their categories is close to their weekly limit"""
+    """Limits the emails being sent to only when spending >=90% and has_email_sent=False to not fill up email inbox"""
+    
     def _make_percent(num, cat_name, user):
                 denom = Category.objects.filter(users__id = user.id).get(name=cat_name).week_limit
                 percent = (100 * (float(num)/float(denom)))
@@ -25,11 +30,6 @@ def category_progress_notification_cron_job():
                 return percent
 
     for user in User.objects.filter(is_staff=False, is_superuser=False):
-        
-        # categories = Category.objects.filter(is_overall = False, users__id=user.id)
-        # expenditures = Expenditure.objects.filter(user = user)
-        
-        # for expenditure in expenditures:
         
         week_start = timezone.now().date() + relativedelta(weekday=MO(-1))
         week_end = week_start + relativedelta(weekday=SU(1)) 
