@@ -303,6 +303,7 @@ class UserEditView(generic.UpdateView):
             return render(request, 'edit_user.html')
         return render(request, 'edit_user.html')
 
+@anonymous_prohibited
 def forum_home(request):
     all_forum_categories = Forum_Category.objects.all()
     num_posts = Post.objects.all().count()
@@ -439,7 +440,7 @@ def get_forum_user_info(points, avatars, tier_colours, user_levels, user_tier_na
         user_tier_names[forum_object.user.id] = ""
     return points, avatars, tier_colours, user_levels, user_tier_names
 
-@login_required
+@anonymous_prohibited
 def create_post(request):
     context = {}
     form = PostForm(request.POST or None, request.FILES or None)
@@ -459,6 +460,7 @@ def create_post(request):
     })
     return render(request, "forum/create_post.html", context)
 
+@anonymous_prohibited_with_id
 def delete_post(request, id):
     try:
         post = Post.objects.get(id = id)
@@ -472,6 +474,7 @@ def delete_post(request, id):
         pass
     return redirect('forum_home')
 
+@anonymous_prohibited_with_id
 def edit_post(request, id):
     try:
         post = Post.objects.get(id=id)
@@ -490,6 +493,7 @@ def edit_post(request, id):
         return redirect('forum_home')
     return render(request, 'forum/edit_post.html', {'form' : form})
 
+@anonymous_prohibited_with_id
 def delete_comment(request, id):
     try:
         comment = Comment.objects.get(id=id)
@@ -503,6 +507,7 @@ def delete_comment(request, id):
         pass
     return redirect('forum_home')
 
+@anonymous_prohibited_with_id
 def edit_comment(request, id):
     try:
         comment = Comment.objects.get(id=id)
@@ -524,6 +529,7 @@ def edit_comment(request, id):
     except Comment.DoesNotExist:
         return redirect('forum_home')
 
+@anonymous_prohibited_with_id
 def delete_reply(request, id):
     try:
         reply = Reply.objects.get(id=id)
@@ -537,6 +543,7 @@ def delete_reply(request, id):
         pass
     return redirect('forum_home')
 
+@anonymous_prohibited_with_id
 def edit_reply(request, id):
     try:
         reply = Reply.objects.get(id=id)
@@ -598,6 +605,7 @@ def check_forum_user_achievements(request):
         except IntegrityError:
             pass
 
+@anonymous_prohibited
 def latest_posts(request):
     posts = Post.objects.all().filter(approved=True)[:10]
     context = {
@@ -1295,6 +1303,7 @@ def report(request):
     return render(request, 'report.html', context)
 
 @csrf_exempt
+@anonymous_prohibited
 def save_item_position(request):
     if request.method == 'POST':
         user = request.user
