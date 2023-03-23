@@ -44,8 +44,15 @@ def category_progress_notification_cron_job():
         overall = Category.objects.filter(users__id = user.id, is_overall=True)
         overall_percent = _make_percent(overall_spend, overall.get(name="Overall"), user)
 
-        if overall_percent > 90:
+        if overall_percent > 90: #and if flag = False
+            # set flag to true
             Emailer.send_spending_limit_notification("Spending Limits", user.email , user.first_name)
+        elif overall_percent <= 90: #and if flag = True
+            pass
+            # set flag to false
+            
+        else:
+            pass
 
 
     

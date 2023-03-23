@@ -1,4 +1,4 @@
-from tracker.models import Expenditure, Category, User,
+from tracker.models import Expenditure, Category, User
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta, MO, SU
 from tracker.send_emails import Emailer
@@ -36,5 +36,12 @@ class Command(BaseCommand):
             overall = Category.objects.filter(users__id = user.id, is_overall=True)
             overall_percent = _make_percent(overall_spend, overall.get(name="Overall"), user)
 
-            if overall_percent > -1:
+            if overall_percent >= 90 and not user.has_email_sent:
+                user.has_email_sent = True
+                user.save()
                 Emailer.send_spending_limit_notification("Spending Limits", "reubenatendido@gmail.com", user.first_name)
+            elif overall_percent < 90 and  user.has_email_sent:
+                user.has_email_sent = False
+                user.save()
+            else: 
+                pass
