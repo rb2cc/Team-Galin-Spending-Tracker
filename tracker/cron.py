@@ -1,5 +1,5 @@
-# from .models import Expenditure, Category
-from .models import Expenditure, Category, Notification, User, Challenge
+
+from .models import Expenditure, Category, Notification, User
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta, MO, SU
 from .send_emails import Emailer
@@ -19,10 +19,6 @@ def category_progress_notification_cron_job():
     
     def _make_percent(num, cat_name, user):
                 denom = Category.objects.filter(users__id = user.id).get(name=cat_name).week_limit
-                percent = (100 * (float(num)/float(denom)))
-                if percent > 100:
-                    return 100
-                return percent
 
     for user in User.objects.filter(is_staff=False, is_superuser=False):
         
@@ -50,9 +46,5 @@ def category_progress_notification_cron_job():
         elif overall_percent <= 90: #and if flag = True
             pass
             # set flag to false
-            
         else:
             pass
-
-
-    

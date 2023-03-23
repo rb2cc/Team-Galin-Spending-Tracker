@@ -1,0 +1,35 @@
+[
+    {
+        "model": "tracker.expenditure",
+        "pk": 0,
+        "fields": {
+            "category":0,
+            "title": "cat_one exp",
+            "description": "cat_one",
+            "expense": 50,
+            "user": 1
+        }
+    },
+    {
+        "model": "tracker.expenditure",
+        "pk": 1,
+        "fields": {
+            "category":1,
+            "title": "cat_two exp",
+            "description": "cat_two",
+            "expense": 125,
+            "user": 1
+        }
+    },
+    {
+        "model": "tracker.expenditure",
+        "pk": 2,
+        "fields": {
+            "category":2,
+            "title": "cat_three exp",
+            "description": "cat_three",
+            "expense": 10,
+            "user": 1
+        }
+    }
+]
