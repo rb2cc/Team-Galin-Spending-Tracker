@@ -6,14 +6,8 @@ from dateutil.relativedelta import relativedelta, MO, SU
 from django.utils import timezone
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
-<<<<<<< HEAD
 from .helpers import anonymous_prohibited, anonymous_prohibited_with_id
 from django.utils.datastructures import MultiValueDictKeyError
-=======
-from .helpers import login_prohibited, admin_prohibited, user_prohibited, anonymous_prohibited, anonymous_prohibited_with_id
-from django.utils.datastructures import MultiValueDictKeyError
-from django.contrib.auth.decorators import user_passes_test, login_required
->>>>>>> main
 
 #Collects all categories belonging to the request user and returns the data to the
 # category list view and redirects to that page
@@ -48,12 +42,9 @@ def category_list(request):
     overall = Category.objects.filter(users__id=user_id).get(is_overall=True)
     return render(request, 'category_list.html', {'categories':categoryList, 'form':form, 'overall':overall})
 
-<<<<<<< HEAD
 # gets the correct category object using the id argument and returns its form
 # validates the data again before saving
 # also generates activity objects for the activity page to keep record of when a category is edited
-=======
->>>>>>> main
 @anonymous_prohibited_with_id
 def edit_category(request, id):
     current_user = request.user
@@ -96,13 +87,9 @@ def edit_category(request, id):
             form = EditOverallForm(instance=category, user = current_user)
     return render(request, 'edit_category.html', {'form' : form})
 
-<<<<<<< HEAD
 # function used to calculate how close categories are to their weekly limit and
 # assigns a colour to the bar dependent on the percentage calculated
 # helps visualise spending to the user 
-=======
-@login_required
->>>>>>> main
 def category_progress(request, offset):
 
     def _make_percent(num, category, user):
