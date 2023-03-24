@@ -1,10 +1,8 @@
 from .forms import ExpenditureForm
 from .models import Category, Expenditure, Activity
-from .views import activity_points
 from django.shortcuts import redirect, render
-from django.contrib.auth.decorators import login_required
 from django.utils.datastructures import MultiValueDictKeyError
-from .helpers import login_prohibited, admin_prohibited, user_prohibited, anonymous_prohibited, anonymous_prohibited_with_id
+from .helpers import anonymous_prohibited, anonymous_prohibited_with_id
 
 #Gets all expenditures under the filters of belonging to the current user, is not binned and ordered by latest date
 #Returns both expenditure data and category data which is filtered by what user the category belongs to
@@ -21,6 +19,8 @@ def binned_expenditure_list(request):
     categories = Category.objects.filter(users__id=request.user.id)
     return render(request, 'expenditure_bin.html', {'binned_spendings': binned_list, 'categories': categories})
 
+#checks if the total number of expenditure objects inside the bin is greater than 10
+#if greater than 10 the bin gets emptied (all objects are deleted) otherwise pass
 def overflow_delete_expenditures(request):
     expenditures = Expenditure.objects.filter(user=request.user, is_binned=True)
     if expenditures.count() > 10:
@@ -29,6 +29,7 @@ def overflow_delete_expenditures(request):
         pass
 
 #Gets id field of the selected expenditure radio button and changes the is_binned field from false to true
+#This effectively moves the expenditure from the expenditure list page to the expenditure bin page
 @anonymous_prohibited
 def bin_expenditure(request):
     if request.method == "POST":
@@ -48,6 +49,7 @@ def bin_expenditure(request):
         return redirect('expenditure_list')
 
 #Gets id field of the selected expenditure recover button and changes the is_binned field from true to false
+#This effectively moves the expenditure from the expenditure bin page to the expenditure list page
 @anonymous_prohibited
 def recover_expenditure(request):
     if request.method == "POST":
@@ -65,7 +67,7 @@ def recover_expenditure(request):
     else:
         return redirect('expenditure_bin')
         
-#Gets id field of the selected expenditure delete button and deletes the object from the database
+#Gets id field of the selected expenditure delete button and deletes the expenditure object from the database
 @anonymous_prohibited
 def delete_expenditure(request):
     if request.method == "POST":
@@ -83,7 +85,7 @@ def delete_expenditure(request):
     else:
         return redirect('expenditure_bin')
 
-#Gets selected expenditure object and returns its form allowing changing of its fields and saves the changes
+#Gets selected expenditure object and returns its form allowing the user to change its fields and saves the changes
 @anonymous_prohibited_with_id
 def update_expenditure(request, id):
     expenditure = Expenditure.objects.get(id = id)
@@ -127,7 +129,7 @@ def filter_by_category(request):
         expenditures = Expenditure.objects.all().filter(user=request.user, category=query, is_binned=False).order_by('-date_created')
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
 
-#Reloads page to display expenditures after filtering them with a miscellaneous characteristic
+#Reloads page to display expenditures after filtering them with a miscellaneous characteristic e.g. latest, oldest, most expensive, least expensive
 @anonymous_prohibited
 def filter_by_miscellaneous(request):
     query = request.GET.get("q")
@@ -149,6 +151,7 @@ def filter_by_miscellaneous(request):
         expenditures = Expenditure.objects.filter(is_binned=False)
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
 
+#Creates activity objects when expenditure actions occur such that they will appear on the activty
 def create_expenditure_activity(request, expenditure, previous_title, previous_expense, previous_description, previous_category):
     if (expenditure.title != previous_title):
         activity_name = f'You\'ve changed \"{previous_title}\" expenditure title to \"{expenditure.title}\"'

@@ -65,6 +65,8 @@ class ChallengeViewTest(TestCase):
         self.assertTrue(UserChallenge.objects.filter(user=self.user, challenge=self.challenge).exists())
         response = self.client.post(url, {'challenge_id': self.challenge.id})
         self.assertEqual(response.status_code, 302)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
 
     def test_my_challenges_view(self):
         UserChallenge.objects.create(user=self.user, challenge=self.challenge)
@@ -101,4 +103,8 @@ class ChallengeViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(UserChallenge.objects.filter(user=self.user, challenge=self.challenge).exists())
 
+    def test_complete_not_existing_challenge(self):
+        url = reverse('complete_challenge', args=[10])
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 302)
 

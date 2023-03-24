@@ -1,19 +1,14 @@
-
 from .forms import SignUpForm, LogInForm, EditUserForm, ReportForm, PostForm, CreateUserForm
-from django.contrib.auth.forms import UserChangeForm
 from .models import User, Category, Expenditure, Challenge, UserChallenge, Achievement, UserAchievement, Level, UserLevel, Activity, Post, Forum_Category, Comment, Reply, Avatar, Notification
-from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm, EditOverallForm, AddChallengeForm, AddAchievementForm
+from .forms import SignUpForm, LogInForm, ExpenditureForm, AddCategoryForm, AddChallengeForm, AddAchievementForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.urls import reverse, reverse_lazy
 from django.views import generic
-from django.views.generic import TemplateView
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta
 from django.utils import timezone
-from django.utils.datastructures import MultiValueDictKeyError
-from django.db.models import Q, Count
 from django.db import IntegrityError
 from math import floor
 from urllib.parse import urlencode, unquote
@@ -23,7 +18,7 @@ from django.conf import settings
 import re
 from django.template.defaulttags import register
 from django.views.decorators.cache import cache_control
-from django.http import HttpResponse, QueryDict, HttpResponseRedirect
+from django.http import HttpResponse, QueryDict
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.exceptions import ObjectDoesNotExist
 from .utils import update_views
@@ -35,11 +30,13 @@ from .models import Tree
 import json
 from .utils import create_notification, create_achievement_notification
 from .send_emails import Emailer
-from .helpers import login_prohibited, admin_prohibited, user_prohibited, anonymous_prohibited, anonymous_prohibited_with_id
+from .helpers import login_prohibited, user_prohibited, anonymous_prohibited, anonymous_prohibited_with_id
 from dateutil.relativedelta import relativedelta, MO, SU
 
 # Create your views here.
 
+#view function that will validate login form data and redirect to the relevant homepage
+#depending if theyre an admin or standard user
 @login_prohibited
 def home(request):
     if request.method == 'POST':
@@ -58,6 +55,8 @@ def home(request):
     form = LogInForm()
     return render(request, 'home.html', {'form': form})
 
+#view function that will create a new user object from the form data in the request
+#creates and gives achievements to the new user for signing up as well
 @login_prohibited
 def sign_up(request):
     if request.method == 'POST':
@@ -92,13 +91,17 @@ def sign_up(request):
         form = SignUpForm()
     return render(request, 'sign_up.html', {'form': form})
 
+# logs out user
 def log_out(request):
     logout(request)
     return redirect('home')
 
+# returns the user is not logged in
 def user_test(user):
     return user.is_anonymous == False
 
+# auxiliary function that checks for the overall category percentage and emails the user if overall percent is greater than 90%
+# also changes the flags for has_email_sent to prevent multiple emails being sent when adding new expenditures while over the weekly limit
 def category_progress_email_check():
 
     """Function that will send an email to the user when one of their categories is close to their weekly limit"""
@@ -136,6 +139,9 @@ def category_progress_email_check():
         else:
             pass
 
+# redirects user to landing page when logged in
+# also creates expenditure creation activity for activity page
+# also returns cumulative expenditure data for the graphs and data cards
 @user_passes_test(user_test, login_url='log_out')
 @anonymous_prohibited
 def landing_page(request):
@@ -237,6 +243,7 @@ def landing_page(request):
         'avatar': avatar,
     })
 
+# returns list of categories and expenditures to be used as graph axis data
 def getCategoryAndExpenseList(objectList, request):
     categoryList = []
     expenseList = []
@@ -250,8 +257,7 @@ def getCategoryAndExpenseList(objectList, request):
         expenseList.append(tempInt)
     return categoryList, expenseList
 
-
-
+# returns list of dates and expenses to be used as graph axis data
 def getDateListAndDailyExpenseList(objectList, num):
     dateList = []
     dailyExpenseList = []
@@ -281,7 +287,7 @@ def getDateListAndDailyExpenseList(objectList, num):
 
     return dateList, dailyExpenseList
 
-
+# returns cumulative value of all expenses of a user
 def getCumulativeExpenseList(objectList, dailyExpenseList):
     cumulativeExpenseList = []
     cumulativeExpense = 0
@@ -290,7 +296,7 @@ def getCumulativeExpenseList(objectList, dailyExpenseList):
         cumulativeExpenseList.append(cumulativeExpense)
     return cumulativeExpenseList
 
-
+# returns all category and expenditures
 def getAllList(objectList, num, request):
     first = getCategoryAndExpenseList(objectList, request)
     cat = first[0]
@@ -301,10 +307,12 @@ def getAllList(objectList, num, request):
     cum = getCumulativeExpenseList(objectList, dai)
     return cat, exp, dat, dai, cum
 
+# redirects user on successful password reset
 def change_password_success(request):
     Activity.objects.create(user=request.user, image = "images/edit.png", name = "You've changed your password")
     return render(request, 'change_password_success.html')
 
+# class based view for editing user data
 class UserEditView(generic.UpdateView):
     form_class = EditUserForm
     template_name = 'edit_user.html'
@@ -335,6 +343,8 @@ class UserEditView(generic.UpdateView):
 
         return super().form_valid(form)
 
+# redirects to forum home
+# returns lists for forum categories, number of posts, number of users, number of categories and the last post made
 @anonymous_prohibited
 def forum_home(request):
     all_forum_categories = Forum_Category.objects.all()
@@ -357,6 +367,8 @@ def forum_home(request):
     }
     return render(request, 'forum/forum_home.html', context)
 
+# redirects user to posts list view
+# returns all posts and forum categories to the post view
 def posts(request, slug):
     category = get_object_or_404(Forum_Category, slug=slug)
     posts = Post.objects.filter(approved=True, forum_categories=category).order_by('id')
@@ -440,7 +452,6 @@ def detail(request, slug):
 
 
 # Moves to notification page and updates notifications.
-
 @anonymous_prohibited
 def notifications(request):
 
@@ -452,6 +463,7 @@ def notifications(request):
 
     return render(request, 'notifications.html')
 
+# displays user info of other users when clicking on their name in a forum post
 def get_forum_user_info(points, avatars, tier_colours, user_levels, user_tier_names, forum_object):
     user_level = UserLevel.objects.get(user=forum_object.user)
     user_points = user_level.points
@@ -472,6 +484,7 @@ def get_forum_user_info(points, avatars, tier_colours, user_levels, user_tier_na
         user_tier_names[forum_object.user.id] = ""
     return points, avatars, tier_colours, user_levels, user_tier_names
 
+# creates post object from user form input data and redirects to a new page display the created post
 @anonymous_prohibited
 def create_post(request):
     context = {}
@@ -492,6 +505,7 @@ def create_post(request):
     })
     return render(request, "forum/create_post.html", context)
 
+# deletes a post from the database
 @anonymous_prohibited_with_id
 def delete_post(request, id):
     try:
@@ -506,6 +520,7 @@ def delete_post(request, id):
         pass
     return redirect('forum_home')
 
+# validates and saves edited form data
 @anonymous_prohibited_with_id
 def edit_post(request, id):
     try:
@@ -525,6 +540,7 @@ def edit_post(request, id):
         return redirect('forum_home')
     return render(request, 'forum/edit_post.html', {'form' : form})
 
+# deletes comment from the database
 @anonymous_prohibited_with_id
 def delete_comment(request, id):
     try:
@@ -539,6 +555,7 @@ def delete_comment(request, id):
         pass
     return redirect('forum_home')
 
+# validates and saves form input data when editing a comment
 @anonymous_prohibited_with_id
 def edit_comment(request, id):
     try:
@@ -557,10 +574,11 @@ def edit_comment(request, id):
             comment.edited_at = timezone.now()
             comment.save()
             create_forum_activity(request, "edited", post, comment)
-            return redirect(post.get_url())
+        return redirect(post.get_url())
     except Comment.DoesNotExist:
         return redirect('forum_home')
 
+# deletes a user reply from the database
 @anonymous_prohibited_with_id
 def delete_reply(request, id):
     try:
@@ -575,6 +593,7 @@ def delete_reply(request, id):
         pass
     return redirect('forum_home')
 
+# validates and saves user form data when editing a reply
 @anonymous_prohibited_with_id
 def edit_reply(request, id):
     try:
@@ -594,10 +613,11 @@ def edit_reply(request, id):
             reply.edited_at = timezone.now()
             reply.save()
             create_forum_activity(request, "edited", post, comment, reply)
-            return redirect(post.get_url())
+        return redirect(post.get_url())
     except Reply.DoesNotExist:
         return redirect('forum_home')
 
+# creates activity objects of forum actions e.g. commenting, replying and making posts on the forum to be displayed on the activity page
 def create_forum_activity(request, action, post, *args):
     category_names = [category.title for category in post.forum_categories.all()]
     forum_name = "forums" if len(category_names) > 1 else "forum"
@@ -630,6 +650,7 @@ def create_forum_activity(request, action, post, *args):
     if points != 0:
         activity_points(request, user_activity.points)
 
+# redirects and shows another users achievements when clicking on them in the forum
 def check_forum_user_achievements(request):
     post_count = Post.objects.filter(user=request.user).count()
     reply_count = Reply.objects.filter(user=request.user).count()
@@ -652,6 +673,7 @@ def check_forum_user_achievements(request):
         except IntegrityError:
             pass
 
+# returns the last 10 posts on the database
 @anonymous_prohibited
 def latest_posts(request):
     posts = Post.objects.all().filter(approved=True)[:10]
@@ -663,6 +685,8 @@ def latest_posts(request):
 
 # Returns the results of a forum search.
 
+# returns the forum post list after filtering with the search bar input
+# only shows posts relevant to what the user input
 def search_result(request):
     query = request.GET.get('q')
     results = Post.objects.filter(title__icontains=query).order_by('id')
@@ -677,20 +701,25 @@ def search_result(request):
     }
     return render(request, 'forum/search.html', context)
 
+# returns all the current challenges in the database to return for display on the challenge list page
 @anonymous_prohibited
 def challenge_list(request):
     challenges = Challenge.objects.all()
     return render(request, 'challenge_list.html', {'challenges': challenges})
 
+# returns all the current achievements in the database to return for display on the achievement list page
 @anonymous_prohibited
 def achievement_list(request):
     achievements = Achievement.objects.all()
     return render(request, 'achievement_list.html', {'achievements': achievements})
 
+# returns description of the achievement got by the id argument
 def challenge_details(request, id):
     challenge = Challenge.objects.get(id=id)
     return render(request, 'challenge_details.html', {'challenge': challenge})
 
+# enters a user into a challenge
+# checks if user is already in challenge
 def enter_challenge(request):
     try:
         if request.method == 'POST':
@@ -700,18 +729,24 @@ def enter_challenge(request):
             user_activity = Activity.objects.create(user=request.user, image = "images/start.png", name = f'You\'ve entered \"{user_challenge.challenge.name}\" challenge', points = 15)
             activity_points(request, user_activity.points)
             complete_challenge(request, challenge_id)
-            return redirect('my_challenges')
+        return redirect('my_challenges')
     except IntegrityError:
         messages.error(request, 'You have already entered this challenge.')
         return redirect('challenge_list')
 
+# returns list of challenges the user has entered
 @anonymous_prohibited
 def my_challenges(request):
     user_challenges = UserChallenge.objects.filter(user=request.user)
     return render(request, 'my_challenges.html', {'user_challenges': user_challenges})
 
+# marks challenge completed and gives the set points
+# also checks for number of challenges completed, giving the user achievements for 1 and 10 completed challenges
 def complete_challenge(request, id):
-    user_challenge = UserChallenge.objects.get(user=request.user, challenge_id=id)
+    try:
+        user_challenge = UserChallenge.objects.get(user=request.user, challenge_id=id)
+    except UserChallenge.DoesNotExist:
+        user_challenge = None
     if user_challenge is not None:
         if user_challenge.date_completed is not None:
             return redirect('challenge_list')
@@ -748,6 +783,7 @@ def complete_challenge(request, id):
 
     return redirect('challenge_list')
 
+# assigns points for any point giving actions to the users level
 def activity_points(request, points):
     try:
         user_level = UserLevel.objects.get(user=request.user)
@@ -757,6 +793,8 @@ def activity_points(request, points):
     except ObjectDoesNotExist:
         pass
 
+# creates a new level object when a user reaches a level that has not been reached before
+# assigns a level to user when levelled up when level object already exists
 def update_user_level(user):
     user_level = UserLevel.objects.get(user=user)
     total_points = user_level.points
@@ -786,6 +824,7 @@ def update_user_level(user):
         user_level.level = current_level
         user_level.save()
 
+# creates url for avatar to be shared on external sites
 def share_avatar(request):
     svg = "avatar"
     name = "My avatar"
@@ -794,6 +833,7 @@ def share_avatar(request):
     text = "Check out my avatar created in Galin's Spending Tracker"
     return share(request, svg, name, description, url, text)
 
+# creates url for challenges to be shared on external sites
 def share_challenge(request, id):
     user_challenge = UserChallenge.objects.get(id=id)
     name = user_challenge.challenge.name
@@ -802,6 +842,7 @@ def share_challenge(request, id):
     text = f"I'm doing the \"{name}\" challenge on Galin's Spending Tracker"
     return share(request, user_challenge, name, description, url, text)
 
+# creates url for achievement to be shared on external sites
 def share_achievement(request, id):
     user_achievement = UserAchievement.objects.get(id=id)
     name = user_achievement.achievement.name
@@ -810,6 +851,7 @@ def share_achievement(request, id):
     text = f"I've earned the \"{name}\" achievement on Galin's Spending Tracker"
     return share(request, user_achievement, name, description, url, text)
 
+# creates url for post to be shared on external sites
 def share_post(request, id):
     post = Post.objects.get(id=id)
     name = post.title
@@ -823,6 +865,7 @@ def share_post(request, id):
     text = f"Check out \"{name}\" post by {user_name} on Galin's Spending Tracker"
     return share(request, post, name, description, url, text)
 
+# creates url for comment to be shared on external sites
 def share_comment(request, id):
     comment = Comment.objects.get(id=id)
     post = Post.objects.get(comments=comment)
@@ -837,6 +880,7 @@ def share_comment(request, id):
     text = f"Check out \"{name}\" comment by {user_name} on \"{post.title}\" post in Galin's Spending Tracker"
     return share(request, comment, name, description, url, text)
 
+# creates url for reply to be shared on external sites
 def share_reply(request, id):
     reply = Reply.objects.get(id=id)
     comment = Comment.objects.get(replies=reply)
@@ -852,46 +896,56 @@ def share_reply(request, id):
     text = f"Check out \"{name}\" reply by {user_name} on \"{post.title}\" post in Galin's Spending Tracker"
     return share(request, reply, name, description, url, text)
 
-def share(request, user_object, name, description, url, text):
-    facebook_params = {
-        'app_id': '1437874963685388',
-        'display': 'popup',
-        'href': 'facebook.com'
-    }
-    twitter_params = {
-        'url': url,
-        'text': text
-    }
-    share_urls = {
-        'facebook': 'https://www.facebook.com/dialog/share?' + urlencode(facebook_params),
-        'twitter': 'https://twitter.com/share?' + urlencode(twitter_params),
-        'forum': request.build_absolute_uri(reverse('create_post'))
-    }
+def share(request, *args):
+    if args:
+        user_object = args[0]
+        name = args[1]
+        description = args[2]
+        url = args[3]
+        text = args[4]
+        facebook_params = {
+            'app_id': '1437874963685388',
+            'display': 'popup',
+            'href': 'facebook.com'
+        }
+        twitter_params = {
+            'url': url,
+            'text': text
+        }
+        share_urls = {
+            'facebook': 'https://www.facebook.com/dialog/share?' + urlencode(facebook_params),
+            'twitter': 'https://twitter.com/share?' + urlencode(twitter_params),
+            'forum': request.build_absolute_uri(reverse('create_post'))
+        }
 
-    if isinstance(user_object, UserAchievement):
-        media = user_object.achievement.badge
-        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'achievement', 'media': media})
-    elif isinstance(user_object, UserChallenge):
-        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'challenge'})
-    elif isinstance(user_object, str):
-        user_tier_colour = get_user_tier_colour(request.user)
-        try:
-            media = 'avatar/' + Avatar.objects.get(user=request.user).file_name
-            avatar_path = os.path.join(settings.STATICFILES_DIRS[0], media)
-            if not os.path.exists(avatar_path):
+        if isinstance(user_object, UserAchievement):
+            media = user_object.achievement.badge
+            return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'achievement', 'media': media})
+        elif isinstance(user_object, UserChallenge):
+            return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'challenge'})
+        elif isinstance(user_object, str):
+            user_tier_colour = get_user_tier_colour(request.user)
+            try:
+                media = 'avatar/' + Avatar.objects.get(user=request.user).file_name
+                avatar_path = os.path.join(settings.STATICFILES_DIRS[0], media)
+                if not os.path.exists(avatar_path):
+                    media = 'avatar/default_avatar.png'
+            except Avatar.DoesNotExist:
                 media = 'avatar/default_avatar.png'
-        except Avatar.DoesNotExist:
-            media = 'avatar/default_avatar.png'
-        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'avatar', 'user_tier_colour': user_tier_colour, 'media': media})
-    elif isinstance(user_object, Post):
-        media = user_object.media
-        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'post', 'media': media})
-    elif isinstance(user_object, Comment):
-        media = user_object.media
-        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'comment', 'media': media})
-    elif isinstance(user_object, Reply):
-        media = user_object.media
-        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'reply', 'media': media})
+            return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'avatar', 'user_tier_colour': user_tier_colour, 'media': media})
+        elif isinstance(user_object, Post):
+            media = user_object.media
+            return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'post', 'media': media})
+        elif isinstance(user_object, Comment):
+            media = user_object.media
+            return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'comment', 'media': media})
+        elif isinstance(user_object, Reply):
+            media = user_object.media
+            return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'reply', 'media': media})
+        else:
+            return redirect('landing_page')
+    else:
+        return redirect('landing_page')
 
 def handle_share(request):
     type = unquote(request.GET.get('type'))
@@ -911,12 +965,13 @@ def handle_share(request):
         pass
     return redirect(share_url)
 
+# returns list of achievements the user has
 @anonymous_prohibited
 def my_achievements(request):
     user_achievements = UserAchievement.objects.filter(user=request.user)
     return render(request, 'my_achievements.html', {'user_achievements': user_achievements})
 
-
+# returns list of all activity objects created for a user
 @login_required
 def my_activity(request):
     num_items = request.GET.get('num_items')
@@ -926,6 +981,7 @@ def my_activity(request):
         user_activity = Activity.objects.filter(user=request.user).order_by('-time')[:int(num_items)]
     return render(request, 'my_activity.html', {'user_activity': user_activity})
 
+# returns all customisation options of user avatar
 @anonymous_prohibited
 @cache_control(no_store=True)
 def my_avatar(request):
@@ -982,6 +1038,7 @@ def my_avatar(request):
 
     return render(request, 'my_avatar.html', {'components': components, 'colours': colours, 'locked_items': locked_items, 'tier_info': tier_info, 'user_tier_colour': user_tier_colour})
 
+# checks if user avatar has all the required customisations to be saved
 def check_required_items(request):
     required_items_selected = True
     current_template = Avatar.objects.get(user=request.user).current_template
@@ -1010,6 +1067,7 @@ def check_required_items(request):
 
     return required_items_selected
 
+# creates avatar from user customisations
 @login_required
 @cache_control(no_store=True)
 def create_avatar(request):
@@ -1062,6 +1120,7 @@ def create_avatar(request):
     open(user_svg_path, 'w').write(user_svg)
     return HttpResponse(user_svg, content_type='image/svg+xml')
 
+# creates svg file for when a user customises their avatar
 def create_avatar_object(request):
     template_path = os.path.join(settings.STATICFILES_DIRS[1], 'template.svg')
     template_svg = open(template_path, 'r').read()
@@ -1073,6 +1132,7 @@ def create_avatar_object(request):
     avatar = Avatar.objects.create(user=request.user, file_name='default_avatar.png', current_template=avatar_file_name)
     return avatar
 
+# finds svg file for a component customisation
 def get_svg_paths_for_component(category, component):
     file_name = component + '.svg'
     item_path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', category, file_name)
@@ -1080,6 +1140,7 @@ def get_svg_paths_for_component(category, component):
     path_tags = re.findall(r'<path.*?/>', svg)
     return ''.join(path_tags)
 
+# returns all colours used for customisation
 def get_avatar_colours():
     colours = {'skin': ['#694d3d', '#ae5d29', '#d08b5b', '#edb98a', '#ffdbb4'],
         'accessories': ['#78e185', '#8fa7df', '#9ddadb', '#e279c7', '#e78276', '#fdea6b', '#ffcf77'],
@@ -1088,6 +1149,7 @@ def get_avatar_colours():
         'background': ['#b6e3f4', '#c0aede', '#d1d4f9', '#ffd5dc', '#ffdfbf']}
     return colours
 
+# creates activity objects for when a user edits their avatar or creates an avatar.
 def create_avatar_activity(request):
     if Activity.objects.filter(user=request.user, name="You've created an avatar").exists():
         user_activity = Activity.objects.create(user=request.user, image = "images/edit.png", name = "You've edited your avatar", points = 15)
@@ -1194,6 +1256,7 @@ def time_since_custom(time):
         time_since = f"{elapsed_time // 31536000} year{'s' if elapsed_time // 31536000 != 1 else ''} ago"
     return time_since
 
+# returns report data for categories and expenditures to be displayed in the report page
 @anonymous_prohibited
 def report(request):
     user = request.user
@@ -1329,6 +1392,7 @@ def report(request):
     }
     return render(request, 'report.html', context)
 
+# saves the position of created trees in the garden page
 @csrf_exempt
 @anonymous_prohibited
 def save_item_position(request):
@@ -1342,6 +1406,7 @@ def save_item_position(request):
         return JsonResponse({'success': True})
     return JsonResponse({'success': False})
 
+# redirects user to the garden page
 @anonymous_prohibited
 def garden(request):
     currentUser = request.user
@@ -1375,7 +1440,7 @@ def garden(request):
         "trees":trees,
     })
 
-
+# checks for achievements regarding how many trees have been planted in the garden page
 def check_tree_achievements(request, treeNum):
     tree_achievements = {1: ("Planting pioneer", 10), 10: ("Forest friend", 50), 100: ("Green guardian", 100)}
     if treeNum in tree_achievements:
@@ -1394,6 +1459,7 @@ def check_tree_achievements(request, treeNum):
             pass
 
 @anonymous_prohibited_with_id
+# returns user data of the current user logged in to be displayed as a profile card
 def profile(request, id):
     profile_user = User.objects.get(id=id)
     user_level = UserLevel.objects.get(user=profile_user)
@@ -1447,6 +1513,7 @@ def superuser_dashboard(request):
 
     return render(request, 'superuser_dashboard.html', {'form': form, 'page': page})
 
+# redirects to admin dashboard for admin users, with checks if any object creation has occured e.g category creations
 def admin_dashboard(request):
     view = request.GET.get('view', 'Users')
     if (request.user.is_staff == True):
@@ -1545,6 +1612,7 @@ def admin_dashboard(request):
 
     return render(request, 'admin_dashboard.html', context)
 
+# returns list of all users for admin dashboard
 def user_table(request):
   user_list = User.objects.all().order_by('id')
   if not request.user.is_superuser:
@@ -1554,6 +1622,7 @@ def user_table(request):
   user_page = user_paginator.get_page(user_page_number)
   return render(request, 'user_table.html', {'user_page': user_page})
 
+# returns list of all existing categories for admin dashboard
 def category_table(request):
   category_list = Category.objects.filter(is_global=True).order_by('id')
   category_paginator = Paginator(category_list, 8)
@@ -1561,6 +1630,7 @@ def category_table(request):
   category_page = category_paginator.get_page(category_page_number)
   return render(request, 'category_table.html', {'category_page': category_page})
 
+# returns list of all existing challenges available for admin dashboard
 def challenge_table(request):
   challenge_list = Challenge.objects.all().order_by('id')
   challenge_paginator = Paginator(challenge_list, 8)
@@ -1568,6 +1638,7 @@ def challenge_table(request):
   challenge_page = challenge_paginator.get_page(challenge_page_number)
   return render(request, 'challenge_table.html', {'challenge_page': challenge_page})
 
+# returns list of all existing achievements available for admin dashboard
 def achievement_table(request):
   achievement_list = Achievement.objects.all().order_by('id')
   achievement_paginator = Paginator(achievement_list, 8)
@@ -1575,6 +1646,7 @@ def achievement_table(request):
   achievement_page = achievement_paginator.get_page(achievement_page_number)
   return render(request, 'achievement_table.html', {'achievement_page': achievement_page})
 
+# admin deletion function which will determine what object was selected to be deleted and deletes them from the database
 def delete(request):
     if request.method == "POST":
         if 'user_pk' in request.POST:
@@ -1618,7 +1690,7 @@ def delete(request):
     else:
         return redirect('admin_dashboard')
 
-
+#  promotes a standard user to admin by changing is_staff to True
 def user_promote(request):
     if request.method == "POST":
         try:
@@ -1636,6 +1708,7 @@ def user_promote(request):
     else:
         return redirect('admin_dashboard')
 
+# demotes an admin to standard user by changing is_staff to False
 def user_demote(request):
     if request.method == "POST":
         try:

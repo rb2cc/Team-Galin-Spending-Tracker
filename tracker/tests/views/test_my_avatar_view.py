@@ -1,7 +1,8 @@
-from django.test import TransactionTestCase, Client
+from django.test import TransactionTestCase, RequestFactory, Client
 from django.urls import reverse
-from tracker.models import User, Level, UserLevel, Activity, Achievement, UserAchievement
+from tracker.models import User, Level, UserLevel, Activity, Achievement, UserAchievement, Avatar
 from tracker.tests.helpers import delete_avatar_after_test
+from tracker.views import check_required_items
 
 class MyAchievementsViewTests(TransactionTestCase):
 
@@ -9,6 +10,7 @@ class MyAchievementsViewTests(TransactionTestCase):
 
     def setUp(self):
         self.client = Client()
+        self.factory = RequestFactory()
         self.user = User.objects.get(email='galin@email.com')
         self.level = Level.objects.create(name='level', description='description', required_points=10)
         self.userlevel = UserLevel.objects.create(user=self.user, level=self.level, points=1000)
@@ -103,3 +105,10 @@ class MyAchievementsViewTests(TransactionTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(UserAchievement.objects.filter(user=self.user, achievement=self.achievement).count(), 1)
         delete_avatar_after_test(self)
+
+    def test_current_template_ends_with_png(self):
+        request = self.factory.get('/')
+        request.user = self.user
+        Avatar.objects.create(user=request.user, file_name="avatar.png", current_template="avatar.png")
+        response = check_required_items(request)
+        self.assertTrue(response)
