@@ -147,6 +147,13 @@ def category_progress(request, offset):
         'next':next_week,
     })
     
+def overflow_delete_categories(request):
+    categories = Category.objects.filter(users__id=request.user.id).filter(is_overall=False, is_binned=True)
+    if categories.count() > 10:
+        categories.delete()
+    else:
+        pass 
+
 @anonymous_prohibited_with_id
 def bin_category(request, id):
     category = Category.objects.get(id = id)
@@ -154,13 +161,13 @@ def bin_category(request, id):
     if category.is_global:
         request.user.available_categories.remove(category)
     else:
-        # category.delete()
         category.is_binned = True
         category.save()
     expenditures_of_category=Expenditure.objects.filter(is_binned=False,category=category)
     for expenditure in expenditures_of_category:
         expenditure.is_binned = True
         expenditure.save()
+    overflow_delete_categories(request)
     Activity.objects.create(user=request.user, image = "images/delete.png", name = f'You\'ve put \"{category.name}\" category with all its expenditures in the bin')
     overall = Category.objects.filter(is_overall = True).get(users__id=request.user.id)
     overall.week_limit -= diff
