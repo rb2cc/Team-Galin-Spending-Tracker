@@ -12,7 +12,7 @@ class SharePostViewTests(TestCase):
         self.factory = RequestFactory()
         self.user = User.objects.get(email='galin@email.com')
         self.forum_category = Forum_Category.objects.get(title='Test Category')
-        self.post = Post.objects.create(user=self.user, title='Test Post', content='Test content')
+        self.post = Post.objects.get(title='Test Post')
         self.url = reverse('share_post', kwargs={'id': self.post.id})
         self.post.forum_categories.add(self.forum_category)
         self.level = Level.objects.create(name='level', description='description', required_points=10)

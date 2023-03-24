@@ -7,5 +7,15 @@
             "slug": "test-category",
             "description": "Description"
         }
+    },
+    {
+        "model": "tracker.post",
+        "pk": 1,
+        "fields": {
+            "user": 8,
+            "title": "Test Post",
+            "content": "Test content",
+            "slug": "test-post"
+        }
     }
 ]
