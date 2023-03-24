@@ -266,8 +266,6 @@ def getDateListAndDailyExpenseList(objectList, num):
         dailyExpenseList.append(x.expense)
     for x in range(0, len(dateList)):
         try:
-            print(dateList[x])
-            print(dateList[x+1])
             while dateList[x] == dateList[x+1]:
                 dailyExpenseList[x] += dailyExpenseList[x+1]
                 dailyExpenseList.pop(x+1)
