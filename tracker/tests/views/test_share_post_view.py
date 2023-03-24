@@ -5,12 +5,13 @@ from tracker.views import share_post
 
 class SharePostViewTests(TestCase):
 
-    fixtures = ['tracker/tests/fixtures/default_user.json']
+    fixtures = ['tracker/tests/fixtures/default_user.json',
+                'tracker/tests/fixtures/forum_fixtures.json']
 
     def setUp(self):
         self.factory = RequestFactory()
         self.user = User.objects.get(email='galin@email.com')
-        self.forum_category = Forum_Category.objects.create(title='Test Category', slug='test-category', description='Description')
+        self.forum_category = Forum_Category.objects.get(title='Test Category')
         self.post = Post.objects.create(user=self.user, title='Test Post', content='Test content')
         self.url = reverse('share_post', kwargs={'id': self.post.id})
         self.post.forum_categories.add(self.forum_category)

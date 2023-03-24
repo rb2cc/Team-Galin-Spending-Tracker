@@ -5,12 +5,13 @@ from tracker.views import share_comment
 
 class ShareCommentViewTests(TestCase):
 
-    fixtures = ['tracker/tests/fixtures/default_user.json']
+    fixtures = ['tracker/tests/fixtures/default_user.json',
+                'tracker/tests/fixtures/forum_fixtures.json']
 
     def setUp(self):
         self.factory = RequestFactory()
         self.user = User.objects.get(email='galin@email.com')
-        self.forum_category = Forum_Category.objects.create(title='Test Category', slug='test-category', description='Description')
+        self.forum_category = Forum_Category.objects.get(title='Test Category')
         self.post = Post.objects.create(user=self.user, title='Test Post', content='Test content')
         self.comment = Comment.objects.create(user=self.user, content='Test commet content')
         self.reply = Reply.objects.create(user=self.user, content='Test reply content')

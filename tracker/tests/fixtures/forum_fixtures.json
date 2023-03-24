@@ -1,0 +1,11 @@
+[
+    {
+        "model": "tracker.forum_Category",
+        "pk": 0,
+        "fields": {
+            "title": "Test Category",
+            "slug": "test-category",
+            "description": "Description"
+        }
+    }
+]
