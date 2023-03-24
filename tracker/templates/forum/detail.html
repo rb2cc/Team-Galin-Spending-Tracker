@@ -164,7 +164,7 @@
                         </div>
 
                         <div class="comment" style="display: inline-block;">
-                            <button class="delete-button" data-bs-toggle="modal" data-bs-target="#delete_modal" data-object-type="comment" data-object-id="{{ comment.id }}" style="margin-left: 10px">Delete</button>
+                            <button class="delete-button" data-bs-toggle="modal" data-bs-target="#delete_modal" data-object-type="comment" data-object-id="{{ comment.id }}" style="margin-left: 10px ">Delete</button>
                         </div>
                     {% endif %}
                 </div>
@@ -222,9 +222,9 @@
 <form action="." method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="comment-area hide" id="comment{{comment.id}}">
-        <textarea name="reply" placeholder="Add reply......"></textarea>
-        <input type="submit" value="Submit" name="reply-form">
-        <input type="hidden" name="comment-id" value="{{comment.id}}">
+        <textarea name="reply" placeholder="Add reply......" style="border-radius: 10px 10px 10px 10px;"></textarea>
+        <input type="submit" value="Submit" name="reply-form" style="border-radius: 50px 50px 50px 50px;">
+        <input type="hidden" name="comment-id" value="{{comment.id}}" style="border-radius: 10px 10px 10px 10px;">
     </div>
     <div>
         <input type="file" name="media" accept="image/*">
@@ -248,7 +248,7 @@
     </div> -->
 
     <div class="body">
-        <div class="authors">
+        <div class="authors" >
             <div class="avatar-container"><img src="{% static avatars|get_forum_item:reply.user.id %}" style="border: 3px solid {{ tier_colours|get_forum_item:reply.user.id }}"/></div>
             <div class="AnotherUser"><a href="{% url 'profile' reply.user.id %}"> {% if reply.user.username is not None %}
                                                     {{reply.user.username|title}}
