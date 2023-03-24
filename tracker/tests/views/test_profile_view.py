@@ -1,6 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from tracker.models import User, UserLevel, Level
+from tracker.tests.helpers import delete_avatar_after_test
 
 
 class ProfileViewTests(TestCase):
@@ -37,6 +38,24 @@ class ProfileViewTests(TestCase):
     def test_with_reached_tiers(self):
         self.client.login(email='galin@email.com', password='Password123')
         self.userlevel.delete()
-        userlevel = UserLevel.objects.create(user=self.user, level=self.level, points=10000)
+        UserLevel.objects.create(user=self.user, level=self.level, points=10000)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_profile_with_existing_avatar_template(self):
+        self.client.login(email='galin@email.com', password='Password123')
+        url = reverse('my_avatar')
+        response = self.client.get(url, {'random': ''})
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        delete_avatar_after_test(self)
+
+    def test_profile_with_deleted_avatar_template(self):
+        self.client.login(email='galin@email.com', password='Password123')
+        url = reverse('my_avatar')
+        response = self.client.get(url, {'random': ''})
+        self.assertEqual(response.status_code, 200)
+        delete_avatar_after_test(self)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)

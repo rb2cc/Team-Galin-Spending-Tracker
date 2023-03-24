@@ -74,20 +74,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     def num_posts(self):
         return Post.objects.filter(user=self).count()
 
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    forget_password_token = models.CharField(max_length=100)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.user.email
-
-    def _add_category(self, category):
-        self.available_categories.add(category)
-
-    def _remove_category(self, category):
-        self.available_categories.remove(category)
-
 class Category(models.Model):
     """Categories used for classifying expenditure"""
 
@@ -195,7 +181,7 @@ class Notification(models.Model):
     extra_id = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, related_name="created", on_delete=models.CASCADE)
-    slugg = models.SlugField(max_length=20, null=True)
+    slug = models.SlugField(max_length=20, null=True)
     achievement_type = models.CharField(max_length=100, null=True)
 
     class Meta:

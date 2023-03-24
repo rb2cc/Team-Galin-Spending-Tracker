@@ -161,3 +161,8 @@ class AdminDashboardViewTestCase(TestCase):
         non_staff_number_of_users = User.objects.filter(is_staff=False).count()
         paginator_number_of_users = response.context['user_page'].paginator.count
         self.assertEqual(non_staff_number_of_users, paginator_number_of_users)
+
+    def test_post_request_without_data(self):
+        self.c.login(email='superuser@email.com', password='Password123')
+        response = self.c.post(self.url)
+        self.assertEqual(response.status_code, 302)

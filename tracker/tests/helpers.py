@@ -1,4 +1,6 @@
-from tracker.models import Category
+from tracker.models import Category, Avatar
+from django.conf import settings
+import os
 
 class LogInTester:
     """Helper to check if a user is logged in"""
@@ -11,3 +13,9 @@ class CategoryFunctions:
         Category.objects.create(name="Food", week_limit=150, is_global=True)
         Category.objects.create(name="Clothes", week_limit=50, is_global=True)
         Category.objects.create(name="Pub", week_limit=50, is_global=False)
+
+def delete_avatar_after_test(self):
+    if Avatar.objects.filter(user=self.user).exists():
+        current_template = Avatar.objects.get(user=self.user).current_template
+        path = os.path.join(settings.STATICFILES_DIRS[0], 'avatar', current_template)
+        os.remove(path)

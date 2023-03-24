@@ -84,3 +84,17 @@ class CategoryProgressViewTestCase(TestCase):
         previous_week_response = self.client.get(reverse('category_progress', kwargs={'offset':response.context['prev']}))
         self.assertEqual(response.context['cat_map'][self.cat_one.name][0], 50)
         self.assertEqual(previous_week_response.context['cat_map'][self.cat_one.name][0], 90)
+
+    def test_category_progress_get_request(self):
+        test_expenditure = Expenditure.objects.create(
+            category=self.cat_one,
+            title='Test Expenditure',
+            description='This is a test expenditure',
+            expense=0,
+            user=self.user
+        )
+        self.client.login(email='james@example.org', password='Lu123')
+        test_expenditure.expense = 150
+        test_expenditure.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)

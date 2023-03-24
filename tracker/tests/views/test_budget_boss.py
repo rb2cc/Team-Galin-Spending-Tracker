@@ -1,11 +1,11 @@
-from django.test import TestCase
+from django.test import TransactionTestCase
 from django.urls import reverse
 from tracker.models import User, Category, Achievement, UserAchievement, Activity
 from tracker.forms import AddCategoryForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 
-class TestBudgetBoss(TestCase):
+class TestBudgetBoss(TransactionTestCase):
     def setUp(self):
         self.url = reverse('category_list')
         self.user = User.objects.create_user(
@@ -30,6 +30,8 @@ class TestBudgetBoss(TestCase):
         self.assertTrue(user_achievement.exists())
         user_activity = Activity.objects.filter(user=self.user, name="You've earned \"Budget boss\" achievement", points=15)
         self.assertTrue(user_activity.exists())
+        response = self.client.post(self.url, self.form_input, follow=True)
+        self.assertEqual(response.status_code, 200)
 
     def test_budget_boss_achievement_object_does_not_exist(self):
         self.client.login(username=self.user.email, password='Lu123')

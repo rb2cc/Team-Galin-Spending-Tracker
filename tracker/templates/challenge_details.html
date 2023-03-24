@@ -8,11 +8,13 @@
             <p>Points: {{ challenge.points }}</p>
             <p>Start date: {{ challenge.start_date }}</p>
             <p>End date: {{ challenge.end_date }}</p>
-            <form method='post' action="{% url 'enter_challenge' %}">
-                {% csrf_token %}
-                <input type='hidden' name='challenge_id' value='{{ challenge.id }}'>
-                <button type="submit" class='btn btn-primary'>Enter Challenge</button>
-            </form>
+            {% if user.is_authenticated %}
+                <form method='post' action="{% url 'enter_challenge' %}">
+                    {% csrf_token %}
+                    <input type='hidden' name='challenge_id' value='{{ challenge.id }}'>
+                    <button type="submit" class='btn btn-primary'>Enter Challenge</button>
+                </form>
+            {% endif %}
         </div>
     </div>
 </div>

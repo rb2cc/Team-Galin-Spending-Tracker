@@ -45,6 +45,8 @@ def bin_expenditure(request):
             return redirect('expenditure_list')
         except MultiValueDictKeyError:
             return redirect('expenditure_list')
+    else:
+        return redirect('expenditure_list')
 
 #Gets id field of the selected expenditure recover button and changes the is_binned field from true to false
 #This effectively moves the expenditure from the expenditure bin page to the expenditure list page
@@ -62,6 +64,8 @@ def recover_expenditure(request):
             return redirect('expenditure_bin')
         except MultiValueDictKeyError:
             return redirect('expenditure_bin')
+    else:
+        return redirect('expenditure_bin')
         
 #Gets id field of the selected expenditure delete button and deletes the expenditure object from the database
 @anonymous_prohibited
@@ -78,6 +82,8 @@ def delete_expenditure(request):
             return redirect('expenditure_bin')
         except MultiValueDictKeyError:
             return redirect('expenditure_bin')
+    else:
+        return redirect('expenditure_bin')
 
 #Gets selected expenditure object and returns its form allowing the user to change its fields and saves the changes
 @anonymous_prohibited_with_id
@@ -140,6 +146,9 @@ def filter_by_miscellaneous(request):
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
     elif (query == "new"):
         expenditures = Expenditure.objects.filter(is_binned=False).order_by('-date_created')
+        return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
+    else:
+        expenditures = Expenditure.objects.filter(is_binned=False)
         return render(request, 'expenditure_list.html', {'spendings': expenditures, 'categories': categories})
 
 #Creates activity objects when expenditure actions occur such that they will appear on the activty

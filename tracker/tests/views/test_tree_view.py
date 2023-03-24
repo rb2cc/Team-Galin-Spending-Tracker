@@ -1,11 +1,11 @@
-from django.test import Client, TestCase
+from django.test import Client, TransactionTestCase
 from django.urls import reverse
-from tracker.models import User, Level, UserLevel, Tree
+from tracker.models import User, Level, UserLevel, Tree, Achievement, UserAchievement
 from django.contrib.messages import get_messages
 import json
 
 
-class GardenViewTestCase(TestCase):
+class GardenViewTestCase(TransactionTestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(
@@ -25,6 +25,7 @@ class GardenViewTestCase(TestCase):
             points=550
         )
         self.tree = Tree.objects.create(user=self.user, x_position=500, y_position=50)
+        self.achievement = Achievement.objects.create(name="Planting pioneer", description="Test", criteria="Test", badge="Test")
 
     def test_garden_view_get(self):
         self.client.force_login(self.user)
@@ -47,3 +48,21 @@ class GardenViewTestCase(TestCase):
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(len(messages), 1)
         self.assertEqual(str(messages[0]), 'Not Enough Points Available')
+
+    def test_deleted_garden_achievement(self):
+        self.achievement.delete()
+        self.tree.delete()
+        self.client.force_login(self.user)
+        response = self.client.post(reverse('garden'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_garden_user_achievement_already_exists(self):
+        self.client.force_login(self.user)
+        response = self.client.post(reverse('garden'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(UserAchievement.objects.filter(user=self.user, achievement=self.achievement).count(), 1)
+        self.user.trees = 0
+        self.user.save()
+        response = self.client.post(reverse('garden'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(UserAchievement.objects.filter(user=self.user, achievement=self.achievement).count(), 1)

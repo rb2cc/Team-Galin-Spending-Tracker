@@ -35,3 +35,10 @@ class SaveItemPositionViewTestCase(TestCase):
         self.tree.refresh_from_db()
         self.assertEqual(self.tree.x_position, 100)
         self.assertEqual(self.tree.y_position, 100)
+
+    def test_save_item_position_get_request(self):
+        self.client.force_login(self.user)
+        request = self.factory.get('/save-item-position/')
+        request.user = self.user
+        response = save_item_position(request)
+        self.assertEqual(response.status_code, 200)

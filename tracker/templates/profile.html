@@ -20,6 +20,9 @@
                         {% endif %}
                     </p>
                     <p>Points: {{ user_level.points }}</p>
+                    {% if profile_user.username %}
+                        <p>Username: {{ profile_user.username }}</p>
+                    {% endif %}
                     <p>Trees planted: {{profile_user.trees}} </p>
                 </div>
             </div>

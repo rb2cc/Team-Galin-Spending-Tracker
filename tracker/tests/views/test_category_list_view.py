@@ -57,3 +57,12 @@ class CategoryListViewTestCase(TestCase):
         self.assertEqual(correct_user_after_count, correct_user_before_count+1)
         self.assertEqual(incorrect_user_after_count, incorrect_user_before_count)
 
+    def test_post_invalid_add_category(self):
+        self.client.login(username=self.user.email, password='Lu123')
+        self.form_input['week_limit']=-100
+        before_count = Category.objects.count()
+        response = self.client.post(self.url, self.form_input, follow=True)
+        after_count = Category.objects.count()
+        self.assertEqual(after_count, before_count)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Weekly limit cannot be negative", response.content.decode())

@@ -20,6 +20,8 @@ class SharePostViewTests(TestCase):
 
     def test_share_post_without_username(self):
         request = self.factory.get(reverse('share_post', args=[str(self.post.id)]))
+        self.user.username = ""
+        self.user.save()
         request.user = self.user
         response = share_post(request, self.post.id)
         self.assertEqual(response.status_code, 200)

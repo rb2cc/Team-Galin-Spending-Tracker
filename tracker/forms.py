@@ -159,7 +159,13 @@ class AddCategoryForm(forms.ModelForm):
         fields = ['name', 'week_limit']
 
     name = forms.CharField(label='', widget=forms.TextInput(attrs={'style':'width:100%; height:10%', 'placeholder': 'Category Name'}))
-    week_limit = forms.CharField(label='', widget=forms.TextInput(attrs={'style':'width:100%; height:10%', 'placeholder': 'Weekly Limit'}))
+    week_limit = forms.IntegerField(label='', widget=forms.TextInput(attrs={'style':'width:100%; height:10%', 'placeholder': 'Weekly Limit'}))
+
+    def clean_week_limit(self):
+        week_limit = self.cleaned_data.get('week_limit')
+        if week_limit and week_limit < 0:
+            raise forms.ValidationError("Weekly limit cannot be negative")
+        return week_limit
 
 
 class ReportForm(forms.Form):

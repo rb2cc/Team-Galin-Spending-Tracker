@@ -5,11 +5,12 @@ from tracker.models import Level, UserLevel
 from tracker.forms import ExpenditureForm
 from tracker.models import User
 from tracker.models import Category
-from tracker.views import getDateListAndDailyExpenseList
+from tracker.views import getDateListAndDailyExpenseList, landing_page
 from django.utils import timezone
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
+from tracker.tests.helpers import delete_avatar_after_test
 
-class LandingPageViewTest(TestCase):
+class LandingPageViewTest(TransactionTestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(
@@ -25,6 +26,10 @@ class LandingPageViewTest(TestCase):
         self.user.save()
         self.url = reverse('landing_page')
         self.client.login(email='testuser@example.com', password='testpassword')
+        self.achievement = Achievement.objects.create(name="First expenditure", description="Test", criteria="Test", badge="Test")
+        self.user_achievement = UserAchievement.objects.create(user=self.user, achievement=self.achievement)
+        self.level = Level.objects.create(name='level', description='description', required_points=100)
+        self.user_level = UserLevel.objects.create(user=self.user, level=self.level, points=1000)
 
     def test_landing_page_post_request(self):
         data = {
@@ -40,10 +45,16 @@ class LandingPageViewTest(TestCase):
         self.assertRedirects(response, self.url)
 
     def test_progress_percentage_100(self):
-        level = Level.objects.create(name="Level 1", description="Description of level 1", required_points=100)
-        user_level = UserLevel.objects.create(user=self.user, level=level, points=100)
+        self.user_level.points = 100
+        self.user_level.save()
         response = self.client.get(self.url)
         self.assertEqual(response.context['progress_percentage'], 100)
+
+    def test_progress_percentage_95(self):
+        self.user_level.points = 95
+        self.user_level.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.context['progress_percentage'], 95)
 
     def test_get_date_list_and_daily_expense_list(self):
         date_created = timezone.now().date()
@@ -67,3 +78,63 @@ class LandingPageViewTest(TestCase):
         self.assertEqual(len(daily_expense_list), 7)
         self.assertEqual(date_list[6], date_created)
         self.assertEqual(daily_expense_list[6], 300)
+
+    def test_first_expenditure_user_achievement_exists(self):
+        self.user_achievement.delete()
+        Expenditure.objects.create(
+            user=self.user,
+            title='Test Expenditure',
+            category=self.category,
+            expense=100
+        )
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(UserAchievement.objects.filter(user=self.user).count(), 1)
+        self.assertEqual(Expenditure.objects.filter(user=self.user).count(), 1)
+
+    def test_first_expenditure_achievement_deleted(self):
+        self.user_achievement.delete()
+        self.achievement.delete()
+        Expenditure.objects.create(
+            user=self.user,
+            title='Test Expenditure',
+            category=self.category,
+            expense=100
+        )
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(UserAchievement.objects.filter(user=self.user).count(), 0)
+        self.assertEqual(Expenditure.objects.filter(user=self.user).count(), 1)
+
+    def test_first_expenditure_achievement_not_given_twice(self):
+        Expenditure.objects.create(
+            user=self.user,
+            title='Test Expenditure',
+            category=self.category,
+            expense=100
+        )
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(UserAchievement.objects.filter(user=self.user).count(), 1)
+        self.assertEqual(Expenditure.objects.filter(user=self.user).count(), 1)
+
+    def test_landing_page_with_existing_avatar_template(self):
+        url = reverse('my_avatar')
+        response = self.client.get(url, {'random': ''})
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        delete_avatar_after_test(self)
+
+    def test_landing_page_with_deleted_avatar_template(self):
+        url = reverse('my_avatar')
+        response = self.client.get(url, {'random': ''})
+        self.assertEqual(response.status_code, 200)
+        delete_avatar_after_test(self)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_landing_page_with_deleted_user_level(self):
+        self.user_level.delete()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
