@@ -8,14 +8,14 @@
     <form action="{% url 'search_result' %}" role="form" method="GET">
         <div class="search-box">
             <div>
-                <select name="" id="">
+                <select name="" id="" style="border-radius: 10px;">
                     <option value="everything"> Everything </option>
                     <option value="titles"> Titles </option>
                     <option value="description"> Description </option>
                 </select>
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
-                <input type="text" name="q" id="" placeholder="search ...">
-                <button type="submit" name ="search"><i class="fa fa-search"></i></button>
+                <input type="text" name="q" id="" placeholder="search ..." style="background-color: white; opacity: 0.5; border-radius: 10px;">
+                <button type="submit" name ="search" style="border-radius: 50px 50px 50px 50px;"><i class="fa fa-search"></i></button>
             </div>
     </div>
 </form>
