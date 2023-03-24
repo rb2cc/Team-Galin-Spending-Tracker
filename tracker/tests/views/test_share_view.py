@@ -9,14 +9,11 @@ import os
 
 class ShareViewsTestCase(TestCase):
 
+    fixtures = ['tracker/tests/fixtures/default_user.json']
+
     def setUp(self):
         self.factory = RequestFactory()
-        self.user = User.objects.create_user(
-            email='testuser@example.com',
-            first_name='Test',
-            last_name='User',
-            password='testpassword'
-        )
+        self.user = User.objects.get(email='test@example.com')
         self.level = Level.objects.create(name="Level 1", description="Level 1 description", required_points=0)
         self.user_level = UserLevel.objects.create(user=self.user, level=self.level, points=0)
         self.achievement = Achievement.objects.create(

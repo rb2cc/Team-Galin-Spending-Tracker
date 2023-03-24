@@ -6,14 +6,12 @@ from django.utils import timezone
 from tracker.forms import ReportForm
 
 class ReportViewTestCase(TestCase):
+
+    fixtures = ['tracker/tests/fixtures/default_user.json']
+
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create_user(
-            email='test@example.com',
-            password='testpassword',
-            first_name='Test',
-            last_name='User'
-        )
+        self.user = User.objects.get(email='test@example.com')
         self.category = Category.objects.create(name='TestCategory', week_limit=100)
         self.user.available_categories.add(self.category)
         self.expenditure = Expenditure.objects.create(

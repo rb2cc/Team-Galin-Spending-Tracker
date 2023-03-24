@@ -6,14 +6,12 @@ import json
 
 
 class GardenViewTestCase(TestCase):
+    
+    fixtures = ['tracker/tests/fixtures/default_user.json']
+    
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create_user(
-            email='test@example.com',
-            password='testpassword',
-            first_name='Test',
-            last_name='User'
-        )
+        self.user = User.objects.get(email='test@example.com')
         self.level = Level.objects.create(
             name='Test Level',
             description='This is a test level',

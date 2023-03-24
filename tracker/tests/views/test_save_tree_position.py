@@ -6,14 +6,12 @@ from tracker.models import User, Level, UserLevel, Tree
 import json
 
 class SaveItemPositionViewTestCase(TestCase):
+
+    fixtures = ['tracker/tests/fixtures/default_user.json']
+
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create_user(
-            email='test@example.com',
-            password='testpassword',
-            first_name='Test',
-            last_name='User'
-        )
+        self.user = User.objects.get(email='test@example.com')
         self.tree = Tree.objects.create(user=self.user, x_position=500, y_position=50)
         self.factory = RequestFactory()
 

@@ -6,8 +6,10 @@ from tracker.views import update_user_level
 
 class UpdateUserLevelTest(TestCase):
 
+    fixtures = ['tracker/tests/fixtures/default_user.json']
+
     def setUp(self):
-        self.user = User.objects.create(email="test@example.com", first_name="Test", last_name="User")
+        self.user = User.objects.get(email="test@example.com")
         self.user.set_password("testpassword")
         self.user.save()
         level = Level.objects.create(name="Level 1", description="Description of level 1", required_points=0)
