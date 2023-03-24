@@ -19,8 +19,8 @@ def update_views(request, object):
 
 # Utility method that creates notification to raise notifications.
 
-def create_notification(request, to_user, notification_type, slugg):
-    notification = Notification.objects.create(to_user=to_user, notification_type=notification_type, created_by=request.user, slugg=slugg)
+def create_notification(request, to_user, notification_type, slug):
+    notification = Notification.objects.create(to_user=to_user, notification_type=notification_type, created_by=request.user, slug=slug)
 
 def create_achievement_notification(request, to_user, notification_type, achievement_type):
     notification = Notification.objects.create(to_user=to_user, notification_type=notification_type, created_by=request.user, achievement_type=achievement_type)

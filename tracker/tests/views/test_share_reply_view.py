@@ -24,6 +24,8 @@ class ShareReplyViewTests(TestCase):
 
     def test_share_reply_without_username(self):
         request = self.factory.get(reverse('share_reply', args=[str(self.reply.id)]))
+        self.user.username = ""
+        self.user.save()
         request.user = self.user
         response = share_reply(request, self.reply.id)
         self.assertEqual(response.status_code, 200)

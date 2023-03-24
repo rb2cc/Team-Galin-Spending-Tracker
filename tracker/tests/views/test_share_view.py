@@ -1,15 +1,16 @@
-from django.test import TestCase, RequestFactory
+from django.test import TestCase, RequestFactory, Client
 from django.urls import reverse
 from tracker.models import User, UserAchievement, Achievement, Activity, UserChallenge, Challenge, UserLevel, Level
 from tracker.views import share_avatar, share_challenge, share_achievement
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from tracker.views import handle_share
-import os
+from tracker.tests.helpers import delete_avatar_after_test
 
 class ShareViewsTestCase(TestCase):
 
     def setUp(self):
+        self.client = Client()
         self.factory = RequestFactory()
         self.user = User.objects.create_user(
             email='testuser@example.com',
@@ -41,6 +42,27 @@ class ShareViewsTestCase(TestCase):
         response = share_avatar(request)
         self.assertEqual(response.status_code, 200)
 
+    def test_share_avatar_with_existing_template(self):
+        self.client.login(email='testuser@example.com', password='testpassword')
+        url = reverse('my_avatar')
+        response = self.client.get(url, {'random': ''})
+        self.assertEqual(response.status_code, 200)
+        request = self.factory.get(reverse('share_avatar'))
+        request.user = self.user
+        response = share_avatar(request)
+        self.assertEqual(response.status_code, 200)
+        delete_avatar_after_test(self)
+
+    def test_share_avatar_with_deleted_template(self):
+        self.client.login(email='testuser@example.com', password='testpassword')
+        url = reverse('my_avatar')
+        response = self.client.get(url, {'random': ''})
+        self.assertEqual(response.status_code, 200)
+        delete_avatar_after_test(self)
+        request = self.factory.get(reverse('share_avatar'))
+        request.user = self.user
+        response = share_avatar(request)
+        self.assertEqual(response.status_code, 200)
 
     def test_share_challenge(self):
         request = self.factory.get(reverse('share_challenge', args=[str(self.user_challenge.id)]))
@@ -55,4 +77,3 @@ class ShareViewsTestCase(TestCase):
         response = share_achievement(request, self.user_achievement.id)
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.achievement.name, response.content.decode())
-

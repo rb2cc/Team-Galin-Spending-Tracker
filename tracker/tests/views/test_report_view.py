@@ -48,4 +48,29 @@ class ReportViewTestCase(TestCase):
         self.assertEqual(response.context['start_date'], start_date)
         self.assertEqual(response.context['end_date'], end_date)
 
+    def test_report_view_with_multiple_expenditures(self):
+        self.category.week_limit = 50
+        self.category.save()
+        for n in range(0, 22):
+            test_expenditure = self.expenditure
+            test_expenditure.id = n + 2
+            time_delta_days = timezone.timedelta(days=n) if n+2 < 11 else - timezone.timedelta(days=n+2)
+            test_expenditure.date_created = timezone.now() + time_delta_days
+            test_expenditure.save()
+        self.client.force_login(self.user)
+        today = timezone.now().date()
+        start_date = today - timezone.timedelta(days=10)
+        end_date = today + timezone.timedelta(days=10)
+        post_data = {
+            'start_date': start_date,
+            'end_date': end_date,
+        }
+        response = self.client.post(reverse('report'), data=post_data)
+        self.assertEqual(response.status_code, 200)
+        for expenditure_id in range(11, 22):
+            Expenditure.objects.get(id=expenditure_id).delete()
+        response = self.client.post(reverse('report'), data=post_data)
+        self.assertEqual(response.status_code, 200)
+
+
     

@@ -1,6 +1,9 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from tracker.models import User, Post, Comment, Reply, UserLevel, Level
+from datetime import timedelta
+from django.utils import timezone
+from tracker.tests.helpers import delete_avatar_after_test
 
 class DetailsViewTests(TestCase):
 
@@ -13,8 +16,8 @@ class DetailsViewTests(TestCase):
         self.post = Post.objects.create(user=self.user, title='Test Post', content='Test content', slug='test-slug')
         self.comment = Comment.objects.create(user=self.user, content='Test comment')
         self.reply = Reply.objects.create(user=self.user, content='Test reply')
-        self.level = Level.objects.create(name='level', description='description', required_points=10)
-        self.userlevel = UserLevel.objects.create(user=self.user, level=self.level, points=20)
+        self.level = Level.objects.create(name='level', description='description', required_points=100)
+        self.userlevel = UserLevel.objects.create(user=self.user, level=self.level, points=1000)
         self.otherlevel = Level.objects.create(name='level', description='description', required_points=10)
         self.otheruserlevel = UserLevel.objects.create(user=self.otheruser, level=self.otherlevel, points=20)
         self.post.comments.add(self.comment)
@@ -89,3 +92,33 @@ class DetailsViewTests(TestCase):
     def test_user_not_logged_in(self):
         response = self.client.get(self.url)
         self.assertRedirects(response, reverse('home'))
+
+    def test_time_since_older_posts(self):
+        test_post = self.post
+        timedeltas = [timedelta(minutes=55), timedelta(hours=5), timedelta(days=1),
+                      timedelta(weeks=1), timedelta(weeks=5), timedelta(weeks=55)]
+        for delta in timedeltas:
+            test_post.date = timezone.now() - delta
+            test_post.save()
+            url = reverse('detail', args=[test_post.slug])
+            self.client.login(email='galin@email.com', password='Password123')
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
+
+    def test_post_detail_with_existing_avatar_template(self):
+        self.client.login(email='galin@email.com', password='Password123')
+        url = reverse('my_avatar')
+        response = self.client.get(url, {'random': ''})
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        delete_avatar_after_test(self)
+
+    def test_post_detail_with_deleted_avatar_template(self):
+        self.client.login(email='galin@email.com', password='Password123')
+        url = reverse('my_avatar')
+        response = self.client.get(url, {'random': ''})
+        self.assertEqual(response.status_code, 200)
+        delete_avatar_after_test(self)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)

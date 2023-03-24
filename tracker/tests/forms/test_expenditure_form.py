@@ -40,7 +40,6 @@ class RequestFormTestCase(TestCase):
         request.user = self.user
         
         form = ExpenditureForm(data=self.form_input, r=request)
-        print(form.errors)
         self.assertTrue(form.is_valid())
 
     def test_form_has_all_fields(self):

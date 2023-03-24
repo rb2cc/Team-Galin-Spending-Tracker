@@ -79,7 +79,7 @@ def sign_up(request):
                 except ObjectDoesNotExist:
                     pass
                 sign_up_achievement_1 = Activity.objects.create(user=request.user, image = "images/user.png", name = "You've created an account on Galin's Spending Tracker")
-                sign_up_achievement_2 =Activity.objects.create(user=request.user, image = "badges/new_user.png", name = "You've earned \"New user\" achievement")
+                sign_up_achievement_2 = Activity.objects.create(user=request.user, image = "badges/new_user.png", name = "You've earned \"New user\" achievement")
                 overall = Category.objects.create(name="Overall", week_limit=overall_count, is_overall = True)
                 user.available_categories.add(overall)
                 create_achievement_notification(request, request.user, "achievement", sign_up_achievement_1.name)
@@ -100,10 +100,10 @@ def user_test(user):
     return user.is_anonymous == False
 
 def category_progress_email_check():
-    
+
     """Function that will send an email to the user when one of their categories is close to their weekly limit"""
     """Limits the emails being sent to only when spending >=90% and has_email_sent=False to not fill up email inbox"""
-    
+
     def _make_percent(num, cat_name, user):
                 denom = Category.objects.filter(users__id = user.id).get(name=cat_name).week_limit
                 percent = (100 * (float(num)/float(denom)))
@@ -112,13 +112,13 @@ def category_progress_email_check():
                 return percent
 
     for user in User.objects.filter(is_staff=False, is_superuser=False):
-        
+
         week_start = timezone.now().date() + relativedelta(weekday=MO(-1))
-        week_end = week_start + relativedelta(weekday=SU(1)) 
+        week_end = week_start + relativedelta(weekday=SU(1))
         categories = Category.objects.filter(is_overall = False).filter(users__id = user.id)
         val_dict = {}
         for category in categories:
-            val_dict[category.name] = 0 
+            val_dict[category.name] = 0
         expenditures = Expenditure.objects.filter(user=user, date_created__gte = week_start, date_created__lte = week_end, is_binned = False)
         for expenditure in expenditures:
             val_dict[expenditure.category.name] += expenditure.expense#dict from category name -> total expense
@@ -133,7 +133,7 @@ def category_progress_email_check():
         elif overall_percent < 90 and  user.has_email_sent:
             user.has_email_sent = False
             user.save()
-        else: 
+        else:
             pass
 
 @user_passes_test(user_test, login_url='log_out')
@@ -333,14 +333,6 @@ class UserEditView(generic.UpdateView):
 
         return super().form_valid(form)
 
-    def update_user(request):
-        form = EditUserForm(instance=request.user)
-        if (request.method) == "POST":
-            form = EditUserForm(request.POST, instance=request.user)
-            form.save()
-            return render(request, 'edit_user.html')
-        return render(request, 'edit_user.html')
-
 @anonymous_prohibited
 def forum_home(request):
     all_forum_categories = Forum_Category.objects.all()
@@ -365,7 +357,7 @@ def forum_home(request):
 
 def posts(request, slug):
     category = get_object_or_404(Forum_Category, slug=slug)
-    posts = Post.objects.filter(approved=True, forum_categories=category)
+    posts = Post.objects.filter(approved=True, forum_categories=category).order_by('id')
     paginator = Paginator(posts, 5)
     page = request.GET.get("page")
     try:
@@ -607,11 +599,26 @@ def edit_reply(request, id):
 def create_forum_activity(request, action, post, *args):
     category_names = [category.title for category in post.forum_categories.all()]
     forum_name = "forums" if len(category_names) > 1 else "forum"
+    dots = ""
 
     if len(args) == 1:
-        activity_name = f'You\'ve {action} \"{args[0].content}\" comment on the \"{post.title}\" post in {", ".join(category_names)} {forum_name}'
+        comment_content = args[0].content.split()
+        if len(comment_content) > 5:
+            dots = "..."
+        for i in range(0, len(comment_content)):
+            word = comment_content[i]
+            if len(word) > 45:
+                comment_content[i] = word[0:10] + "..."
+        activity_name = f'You\'ve {action} \"{" ".join(comment_content[:5])}{dots}\" comment on the \"{post.title}\" post in {", ".join(category_names)} {forum_name}'
     elif len(args) == 2:
-        activity_name = f'You\'ve {action} \"{args[1].content}\" reply on the \"{post.title}\" post in {", ".join(category_names)} {forum_name}'
+        reply_content = args[1].content.split()
+        if len(reply_content) > 5:
+            dots = "..."
+        for i in range(0, len(reply_content)):
+            word = reply_content[i]
+            if len(word) > 45:
+                reply_content[i] = word[0:10] + "..."
+        activity_name = f'You\'ve {action} \"{" ".join(reply_content[:5])}{dots}\" reply on the \"{post.title}\" post in {", ".join(category_names)} {forum_name}'
     else:
         activity_name = f'You\'ve {action} \"{post.title}\" post in {", ".join(category_names)} {forum_name}'
 
@@ -656,7 +663,7 @@ def latest_posts(request):
 
 def search_result(request):
     query = request.GET.get('q')
-    results = Post.objects.filter(title__icontains=query)
+    results = Post.objects.filter(title__icontains=query).order_by('id')
 
     paginator = Paginator(results, 5)
     page = request.GET.get('page')
@@ -696,16 +703,16 @@ def enter_challenge(request):
         messages.error(request, 'You have already entered this challenge.')
         return redirect('challenge_list')
 
-@login_required
+@anonymous_prohibited
 def my_challenges(request):
     user_challenges = UserChallenge.objects.filter(user=request.user)
     return render(request, 'my_challenges.html', {'user_challenges': user_challenges})
 
-def complete_challenge(request, challenge_id):
-    user_challenge = UserChallenge.objects.get(user=request.user, challenge_id=challenge_id)
+def complete_challenge(request, id):
+    user_challenge = UserChallenge.objects.get(user=request.user, challenge_id=id)
     if user_challenge is not None:
         if user_challenge.date_completed is not None:
-            return
+            return redirect('challenge_list')
 
         user_challenge.date_completed = timezone.now()
         user_challenge.save()
@@ -754,7 +761,7 @@ def update_user_level(user):
 
     try:
         current_level = Level.objects.get(name = f"Level {floor(total_points / 100) + 1}")
-        if (user_level.level.id < current_level.id):
+        if user_level.level.id < current_level.id:
             Activity.objects.create(user=user, image = "images/level_up.png", name = f'You\'ve leveled up to {current_level.name}')
         user_level.level = current_level
         user_level.save()
@@ -1102,7 +1109,8 @@ def unlock_avatar(request):
             category = key
             file_name = request.GET.get(key) + '.svg'
             name = request.GET.get(key).replace("_", " ")
-    return render(request, 'unlock_avatar.html', {'category': category, 'file_name': file_name, 'name': name, 'tier': tier})
+            return render(request, 'unlock_avatar.html', {'category': category, 'file_name': file_name, 'name': name, 'tier': tier})
+    return redirect('my_avatar')
 
 def get_tier_info():
     tier_info = {'bronze': ['400', '#f5922a'],
@@ -1165,17 +1173,6 @@ def get_forum_item(dictionary, user_id):
     return dictionary.get(user_id)
 
 @register.filter
-def check_forum_instance(type, value):
-    if isinstance(value, Post):
-        type = "post"
-    elif isinstance(value, Comment):
-        type = "comment"
-    elif isinstance(value, Reply):
-        type = "reply"
-    return type
-
-
-@register.filter
 def time_since_custom(time):
     timedelta = timezone.now() - time
     elapsed_time = int(timedelta.total_seconds())
@@ -1195,12 +1192,6 @@ def time_since_custom(time):
         time_since = f"{elapsed_time // 31536000} year{'s' if elapsed_time // 31536000 != 1 else ''} ago"
     return time_since
 
-def create_forum_avatar(request, id):
-    query_dict = request.GET.copy()
-    query_dict['user'] = id
-    request.GET = query_dict
-    return create_avatar(request)
-
 @anonymous_prohibited
 def report(request):
     user = request.user
@@ -1209,10 +1200,6 @@ def report(request):
         if form.is_valid():
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
-        else:
-            print('MSDIKAMDKASMDKASMDK')
-            start_date = None
-            end_date = None
     else:
         today = timezone.now().date()
         start_date = today - timedelta(days=30)
@@ -1451,7 +1438,7 @@ def superuser_dashboard(request):
     else:
         form = CreateUserForm()
 
-    user_list = User.objects.all()
+    user_list = User.objects.all().order_by('id')
     paginator = Paginator(user_list, 10)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
@@ -1476,7 +1463,7 @@ def admin_dashboard(request):
                     return redirect('admin_dashboard')
 
             # IF CREATE CATEGORY BUTTON CLICKED
-            if 'create_category' in request.POST:
+            elif 'create_category' in request.POST:
                 form = AddCategoryForm(request.POST)
                 if form.is_valid():
                     category = form.save()
@@ -1488,7 +1475,7 @@ def admin_dashboard(request):
                     return redirect('admin_dashboard')
 
             # IF CREATE CHALLENGE BUTTON CLICKED
-            if 'create_challenge' in request.POST:
+            elif 'create_challenge' in request.POST:
                 form = AddChallengeForm(request.POST)
                 if form.is_valid():
                     challenge = form.save()
@@ -1497,7 +1484,7 @@ def admin_dashboard(request):
                     messages.info(request, 'Unsuccessful creation of challenge')
                     return redirect('admin_dashboard')
 
-            if 'create_achievement' in request.POST:
+            elif 'create_achievement' in request.POST:
                 form = AddAchievementForm(request.POST)
                 if form.is_valid():
                     achievement = form.save()
@@ -1507,6 +1494,9 @@ def admin_dashboard(request):
                 else:
                     messages.info(request, 'Unsuccessful creation of achievement')
                     return redirect('admin_dashboard')
+
+            else:
+                return redirect('admin_dashboard')
 
         else:
             # DEFAULT TABLE TO LOAD ON PAGE
@@ -1660,8 +1650,3 @@ def user_demote(request):
             return redirect('admin_dashboard')
     else:
         return redirect('admin_dashboard')
-
-
-# def display_expenditures(request):
-#     expenditures = Expenditure.objects.all()
-#     return render(request, 'expenditure_list.html', {'expenditures':expenditures})

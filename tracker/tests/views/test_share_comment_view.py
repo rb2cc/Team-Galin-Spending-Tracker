@@ -24,6 +24,8 @@ class ShareCommentViewTests(TestCase):
 
     def test_share_comment_without_username(self):
         request = self.factory.get(reverse('share_comment', args=[str(self.comment.id)]))
+        self.user.username = ""
+        self.user.save()
         request.user = self.user
         response = share_comment(request, self.comment.id)
         self.assertEqual(response.status_code, 200)

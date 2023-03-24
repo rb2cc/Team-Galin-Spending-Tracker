@@ -8,6 +8,8 @@ from django.utils import timezone
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from .helpers import login_prohibited, admin_prohibited, user_prohibited, anonymous_prohibited, anonymous_prohibited_with_id
+from django.utils.datastructures import MultiValueDictKeyError
+from django.contrib.auth.decorators import user_passes_test, login_required
 
 @anonymous_prohibited
 def category_list(request):
@@ -39,21 +41,6 @@ def category_list(request):
     categoryList = Category.objects.filter(users__id=user_id).filter(is_overall=False, is_binned=False).order_by('name')
     overall = Category.objects.filter(users__id=user_id).get(is_overall=True)
     return render(request, 'category_list.html', {'categories':categoryList, 'form':form, 'overall':overall})
-
-@anonymous_prohibited_with_id
-def remove_category(request, id):
-    category = Category.objects.get(id = id)
-    category_name = category.name
-    diff = category.week_limit
-    if category.is_global:
-        request.user.available_categories.remove(category)
-    else:
-        category.delete()
-    user_activity = Activity.objects.create(user=request.user, image = "images/delete.png", name = f'You\'ve deleted \"{category_name}\" category')
-    overall = Category.objects.filter(is_overall = True).get(users__id=request.user.id)
-    overall.week_limit -= diff
-    overall.save(force_update = True)
-    return redirect('category_list')
 
 @anonymous_prohibited_with_id
 def edit_category(request, id):
@@ -97,11 +84,12 @@ def edit_category(request, id):
             form = EditOverallForm(instance=category, user = current_user)
     return render(request, 'edit_category.html', {'form' : form})
 
+@login_required
 def category_progress(request, offset):
 
-    def _make_percent(num, cat_name, user):
-        denom = Category.objects.filter(users__id = user.id).get(name=cat_name).week_limit
-        percent = int(100 * (float(num)/float(denom)))
+    def _make_percent(num, category, user):
+        denom = category.week_limit
+        percent = int(100 * (float(num) / float(denom)))
         if percent > 100:
             return 100
         return percent
@@ -122,16 +110,18 @@ def category_progress(request, offset):
     categories = Category.objects.filter(is_overall = False).filter(users__id = user.id)
     val_dict = {}
     for category in categories:
-        val_dict[category.name] = 0 
-    expenditures = Expenditure.objects.filter(user=user, date_created__gte = week_start, date_created__lte = week_end, is_binned = False)
+        val_dict[category.name] = 0
+    expenditures = Expenditure.objects.filter(user=user, date_created__gte=week_start, date_created__lte=week_end,
+                                              is_binned=False)
     for expenditure in expenditures:
-        val_dict[expenditure.category.name] += expenditure.expense#dict from category name -> total expense
+        val_dict[expenditure.category.name] += expenditure.expense  # dict from category name -> total expense
     overall_spend = sum(val_dict.values())
-    overall = Category.objects.filter(users__id = user.id).get(is_overall=True)
-    overall_percent = _make_percent(overall_spend, overall.name, user)
+    overall = Category.objects.filter(users__id=user.id).get(is_overall=True)
+    overall_percent = _make_percent(overall_spend, overall, user)
     overall_colour = _get_colour(overall_percent)
-    val_dict = {k:_make_percent(v, k, user) for k, v in val_dict.items()}
-    val_dict = {k:(v, _get_colour(v)) for k, v in val_dict.items()}
+    val_dict = {k: _make_percent(v, Category.objects.filter(users__id=user.id, name=k).first(), user) for k, v in
+                val_dict.items()}
+    val_dict = {k: (v, _get_colour(v)) for k, v in val_dict.items()}
     prev_week = offset + 1
     next_week = offset -1
     if next_week < 0:
@@ -185,10 +175,10 @@ def delete_category(request):
             category.delete()
             Activity.objects.create(user=request.user, image = "images/delete.png", name = f'You\'ve deleted \"{category_name}\" category with all its expenditures')
             return redirect('category_bin')
-        except Expenditure.DoesNotExist:
-            return redirect('category_bin')
         except MultiValueDictKeyError:
             return redirect('category_bin')
+    else:
+        return redirect('category_bin')
 
 #Gets id field of the selected expenditure recover button and changes the is_binned field from true to false
 @anonymous_prohibited
@@ -199,7 +189,7 @@ def recover_category(request):
             category = Category.objects.get(pk=category_pk)
             category.is_binned = False
             category.save()
-            overall = overall = Category.objects.filter(is_overall = True).get(users__id=request.user.id)
+            overall = Category.objects.filter(is_overall = True).get(users__id=request.user.id)
             overall.week_limit += category.week_limit
             overall.save(force_update = True)
             expenditures_of_category=Expenditure.objects.filter(is_binned=True, category=category)
@@ -208,10 +198,10 @@ def recover_category(request):
                 expenditure.save()
             Activity.objects.create(user=request.user, image = "images/recover.png", name = f'You\'ve recovered \"{category.name}\" category with all its expenditures from the bin')
             return redirect('category_bin')
-        except Expenditure.DoesNotExist:
-            return redirect('category_bin')
         except MultiValueDictKeyError:
             return redirect('category_bin')
+    else:
+        return redirect('category_bin')
 
 #Gets all expenditures under the filter of being binned
 @anonymous_prohibited

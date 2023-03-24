@@ -41,3 +41,12 @@ class UpdateUserLevelTest(TestCase):
         update_user_level(self.user)
         user_activity = Activity.objects.filter(user=self.user, name="You've leveled up to Level 3")
         self.assertEqual(user_activity.count(), 1)
+
+    def test_next_level_already_exists(self):
+        Level.objects.create(name="Level 2", description="Description of level 2", required_points=200)
+        user_level = UserLevel.objects.get(user=self.user)
+        user_level.points = 100
+        user_level.save()
+        update_user_level(self.user)
+        user_activity = Activity.objects.filter(user=self.user, name="You've leveled up to Level 2")
+        self.assertEqual(user_activity.count(), 1)

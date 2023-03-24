@@ -701,6 +701,7 @@ footer{
 
 .comments-container{
   margin-top: 50px;
+  overflow-wrap: anywhere;
 }
 
 /* --------------------------- Notifications page. ------------------*/
