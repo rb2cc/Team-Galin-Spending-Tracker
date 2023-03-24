@@ -78,7 +78,7 @@ def sign_up(request):
                 except ObjectDoesNotExist:
                     pass
                 sign_up_achievement_1 = Activity.objects.create(user=request.user, image = "images/user.png", name = "You've created an account on Galin's Spending Tracker")
-                sign_up_achievement_2 =Activity.objects.create(user=request.user, image = "badges/new_user.png", name = "You've earned \"New user\" achievement")
+                sign_up_achievement_2 = Activity.objects.create(user=request.user, image = "badges/new_user.png", name = "You've earned \"New user\" achievement")
                 overall = Category.objects.create(name="Overall", week_limit=overall_count, is_overall = True)
                 user.available_categories.add(overall)
                 create_achievement_notification(request, request.user, "achievement", sign_up_achievement_1.name)
@@ -295,14 +295,6 @@ class UserEditView(generic.UpdateView):
 
         return super().form_valid(form)
 
-    def update_user(request):
-        form = EditUserForm(instance=request.user)
-        if (request.method) == "POST":
-            form = EditUserForm(request.POST, instance=request.user)
-            form.save()
-            return render(request, 'edit_user.html')
-        return render(request, 'edit_user.html')
-
 def forum_home(request):
     all_forum_categories = Forum_Category.objects.all()
     num_posts = Post.objects.all().count()
@@ -326,7 +318,7 @@ def forum_home(request):
 
 def posts(request, slug):
     category = get_object_or_404(Forum_Category, slug=slug)
-    posts = Post.objects.filter(approved=True, forum_categories=category)
+    posts = Post.objects.filter(approved=True, forum_categories=category).order_by('id')
     paginator = Paginator(posts, 5)
     page = request.GET.get("page")
     try:
@@ -610,7 +602,7 @@ def latest_posts(request):
 
 def search_result(request):
     query = request.GET.get('q')
-    results = Post.objects.filter(title__icontains=query)
+    results = Post.objects.filter(title__icontains=query).order_by('id')
 
     paginator = Paginator(results, 5)
     page = request.GET.get('page')
@@ -655,11 +647,11 @@ def my_challenges(request):
     user_challenges = UserChallenge.objects.filter(user=request.user)
     return render(request, 'my_challenges.html', {'user_challenges': user_challenges})
 
-def complete_challenge(request, challenge_id):
-    user_challenge = UserChallenge.objects.get(user=request.user, challenge_id=challenge_id)
+def complete_challenge(request, id):
+    user_challenge = UserChallenge.objects.get(user=request.user, challenge_id=id)
     if user_challenge is not None:
         if user_challenge.date_completed is not None:
-            return
+            return redirect('challenge_list')
 
         user_challenge.date_completed = timezone.now()
         user_challenge.save()
@@ -708,7 +700,7 @@ def update_user_level(user):
 
     try:
         current_level = Level.objects.get(name = f"Level {floor(total_points / 100) + 1}")
-        if (user_level.level.id < current_level.id):
+        if user_level.level.id < current_level.id:
             Activity.objects.create(user=user, image = "images/level_up.png", name = f'You\'ve leveled up to {current_level.name}')
         user_level.level = current_level
         user_level.save()
@@ -1056,7 +1048,8 @@ def unlock_avatar(request):
             category = key
             file_name = request.GET.get(key) + '.svg'
             name = request.GET.get(key).replace("_", " ")
-    return render(request, 'unlock_avatar.html', {'category': category, 'file_name': file_name, 'name': name, 'tier': tier})
+            return render(request, 'unlock_avatar.html', {'category': category, 'file_name': file_name, 'name': name, 'tier': tier})
+    return redirect('my_avatar')
 
 def get_tier_info():
     tier_info = {'bronze': ['400', '#f5922a'],
@@ -1119,17 +1112,6 @@ def get_forum_item(dictionary, user_id):
     return dictionary.get(user_id)
 
 @register.filter
-def check_forum_instance(type, value):
-    if isinstance(value, Post):
-        type = "post"
-    elif isinstance(value, Comment):
-        type = "comment"
-    elif isinstance(value, Reply):
-        type = "reply"
-    return type
-
-
-@register.filter
 def time_since_custom(time):
     timedelta = timezone.now() - time
     elapsed_time = int(timedelta.total_seconds())
@@ -1149,12 +1131,6 @@ def time_since_custom(time):
         time_since = f"{elapsed_time // 31536000} year{'s' if elapsed_time // 31536000 != 1 else ''} ago"
     return time_since
 
-def create_forum_avatar(request, id):
-    query_dict = request.GET.copy()
-    query_dict['user'] = id
-    request.GET = query_dict
-    return create_avatar(request)
-
 @anonymous_prohibited
 def report(request):
     user = request.user
@@ -1163,10 +1139,6 @@ def report(request):
         if form.is_valid():
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
-        else:
-            print('MSDIKAMDKASMDKASMDK')
-            start_date = None
-            end_date = None
     else:
         today = timezone.now().date()
         start_date = today - timedelta(days=30)
@@ -1404,7 +1376,7 @@ def superuser_dashboard(request):
     else:
         form = CreateUserForm()
 
-    user_list = User.objects.all()
+    user_list = User.objects.all().order_by('id')
     paginator = Paginator(user_list, 10)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
@@ -1614,7 +1586,3 @@ def user_demote(request):
     else:
         return redirect('admin_dashboard')
 
-
-# def display_expenditures(request):
-#     expenditures = Expenditure.objects.all()
-#     return render(request, 'expenditure_list.html', {'expenditures':expenditures})

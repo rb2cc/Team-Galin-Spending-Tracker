@@ -14,7 +14,7 @@
      <div class="notification" id="notification{{notification.id}}">
         <p>  
             {% if notification.notification_type == 'comment' %}
-                <a class="notification" href="/detail/{{notification.slugg}}/">
+                <a class="notification" href="/detail/{{notification.slug}}/">
                 <strong> {{notification.created_by.username}} </strong> added a comment to your post. <br>
                 <small> {{notification.created_at|timesince}} ago</small>
                 <input type="hidden" name="noti-id" value="{{notification.id}}">
@@ -25,7 +25,7 @@
                 <input type="hidden" name="noti-id" value="{{notification.id}}">
             </form>
                 {%elif notification.notification_type == 'reply'%}
-                <a class="notification" href="/detail/{{notification.slugg}}/">
+                <a class="notification" href="/detail/{{notification.slug}}/">
                     <strong> {{notification.created_by.username}} </strong> replied to your post. <br>
                     <small> {{notification.created_at|timesince}} ago</small>
                     <input type="hidden" name="noti-id" value="{{notification.id}}">

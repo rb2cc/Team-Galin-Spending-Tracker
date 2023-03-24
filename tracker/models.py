@@ -198,7 +198,7 @@ class Notification(models.Model):
     extra_id = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, related_name="created", on_delete=models.CASCADE)
-    slugg = models.SlugField(max_length=20, null=True)
+    slug = models.SlugField(max_length=20, null=True)
     achievement_type = models.CharField(max_length=100, null=True)
 
 

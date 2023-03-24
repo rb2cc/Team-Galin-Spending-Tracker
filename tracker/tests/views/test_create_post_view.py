@@ -1,9 +1,9 @@
-from django.test import TestCase, Client
+from django.test import TestCase, Client, TransactionTestCase
 from django.urls import reverse
-from tracker.models import User, Post, Comment, Forum_Category, UserLevel, Level
+from tracker.models import User, Post, Comment, Forum_Category, UserLevel, Level, Achievement, UserAchievement
 from tracker.forms import PostForm
 
-class CreatePostViewTests(TestCase):
+class CreatePostViewTests(TransactionTestCase):
 
     fixtures = ['tracker/tests/fixtures/default_user.json']
 
@@ -59,3 +59,17 @@ class CreatePostViewTests(TestCase):
         }
         response = self.client.post(self.url, data)
         self.assertFalse(Post.objects.filter(title='Test Title', content='Test Content', user=self.user).exists())
+
+    def test_forum_achievement_integrity_error(self):
+        Achievement.objects.create(name="Junior forumite", description="Test", criteria="Test", badge="Test")
+        UserAchievement.objects.create(user=self.user,
+                                       achievement=Achievement.objects.get(name="Junior forumite"))
+        self.client.login(email='galin@email.com', password='Password123')
+        data = {
+            'title': 'Test Title',
+            'content': 'Test Content',
+            'forum_categories': self.forum_category.id,
+            'media': ''
+        }
+        response = self.client.post(self.url, data)
+        self.assertTrue(Post.objects.filter(title='Test Title', content='Test Content', user=self.user).exists())

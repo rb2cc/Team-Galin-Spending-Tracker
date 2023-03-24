@@ -93,6 +93,8 @@ class ExpenditureViewsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         response = self.client.get(reverse('filter_miscellaneous'), {'q': 'new'})
         self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse('filter_miscellaneous'), {'q': 'wrong filter'})
+        self.assertEqual(response.status_code, 200)
 
     def test_binned_expenditure_list_view(self):
         self.client.force_login(self.user)
@@ -177,3 +179,41 @@ class ExpenditureViewsTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
         self.expenditure.refresh_from_db()
         self.assertIsNotNone(self.expenditure)
+
+    def test_bin_expenditure_get_request(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('bin_expenditure'))
+        self.assertEqual(response.status_code, 302)
+
+    def test_recover_expenditure_get_request(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('recover_expenditure'))
+        self.assertEqual(response.status_code, 302)
+
+    def test_delete_expenditure_get_request(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('delete_expenditure'))
+        self.assertEqual(response.status_code, 302)
+
+    def test_update_expenditure_post_request_invalid_form(self):
+        self.client.force_login(self.user)
+        updated_data = {
+            'title': 'Updated Expenditure',
+            'description': 'This is an updated test expenditure',
+            'expense': -150,
+            'category': self.category.pk
+        }
+        response = self.client.post(reverse('update_expenditure', kwargs={'id': self.expenditure.pk}), updated_data)
+        self.assertEqual(response.status_code, 200)
+
+    def test_update_expenditure_with_no_changes(self):
+        self.client.force_login(self.user)
+        updated_data = {
+            'title': self.expenditure.title,
+            'description': self.expenditure.description,
+            'expense': self.expenditure.expense,
+            'category': self.category.pk
+        }
+        response = self.client.post(reverse('update_expenditure', kwargs={'id': self.expenditure.pk}), updated_data)
+        self.assertEqual(response.status_code, 302)
+
