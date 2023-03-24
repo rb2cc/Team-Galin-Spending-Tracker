@@ -122,3 +122,45 @@ class DetailsViewTests(TestCase):
         delete_avatar_after_test(self)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
+
+    def test_submit_comment_more_than_five_words_long(self):
+        self.client.login(email='galin@email.com', password='Password123')
+        response = self.client.post(self.url, {
+            'comment-form': '',
+            'comment': 'x ' * 6,
+            'media': ''
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(self.post.comments.filter(content='x ' * 6).exists())
+
+    def test_submit_comment_with_a_long_word(self):
+        self.client.login(email='galin@email.com', password='Password123')
+        response = self.client.post(self.url, {
+            'comment-form': '',
+            'comment': 'x' * 46,
+            'media': ''
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(self.post.comments.filter(content='x' * 46).exists())
+
+    def test_submit_reply_more_than_five_words_long(self):
+        self.client.login(email='galin@email.com', password='Password123')
+        response = self.client.post(self.url, {
+            'reply-form': '',
+            'reply': 'x ' * 6,
+            'media': '',
+            'comment-id': self.comment.id
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(self.post.comments.get(id=self.comment.id).replies.filter(content='x ' * 6).exists())
+
+    def test_submit_reply_with_a_long_word(self):
+        self.client.login(email='galin@email.com', password='Password123')
+        response = self.client.post(self.url, {
+            'reply-form': '',
+            'reply': 'x' * 46,
+            'media': '',
+            'comment-id': self.comment.id
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(self.post.comments.get(id=self.comment.id).replies.filter(content='x' * 46).exists())

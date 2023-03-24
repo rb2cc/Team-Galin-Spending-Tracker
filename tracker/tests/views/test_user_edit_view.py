@@ -55,3 +55,17 @@ class UserEditViewTest(TestCase):
         activity_name2 = f'You\'ve changed your first name from Test to Updated'
         self.assertEqual(Activity.objects.filter(user=self.user, name=activity_name1).count(), 1)
         self.assertEqual(Activity.objects.filter(user=self.user, name=activity_name2).count(), 1)
+
+    def test_update_zero_fields(self):
+        data = {
+            'email': self.user.email,
+            'first_name': self.user.first_name,
+            'last_name': self.user.last_name,
+            'username': self.user.username,
+        }
+        before_count = Activity.objects.filter(user=self.user).count()
+        response = self.client.post(self.url, data)
+        after_count = Activity.objects.filter(user=self.user).count()
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(before_count, after_count)
+
