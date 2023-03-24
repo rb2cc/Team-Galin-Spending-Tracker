@@ -265,7 +265,7 @@ class Post(models.Model):
     """Post model for creating a top most post (main post) appearing on top of the forum post"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=400)
-    slug = models.SlugField(max_length=400, unique=True, blank=True)
+    slug = models.SlugField(max_length=400, unique=True, default=random_slug_number)
     content = HTMLField()
     forum_categories = models.ManyToManyField(Forum_Category)
     date = models.DateTimeField(auto_now_add=True)

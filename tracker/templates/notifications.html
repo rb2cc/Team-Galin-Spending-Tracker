@@ -37,7 +37,7 @@
                 </form>
                 {%elif notification.notification_type == 'achievement'%}
                 <a class="notification" href="{% url 'my_achievements' %}">
-                    Well Done! You have completed the <strong> {{notification.achievement_type}} </strong> . <br>
+                    Well Done! <strong> {{notification.achievement_type}} </strong> . <br>
                     <small> {{notification.created_at|timesince}} ago</small>
                     <input type="hidden" name="noti-id" value="{{notification.id}}">
                 </a>
