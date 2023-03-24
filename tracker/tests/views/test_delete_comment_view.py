@@ -12,7 +12,7 @@ class DeleteCommentViewTests(TestCase):
         self.user = User.objects.get(email='galin@email.com')
         self.forum_category = Forum_Category.objects.get(title='Test Category')
         self.post = Post.objects.get(title='Test Post')
-        self.comment = Comment.objects.create(user=self.user, content='Test commet content')
+        self.comment = Comment.objects.get(content='Test comment content')
         self.reply = Reply.objects.create(user=self.user, content='Test reply content')
         self.post.forum_categories.add(self.forum_category)
         self.post.comments.add(self.comment)

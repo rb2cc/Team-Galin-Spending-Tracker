@@ -17,5 +17,13 @@
             "content": "Test content",
             "slug": "test-post"
         }
+    },
+    {
+        "model": "tracker.comment",
+        "pk": 1,
+        "fields": {
+            "user": 8,
+            "content": "Test comment content"
+        }
     }
 ]
