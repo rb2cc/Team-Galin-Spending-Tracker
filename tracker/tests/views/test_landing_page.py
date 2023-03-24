@@ -11,20 +11,25 @@ from django.test import TestCase
 
 class LandingPageViewTest(TestCase):
 
+    fixtures = ['tracker/tests/fixtures/staff_users.json']
+
     def setUp(self):
         self.user = User.objects.create_user(
             email='testuser@example.com',
             password='testpassword'
         )
         self.superuser = User.objects.create_superuser(email='superuser@email.com', password='Password123')
-        self.staff = User.objects.create_user(email='staff@email.com', password='Password123', is_staff = True)
+        self.staff_user = User.objects.get(email='staff@email.com')
         self.category_overall = Category.objects.create(name='Overall',week_limit=100, is_overall=True)
         self.category = Category.objects.create(name='Test Category',week_limit=100)
         self.user.available_categories.add(self.category_overall)
         self.user.available_categories.add(self.category)
+        self.staff_user.available_categories.add(self.category_overall)
         self.user.save()
         self.url = reverse('landing_page')
         self.client.login(email='testuser@example.com', password='testpassword')
+        for user in User.objects.all():
+            user.available_categories.add(self.category_overall)
 
     def test_landing_page_post_request(self):
         data = {

@@ -5,12 +5,13 @@ from tracker.models import User
 """Unit tests for the user_demote view"""
 class UserDemoteViewTest(TestCase):
 
-    fixtures = ['tracker/tests/fixtures/default_user.json']
+    fixtures = ['tracker/tests/fixtures/default_user.json',
+                'tracker/tests/fixtures/staff_users.json']
 
     def setUp(self):
         self.c = Client()
         self.superuser = User.objects.create_superuser(email='superuser@email.com', password='Password123')
-        self.staff = User.objects.create_user(email='staff@email.com', password='Password123', is_staff=True)
+        self.staff_user = User.objects.get(email='staff@email.com')
         self.url = reverse('user_demote')
         self.user = User.objects.get(email = 'galin@email.com')
         self.user.is_staff = True
