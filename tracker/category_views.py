@@ -9,6 +9,7 @@ from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from .helpers import login_prohibited, admin_prohibited, user_prohibited, anonymous_prohibited, anonymous_prohibited_with_id
 from django.utils.datastructures import MultiValueDictKeyError
+from django.contrib.auth.decorators import user_passes_test, login_required
 
 @anonymous_prohibited
 def category_list(request):
@@ -83,6 +84,7 @@ def edit_category(request, id):
             form = EditOverallForm(instance=category, user = current_user)
     return render(request, 'edit_category.html', {'form' : form})
 
+@login_required
 def category_progress(request, offset):
 
     def _make_percent(num, category, user):

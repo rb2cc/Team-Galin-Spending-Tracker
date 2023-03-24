@@ -599,11 +599,26 @@ def edit_reply(request, id):
 def create_forum_activity(request, action, post, *args):
     category_names = [category.title for category in post.forum_categories.all()]
     forum_name = "forums" if len(category_names) > 1 else "forum"
+    dots = ""
 
     if len(args) == 1:
-        activity_name = f'You\'ve {action} \"{args[0].content}\" comment on the \"{post.title}\" post in {", ".join(category_names)} {forum_name}'
+        comment_content = args[0].content.split()
+        if len(comment_content) > 5:
+            dots = "..."
+        for i in range(0, len(comment_content)):
+            word = comment_content[i]
+            if len(word) > 45:
+                comment_content[i] = word[0:10] + "..."
+        activity_name = f'You\'ve {action} \"{" ".join(comment_content[:5])}{dots}\" comment on the \"{post.title}\" post in {", ".join(category_names)} {forum_name}'
     elif len(args) == 2:
-        activity_name = f'You\'ve {action} \"{args[1].content}\" reply on the \"{post.title}\" post in {", ".join(category_names)} {forum_name}'
+        reply_content = args[1].content.split()
+        if len(reply_content) > 5:
+            dots = "..."
+        for i in range(0, len(reply_content)):
+            word = reply_content[i]
+            if len(word) > 45:
+                reply_content[i] = word[0:10] + "..."
+        activity_name = f'You\'ve {action} \"{" ".join(reply_content[:5])}{dots}\" reply on the \"{post.title}\" post in {", ".join(category_names)} {forum_name}'
     else:
         activity_name = f'You\'ve {action} \"{post.title}\" post in {", ".join(category_names)} {forum_name}'
 
@@ -688,7 +703,7 @@ def enter_challenge(request):
         messages.error(request, 'You have already entered this challenge.')
         return redirect('challenge_list')
 
-@login_required
+@anonymous_prohibited
 def my_challenges(request):
     user_challenges = UserChallenge.objects.filter(user=request.user)
     return render(request, 'my_challenges.html', {'user_challenges': user_challenges})
@@ -1448,7 +1463,7 @@ def admin_dashboard(request):
                     return redirect('admin_dashboard')
 
             # IF CREATE CATEGORY BUTTON CLICKED
-            if 'create_category' in request.POST:
+            elif 'create_category' in request.POST:
                 form = AddCategoryForm(request.POST)
                 if form.is_valid():
                     category = form.save()
@@ -1460,7 +1475,7 @@ def admin_dashboard(request):
                     return redirect('admin_dashboard')
 
             # IF CREATE CHALLENGE BUTTON CLICKED
-            if 'create_challenge' in request.POST:
+            elif 'create_challenge' in request.POST:
                 form = AddChallengeForm(request.POST)
                 if form.is_valid():
                     challenge = form.save()
@@ -1469,7 +1484,7 @@ def admin_dashboard(request):
                     messages.info(request, 'Unsuccessful creation of challenge')
                     return redirect('admin_dashboard')
 
-            if 'create_achievement' in request.POST:
+            elif 'create_achievement' in request.POST:
                 form = AddAchievementForm(request.POST)
                 if form.is_valid():
                     achievement = form.save()
@@ -1479,6 +1494,9 @@ def admin_dashboard(request):
                 else:
                     messages.info(request, 'Unsuccessful creation of achievement')
                     return redirect('admin_dashboard')
+
+            else:
+                return redirect('admin_dashboard')
 
         else:
             # DEFAULT TABLE TO LOAD ON PAGE

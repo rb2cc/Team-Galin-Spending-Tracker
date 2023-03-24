@@ -41,3 +41,15 @@ class BinCategoryViewTestCase(TestCase):
         after_count = Category.objects.filter(is_binned=False).count()
         self.assertEqual(after_count, before_count)
         self.assertEqual(response.status_code, 302)
+
+    def test_bin_overflow_deletes_categories(self):
+        self.user.available_categories.add(self.cat_one, self.cat_two, self.cat_three, self.overall_cat)
+        for id in range (4, 15):
+            test_category = self.cat_two
+            test_category.id = id
+            test_category.week_limit = 1
+            test_category.save()
+            self.user.available_categories.add(test_category)
+            self.client.login(username=self.user.email, password='Lu123')
+            response = self.client.post(reverse('bin_category', kwargs={'id': id}))
+            self.assertEqual(response.status_code, 302)

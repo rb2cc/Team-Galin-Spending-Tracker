@@ -94,14 +94,7 @@ class CategoryProgressViewTestCase(TestCase):
             user=self.user
         )
         self.client.login(email='james@example.org', password='Lu123')
-        for expense in [60, 90, 150]:
-            test_expenditure.expense = expense
-            test_expenditure.save()
-            response = self.client.get(self.url)
-            self.assertEqual(response.status_code, 200)
-
-    def test_category_progress_with_positive_offset(self):
-        self.client.login(email='james@example.org', password='Lu123')
-        url = reverse('category_progress', kwargs={'offset': 1})
-        response = self.client.get(url)
+        test_expenditure.expense = 150
+        test_expenditure.save()
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)

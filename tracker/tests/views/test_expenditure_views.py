@@ -217,3 +217,11 @@ class ExpenditureViewsTestCase(TestCase):
         response = self.client.post(reverse('update_expenditure', kwargs={'id': self.expenditure.pk}), updated_data)
         self.assertEqual(response.status_code, 302)
 
+    def test_bin_overflow_deletes_expenditures(self):
+        self.client.force_login(self.user)
+        for id in range (2, 13):
+            test_expenditure= self.expenditure
+            test_expenditure.id = id
+            test_expenditure.save()
+            response = self.client.post(reverse('bin_expenditure'), {'radio_pk': id})
+            self.assertEqual(response.status_code, 302)
