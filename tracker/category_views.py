@@ -1,16 +1,16 @@
 from .forms import AddCategoryForm, EditOverallForm
-from .models import User, Category, Activity, UserAchievement, Expenditure, Achievement
+from .models import Category, Activity, UserAchievement, Expenditure, Achievement
 from django.shortcuts import redirect, render
 from .views import activity_points
-from  datetime import date
 from dateutil.relativedelta import relativedelta, MO, SU
 from django.utils import timezone
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
-from .helpers import login_prohibited, admin_prohibited, user_prohibited, anonymous_prohibited, anonymous_prohibited_with_id
+from .helpers import anonymous_prohibited, anonymous_prohibited_with_id
 from django.utils.datastructures import MultiValueDictKeyError
-from django.contrib.auth.decorators import user_passes_test, login_required
 
+#Collects all categories belonging to the request user and returns the data to the
+# category list view and redirects to that page
 @anonymous_prohibited
 def category_list(request):
     user_id = request.user.id
@@ -42,6 +42,9 @@ def category_list(request):
     overall = Category.objects.filter(users__id=user_id).get(is_overall=True)
     return render(request, 'category_list.html', {'categories':categoryList, 'form':form, 'overall':overall})
 
+# gets the correct category object using the id argument and returns its form
+# validates the data again before saving
+# also generates activity objects for the activity page to keep record of when a category is edited
 @anonymous_prohibited_with_id
 def edit_category(request, id):
     current_user = request.user
@@ -84,7 +87,9 @@ def edit_category(request, id):
             form = EditOverallForm(instance=category, user = current_user)
     return render(request, 'edit_category.html', {'form' : form})
 
-@login_required
+# function used to calculate how close categories are to their weekly limit and
+# assigns a colour to the bar dependent on the percentage calculated
+# helps visualise spending to the user 
 def category_progress(request, offset):
 
     def _make_percent(num, category, user):
@@ -136,7 +141,9 @@ def category_progress(request, offset):
         'prev':prev_week,
         'next':next_week,
     })
-    
+
+#checks if the number of category objects inside the bin are greater than 0
+#if greater than 10 then the bin gets emptied (all objects get deleted)
 def overflow_delete_categories(request):
     categories = Category.objects.filter(users__id=request.user.id).filter(is_overall=False, is_binned=True)
     if categories.count() > 10:
@@ -144,6 +151,8 @@ def overflow_delete_categories(request):
     else:
         pass 
 
+#gets correct category object using the id argument and changes their is_binned flag from False to True
+#in turn any expenditures with the category also has in_binned changed to True
 @anonymous_prohibited_with_id
 def bin_category(request, id):
     category = Category.objects.get(id = id)
@@ -164,7 +173,8 @@ def bin_category(request, id):
     overall.save(force_update = True)
     return redirect('category_list')
 
-#Gets id field of the selected expenditure delete button and deletes the object from the database
+#gets correct category object using the id argument and deletes them from the database
+#in turn any expenditures with the category also are deleted
 @anonymous_prohibited
 def delete_category(request):
     if request.method == "POST":
@@ -181,6 +191,7 @@ def delete_category(request):
         return redirect('category_bin')
 
 #Gets id field of the selected expenditure recover button and changes the is_binned field from true to false
+# effectively moves the category from category bin to category list
 @anonymous_prohibited
 def recover_category(request):
     if request.method == "POST":
@@ -203,7 +214,7 @@ def recover_category(request):
     else:
         return redirect('category_bin')
 
-#Gets all expenditures under the filter of being binned
+#Gets all expenditures under the filter of being binned and passes the data into the binned category list
 @anonymous_prohibited
 def binned_category_list(request):
     binned_list = Category.objects.filter(users__id=request.user.id).filter(is_overall=False, is_binned=True).order_by('name')
