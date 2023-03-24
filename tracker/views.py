@@ -759,12 +759,12 @@ def complete_challenge(request, id):
             if user_challenges_count == 1:
                 UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Wise spender"))
                 user_activity = Activity.objects.create(user=request.user, image = "badges/wise_spender.png", name = "You've earned \"Wise spender\" achievement", points = 15)
-                create_achievement_notification(request, request.user, "achievement", UserAchievement.achievement)
+                create_achievement_notification(request, request.user, "achievement", user_activity.name)
                 activity_points(request, user_activity.points)
             elif user_challenges_count == 10:
                 UserAchievement.objects.create(user=request.user, achievement=Achievement.objects.get(name="Superstar"))
                 user_activity = Activity.objects.create(user=request.user, image = "badges/super_star.png", name = "You've earned \"Superstar\" achievement", points = 150)
-                create_achievement_notification(request, request.user, "achievement", UserAchievement.achievement)
+                create_achievement_notification(request, request.user, "achievement", user_activity.name)
                 activity_points(request, user_activity.points)
         except ObjectDoesNotExist:
             pass
