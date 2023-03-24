@@ -3,17 +3,13 @@ from django.core.validators import RegexValidator
 from django import forms
 from django.forms import ValidationError
 from .models import User, Post
-from django.contrib.auth.forms import UserChangeForm, UserCreationForm, PasswordResetForm
-
-
+from django.contrib.auth.forms import UserChangeForm, PasswordResetForm
 from .models import User, Expenditure, Category, Challenge, Achievement
-
 
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""
     email = forms.CharField(label='', widget=forms.TextInput(attrs={'placeholder': 'Email'}))
     password = forms.CharField(label='', widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
-
 
 class SignUpForm(forms.ModelForm):
     """Form enabling unregistered users to sign up."""
@@ -104,8 +100,8 @@ class CreateUserForm(forms.ModelForm):
         )
         return user
 
-
 class EditUserForm(UserChangeForm):
+    """Form enabling user form data to be edited"""
 
     email = forms.CharField(
         max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
@@ -149,6 +145,7 @@ class ExpenditureForm(forms.ModelForm):
     # field_order=['title', 'description', 'expense']
 
 class UserPasswordResetForm(PasswordResetForm):
+    """Form enabling user passsword to be reset"""
     def __init__(self, *args, **kwargs):
         super(UserPasswordResetForm, self).__init__(*args, **kwargs)
     email = forms.EmailField(label='', widget=forms.EmailInput(attrs={'placeholder': 'Email',}))
@@ -166,6 +163,7 @@ class AddCategoryForm(forms.ModelForm):
 
 
 class ReportForm(forms.Form):
+    """Form for creating a report for data collected between 2 dates"""
     start_date = forms.DateField(label='Start Date', widget=forms.TextInput(attrs={'type': 'date'}))
     end_date = forms.DateField(label='End Date', widget=forms.TextInput(attrs={'type': 'date'}))
 
@@ -186,7 +184,6 @@ class EditOverallForm(forms.ModelForm):
             raise ValidationError({"week_limit":"The overall limit cannot be less than the sum of other categories."})
         return cleaned_data
 
-
     class Meta:
         """Form options"""
         model = Category
@@ -194,12 +191,11 @@ class EditOverallForm(forms.ModelForm):
 
     week_limit = forms.CharField(widget=forms.TextInput(attrs={'style':'width:100%; height:10%'}))
 
-# Form to allow users to create new forum posts.
 class PostForm(forms.ModelForm):
+    """Form to allow users to create new forum posts."""
     class Meta:
         model = Post
         fields = ["title", "content", "forum_categories", "media"]
-
 
 class AddChallengeForm(forms.ModelForm):
     """Form enabling users to create custom challenges"""

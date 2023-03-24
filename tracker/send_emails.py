@@ -1,4 +1,3 @@
-
 import os
 import smtplib
 from email.message import EmailMessage
@@ -10,19 +9,15 @@ PORT = 587
 EMAIL_SERVER = 'smtp.gmail.com'
 
 # Load the environment variables
-
 current_dir = Path(__file__).resolve().parent if "__file__" in locals() else Path.cwd()
 envars = current_dir / ".env"
 load_dotenv(envars)
 
 # Read environment variables
-
 sender_email = "teamgalin.moneysaver@gmail.com"
 password_email = "boqk cfkx yybp uhxt"
 
-
 class Emailer:
-
     def send_email(subject, receiver_email, name):
     # Create the base text message
         msg = EmailMessage()
@@ -50,7 +45,6 @@ class Emailer:
     # Add html version. This converts the messagee into a multipart/alternative
     # container, with the original message as the first part and th new html
     # message as the second part.
-
         msg.add_alternative(
             f"""\
                 <html>
@@ -67,14 +61,10 @@ class Emailer:
 
                 subtype = "html",
         )
-
-
         with smtplib.SMTP(EMAIL_SERVER, PORT) as server:
             server.starttls()
             server.login(sender_email, password_email)
             server.sendmail(sender_email, receiver_email, msg.as_string())
-
-
 
     def send_register_email(subject, receiver_email, name):
     # Create the base text message
@@ -103,7 +93,6 @@ class Emailer:
     # Add html version. This converts the messagee into a multipart/alternative
     # container, with the original message as the first part and th new html
     # message as the second part.
-
         msg.add_alternative(
             f"""\
                 <html>
@@ -120,16 +109,12 @@ class Emailer:
 
                 subtype = "html",
         )
-
-
         with smtplib.SMTP(EMAIL_SERVER, PORT) as server:
             server.starttls()
             server.login(sender_email, password_email)
             server.sendmail(sender_email, receiver_email, msg.as_string())
-
 
     # Method to send email for registration.
-
     def send_register_email(subject, receiver_email, name):
     # Create the base text message
         msg = EmailMessage()
@@ -137,7 +122,6 @@ class Emailer:
         msg["From"] = formataddr(("Team Galin Money Saver.", f"{sender_email}"))
         msg["To"] = receiver_email
         msg["BCC"] = sender_email
-
         msg.set_content(
             f"""\
             Hi {name},
@@ -157,7 +141,6 @@ class Emailer:
     # Add html version. This converts the messagee into a multipart/alternative
     # container, with the original message as the first part and th new html
     # message as the second part.
-
         msg.add_alternative(
             f"""\
                 <html>
@@ -174,8 +157,6 @@ class Emailer:
 
                 subtype = "html",
         )
-
-
         with smtplib.SMTP(EMAIL_SERVER, PORT) as server:
             server.starttls()
             server.login(sender_email, password_email)

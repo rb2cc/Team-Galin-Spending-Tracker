@@ -62,7 +62,6 @@ urlpatterns = [
     path('recover_category', category_views.recover_category, name='recover_category'),
     path('delete_category', category_views.delete_category, name="delete_category"),
     path('category_list', category_views.category_list, name='category_list'),
-    path('remove_category/<int:id>', category_views.remove_category, name='remove_category'),
     path('edit_category/<int:id>', category_views.edit_category, name='edit_category'),
     path('category_progress/<int:offset>', category_views.category_progress, name='category_progress'),
     path('category_bin/', category_views.binned_category_list, name='category_bin'),

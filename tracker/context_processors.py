@@ -28,7 +28,6 @@ def searchFunction(request):
     }
     return context
         
-
 # Allows notifications that have not been read to be returned.
 
 def notifications(request):

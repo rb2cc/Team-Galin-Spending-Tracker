@@ -3,22 +3,18 @@ from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin, User
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
-from personal_spending_tracker import settings
 from decimal import Decimal
 from django.utils import timezone
-from taggit.managers import TaggableManager
 from django.shortcuts import reverse
 from django.utils.text import slugify
 from django.contrib.contenttypes.fields import GenericRelation
-from hitcount.models import HitCountMixin, HitCount
+from hitcount.models import HitCount
 from django_resized import ResizedImageField
 from tinymce.models import HTMLField
 from django.contrib.auth import get_user_model
 import random
 
 # Create your models here.
-
-
 class UserManager(BaseUserManager):
     """Manage user model objects"""
 
@@ -77,7 +73,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def num_posts(self):
         return Post.objects.filter(user=self).count()
-
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -160,18 +155,20 @@ class UserAchievement(models.Model):
         unique_together = ('user', 'achievement')
 
 class Level(models.Model):
+    """Level model to keep track of all possible levels available"""
     name = models.CharField(max_length=100)
     description = models.TextField()
     required_points = models.PositiveIntegerField()
 
 class UserLevel(models.Model):
+    """User level model to keep track of a specific users current level"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     level = models.ForeignKey(Level, on_delete=models.CASCADE)
     points = models.PositiveIntegerField()
     date_reached = models.DateTimeField(auto_now=True)
 
-
 class Activity(models.Model):
+    """Activity model to keep track a specific users app activity"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     image = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
@@ -180,10 +177,9 @@ class Activity(models.Model):
 
 # Creation of forums models
 
-
-# Notification model for notifying users of various changes in the web application.
-
 class Notification(models.Model):
+    """Notification model for notifying users of various changes in the web application."""
+    
     COMMENT = 'comment'
     REPLY = 'reply'
     ACHIEVEMENT = 'achievement'
@@ -202,13 +198,13 @@ class Notification(models.Model):
     slugg = models.SlugField(max_length=20, null=True)
     achievement_type = models.CharField(max_length=100, null=True)
 
-
     class Meta:
         ordering = ['-created_at'] 
 
 User = get_user_model()
 
 class Author(models.Model):
+    """Author model that keeps track of the author of a forum post"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     fullname = models.CharField(max_length=40, blank=True)
     slug = models.SlugField(max_length=400, unique=True, blank=True)
@@ -225,6 +221,7 @@ class Author(models.Model):
         super(Author, self).save(*args, **kwargs)
 
 class Forum_Category(models.Model):
+    """Forum category model that allows posts made on the forum to be organised into topics"""
     title = models.CharField(max_length=50)
     slug = models.SlugField()
     description = models.TextField(default="description")
@@ -253,7 +250,6 @@ class Forum_Category(models.Model):
     def last_post(self):
         return Post.objects.filter(forum_categories=self).latest("date")
 
-
 class Reply(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
@@ -267,8 +263,8 @@ class Reply(models.Model):
     class Meta:
         verbose_name_plural = "replies"
 
-
 class Comment(models.Model):
+    """Comment model for creating comments under a forum post"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
@@ -279,8 +275,8 @@ class Comment(models.Model):
     def __str__(self):
         return self.content[:100]
 
-
 class Post(models.Model):
+    """Post model for creating a top most post (main post) appearing on top of the forum post"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=400)
     slug = models.SlugField(max_length=400, unique=True, blank=True)
@@ -292,9 +288,6 @@ class Post(models.Model):
     comments = models.ManyToManyField(Comment, blank=True)
     media = models.ImageField(editable=True, upload_to='images', blank=True)
     edited_at = models.DateTimeField(null=True, blank=True)
-    # closed = models.BooleanField(default=False)
-    # state = models.CharField(max_length=40, default="zero")
-
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -324,11 +317,13 @@ class Post(models.Model):
             return None
 
 class Avatar(models.Model):
+    """Avatar model for creating an avatar object unique to each user"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     file_name = models.CharField(max_length=255)
     current_template = models.CharField(max_length=255)
 
 class Tree(models.Model):
+    """Tree model for keeping track of user trees planted"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     tree_id = models.AutoField(primary_key=True)
     x_position = models.IntegerField()
