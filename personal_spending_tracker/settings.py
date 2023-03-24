@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'hitcount',
     'taggit',
     'crispy_forms',
-    'django_crontab',
 ]
 
 MIDDLEWARE = [
@@ -164,20 +163,3 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 CRISPY_TEMPLATE_PACK = ('bootstrap4')
-
-# Automated cron job directory
-# cronjobs will run functions in cron.py in the set period given by the first argument
-CRONJOBS = [
-    ('1 9 * * */1', 'tracker.cron.category_progress_notification_cron_job'), # this job runs everyday at 9:01am
-    ('0 0 1 * *', 'tracker.cron.delete_binned_objects_cron_job') # this job runs at 00:00 on the first day of every month
-    
-    #  Below are another version of the above cron jobs that will run ever
-    #  minute, comment out the above jobs and uncomment the below jobs to 
-    # verify these work.
-    # run the following function:
-    # python3 manage.py crontab add 
-    # ,after changing
-    
-    # ('* * * * *', 'tracker.cron.category_progress_notification_cron_job'),
-    # ('* * * * *', 'tracker.cron.delete_binned_objects_cron_job')
-]
