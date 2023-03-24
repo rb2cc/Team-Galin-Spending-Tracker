@@ -1,7 +1,7 @@
 from django.test import TestCase, RequestFactory, Client
 from django.urls import reverse
 from tracker.models import User, UserAchievement, Achievement, Activity, UserChallenge, Challenge, UserLevel, Level
-from tracker.views import share_avatar, share_challenge, share_achievement
+from tracker.views import share_avatar, share_challenge, share_achievement, share
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from tracker.views import handle_share
@@ -77,3 +77,16 @@ class ShareViewsTestCase(TestCase):
         response = share_achievement(request, self.user_achievement.id)
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.achievement.name, response.content.decode())
+
+    def test_share_nothing(self):
+        self.client.login(email='testuser@example.com', password='testpassword')
+        url = reverse('share')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_share_not_accepted_object(self):
+        self.client.login(email='testuser@example.com', password='testpassword')
+        request = self.factory.get(reverse('share'))
+        request.user = self.user
+        response = share(request, 1, 'x', 'x', 'x', 'x')
+        self.assertEqual(response.status_code, 302)

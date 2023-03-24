@@ -63,3 +63,8 @@ class EditCommentViewTests(TestCase):
         non_existent_comment_url = reverse('edit_comment', kwargs={'id': self.comment.id + 1})
         response = self.client.post(non_existent_comment_url)
         self.assertRedirects(response, reverse('forum_home'))
+
+    def test_edit_comment_get_request(self):
+        self.client.login(email='galin@email.com', password='Password123')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)

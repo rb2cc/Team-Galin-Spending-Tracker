@@ -63,3 +63,8 @@ class EditReplyViewTests(TestCase):
         non_existent_reply_url = reverse('edit_reply', kwargs={'id': self.reply.id + 1})
         response = self.client.post(non_existent_reply_url)
         self.assertRedirects(response, reverse('forum_home'))
+
+    def test_edit_reply_get_request(self):
+        self.client.login(email='galin@email.com', password='Password123')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)

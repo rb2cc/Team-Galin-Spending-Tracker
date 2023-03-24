@@ -555,7 +555,7 @@ def edit_comment(request, id):
             comment.edited_at = timezone.now()
             comment.save()
             create_forum_activity(request, "edited", post, comment)
-            return redirect(post.get_url())
+        return redirect(post.get_url())
     except Comment.DoesNotExist:
         return redirect('forum_home')
 
@@ -592,7 +592,7 @@ def edit_reply(request, id):
             reply.edited_at = timezone.now()
             reply.save()
             create_forum_activity(request, "edited", post, comment, reply)
-            return redirect(post.get_url())
+        return redirect(post.get_url())
     except Reply.DoesNotExist:
         return redirect('forum_home')
 
@@ -698,7 +698,7 @@ def enter_challenge(request):
             user_activity = Activity.objects.create(user=request.user, image = "images/start.png", name = f'You\'ve entered \"{user_challenge.challenge.name}\" challenge', points = 15)
             activity_points(request, user_activity.points)
             complete_challenge(request, challenge_id)
-            return redirect('my_challenges')
+        return redirect('my_challenges')
     except IntegrityError:
         messages.error(request, 'You have already entered this challenge.')
         return redirect('challenge_list')
@@ -709,7 +709,10 @@ def my_challenges(request):
     return render(request, 'my_challenges.html', {'user_challenges': user_challenges})
 
 def complete_challenge(request, id):
-    user_challenge = UserChallenge.objects.get(user=request.user, challenge_id=id)
+    try:
+        user_challenge = UserChallenge.objects.get(user=request.user, challenge_id=id)
+    except UserChallenge.DoesNotExist:
+        user_challenge = None
     if user_challenge is not None:
         if user_challenge.date_completed is not None:
             return redirect('challenge_list')
@@ -850,46 +853,56 @@ def share_reply(request, id):
     text = f"Check out \"{name}\" reply by {user_name} on \"{post.title}\" post in Galin's Spending Tracker"
     return share(request, reply, name, description, url, text)
 
-def share(request, user_object, name, description, url, text):
-    facebook_params = {
-        'app_id': '1437874963685388',
-        'display': 'popup',
-        'href': 'facebook.com'
-    }
-    twitter_params = {
-        'url': url,
-        'text': text
-    }
-    share_urls = {
-        'facebook': 'https://www.facebook.com/dialog/share?' + urlencode(facebook_params),
-        'twitter': 'https://twitter.com/share?' + urlencode(twitter_params),
-        'forum': request.build_absolute_uri(reverse('create_post'))
-    }
+def share(request, *args):
+    if args:
+        user_object = args[0]
+        name = args[1]
+        description = args[2]
+        url = args[3]
+        text = args[4]
+        facebook_params = {
+            'app_id': '1437874963685388',
+            'display': 'popup',
+            'href': 'facebook.com'
+        }
+        twitter_params = {
+            'url': url,
+            'text': text
+        }
+        share_urls = {
+            'facebook': 'https://www.facebook.com/dialog/share?' + urlencode(facebook_params),
+            'twitter': 'https://twitter.com/share?' + urlencode(twitter_params),
+            'forum': request.build_absolute_uri(reverse('create_post'))
+        }
 
-    if isinstance(user_object, UserAchievement):
-        media = user_object.achievement.badge
-        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'achievement', 'media': media})
-    elif isinstance(user_object, UserChallenge):
-        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'challenge'})
-    elif isinstance(user_object, str):
-        user_tier_colour = get_user_tier_colour(request.user)
-        try:
-            media = 'avatar/' + Avatar.objects.get(user=request.user).file_name
-            avatar_path = os.path.join(settings.STATICFILES_DIRS[0], media)
-            if not os.path.exists(avatar_path):
+        if isinstance(user_object, UserAchievement):
+            media = user_object.achievement.badge
+            return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'achievement', 'media': media})
+        elif isinstance(user_object, UserChallenge):
+            return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'challenge'})
+        elif isinstance(user_object, str):
+            user_tier_colour = get_user_tier_colour(request.user)
+            try:
+                media = 'avatar/' + Avatar.objects.get(user=request.user).file_name
+                avatar_path = os.path.join(settings.STATICFILES_DIRS[0], media)
+                if not os.path.exists(avatar_path):
+                    media = 'avatar/default_avatar.png'
+            except Avatar.DoesNotExist:
                 media = 'avatar/default_avatar.png'
-        except Avatar.DoesNotExist:
-            media = 'avatar/default_avatar.png'
-        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'avatar', 'user_tier_colour': user_tier_colour, 'media': media})
-    elif isinstance(user_object, Post):
-        media = user_object.media
-        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'post', 'media': media})
-    elif isinstance(user_object, Comment):
-        media = user_object.media
-        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'comment', 'media': media})
-    elif isinstance(user_object, Reply):
-        media = user_object.media
-        return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'reply', 'media': media})
+            return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'avatar', 'user_tier_colour': user_tier_colour, 'media': media})
+        elif isinstance(user_object, Post):
+            media = user_object.media
+            return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'post', 'media': media})
+        elif isinstance(user_object, Comment):
+            media = user_object.media
+            return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'comment', 'media': media})
+        elif isinstance(user_object, Reply):
+            media = user_object.media
+            return render(request, 'share.html', {'name': name, 'description': description, 'share_urls': share_urls, 'type': 'reply', 'media': media})
+        else:
+            return redirect('landing_page')
+    else:
+        return redirect('landing_page')
 
 def handle_share(request):
     type = unquote(request.GET.get('type'))

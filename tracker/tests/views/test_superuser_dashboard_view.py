@@ -56,3 +56,8 @@ class AdminDashboardViewTestCase(TestCase):
         response = self.client.post(self.url, data)
         self.assertTrue(User.objects.filter(email='test@email.com').exists())
         self.assertTrue(User.objects.get(email='test@email.com').is_staff)
+
+    def test_post_invalid_form_superuser_dashboard(self):
+        self.client.login(email='superuser@email.com', password='Password123')
+        response = self.client.post(self.url, {'email': 'test@email.com'})
+        self.assertTrue(response.status_code, 200)
