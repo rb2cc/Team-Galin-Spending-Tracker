@@ -25,5 +25,22 @@
             "user": 8,
             "content": "Test comment content"
         }
+    },
+    {
+        "model": "tracker.reply",
+        "pk": 1,
+        "fields": {
+            "user": 8,
+            "content": "Test reply content"
+        }
+    },
+    {
+        "model": "tracker.level",
+        "pk": 1,
+        "fields": {
+            "name": "level",
+            "description": "description",
+            "required_points": 10
+        }
     }
 ]

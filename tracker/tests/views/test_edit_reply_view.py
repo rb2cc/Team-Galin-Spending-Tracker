@@ -15,12 +15,12 @@ class EditReplyViewTests(TestCase):
         self.forum_category = Forum_Category.objects.get(title='Test Category')
         self.post = Post.objects.get(title='Test Post')
         self.comment = Comment.objects.get(content='Test comment content')
-        self.reply = Reply.objects.create(user=self.user, content='Test reply content')
+        self.reply = Reply.objects.get(content='Test reply content')
         self.post.forum_categories.add(self.forum_category)
         self.post.comments.add(self.comment)
         self.comment.replies.add(self.reply)
         self.url = reverse('edit_reply', kwargs={'id': self.reply.id})
-        self.level = Level.objects.create(name='level', description='description', required_points=10)
+        self.level = Level.objects.get(name='level')
         self.userlevel = UserLevel.objects.create(user=self.user, level=self.level, points=20)
 
     def test_post_request_with_valid_data_updates_reply(self):

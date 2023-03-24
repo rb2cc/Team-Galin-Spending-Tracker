@@ -15,7 +15,7 @@ class SharePostViewTests(TestCase):
         self.post = Post.objects.get(title='Test Post')
         self.url = reverse('share_post', kwargs={'id': self.post.id})
         self.post.forum_categories.add(self.forum_category)
-        self.level = Level.objects.create(name='level', description='description', required_points=10)
+        self.level = Level.objects.get(name='level')
         self.userlevel = UserLevel.objects.create(user=self.user, level=self.level, points=20)
 
 

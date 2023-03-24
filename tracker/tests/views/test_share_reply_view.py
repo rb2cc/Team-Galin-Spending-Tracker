@@ -19,7 +19,7 @@ class ShareReplyViewTests(TestCase):
         self.post.comments.add(self.comment)
         self.comment.replies.add(self.reply)
         self.url = reverse('share_reply', kwargs={'id': self.reply.id})
-        self.level = Level.objects.create(name='level', description='description', required_points=10)
+        self.level = Level.objects.get(name='level')
         self.userlevel = UserLevel.objects.create(user=self.user, level=self.level, points=20)
 
 

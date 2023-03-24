@@ -257,7 +257,7 @@ class Forum_Category(models.Model):
 class Reply(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateTimeField(default = timezone.now)
     media = models.ImageField(editable=True, upload_to='images', blank=True)
     edited_at = models.DateTimeField(null=True, blank=True)
 
