@@ -21,7 +21,7 @@
             </a>
             <form action="." method="post">
                 {% csrf_token %}
-                <input type="submit" value="Mark As Read" name="noti-form">
+                <input type="submit" value="Mark As Read" name="noti-form" style="border-radius: 50px 50px 50px 50px;">
                 <input type="hidden" name="noti-id" value="{{notification.id}}">
             </form>
                 {%elif notification.notification_type == 'reply'%}
@@ -32,7 +32,7 @@
                 </a>
                 <form action="." method="post">
                     {% csrf_token %}
-                    <input type="submit" value="Mark As Read" name="noti-form">
+                    <input type="submit" value="Mark As Read" name="noti-form" style="border-radius: 50px 50px 50px 50px;">
                     <input type="hidden" name="noti-id" value="{{notification.id}}">
                 </form>
                 {%elif notification.notification_type == 'achievement'%}
@@ -43,7 +43,7 @@
                 </a>
                 <form action="." method="post">
                     {% csrf_token %}
-                    <input type="submit" value="Mark As Read" name="noti-form">
+                    <input type="submit" value="Mark As Read" name="noti-form" style="border-radius: 50px 50px 50px 50px;">
                     <input type="hidden" name="noti-id" value="{{notification.id}}">
                 </form>
                 {% endif %}

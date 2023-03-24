@@ -69,6 +69,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     available_categories = models.ManyToManyField('Category', symmetrical = False, related_name = 'users')
     username = models.CharField(max_length=50, default=random_username, blank=True)
     trees = models.IntegerField(default=0)
+    has_email_sent = models.BooleanField(default=False)
 
     objects = UserManager()
     USERNAME_FIELD = 'email'

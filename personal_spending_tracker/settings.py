@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'hitcount',
     'taggit',
     'crispy_forms',
-    'django_crontab',
 ]
 
 MIDDLEWARE = [
@@ -163,9 +162,3 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 CRISPY_TEMPLATE_PACK = ('bootstrap4')
-
-# Automated cron job directory
-# cron job runs function that deletes expenditures with is_binned=True every 10 minutes
-CRONJOBS = [
-    ('*/10 * * * *', 'tracker.cron.delete_binned_objects_cron_job')
-]

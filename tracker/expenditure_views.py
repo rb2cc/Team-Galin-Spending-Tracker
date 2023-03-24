@@ -21,6 +21,13 @@ def binned_expenditure_list(request):
     categories = Category.objects.filter(users__id=request.user.id)
     return render(request, 'expenditure_bin.html', {'binned_spendings': binned_list, 'categories': categories})
 
+def overflow_delete_expenditures(request):
+    expenditures = Expenditure.objects.filter(user=request.user, is_binned=True)
+    if expenditures.count() > 10:
+        expenditures.delete()
+    else:
+        pass
+
 #Gets id field of the selected expenditure radio button and changes the is_binned field from false to true
 @anonymous_prohibited
 def bin_expenditure(request):
@@ -30,6 +37,7 @@ def bin_expenditure(request):
             expenditure = Expenditure.objects.get(pk=expenditure_pk)
             expenditure.is_binned = True
             expenditure.save()
+            overflow_delete_expenditures(request)
             Activity.objects.create(user=request.user, image = "images/delete.png", name = f'You\'ve put \"{expenditure.title}\" expenditure in the bin')
             return redirect('expenditure_list')
         except Expenditure.DoesNotExist:

@@ -6,7 +6,7 @@
     <form id="expenditure_form" method="POST">
                 {% csrf_token %}
                 <a href="{% url 'category_bin' %}">Category Bin</a> 
-                <p style='text-align: center;'>*EXPENDITURES HERE WILL BE DELETED AFTER 10 MINUTES!!!*</p>
+                <p style='text-align: center;'>*EXPENDITURES HERE WILL BE DELETED AFTER OVERFLOWING 10 DELETIONS!!!*</p>
             <table class="table mainTable">
         </div>
             <thead class="mainThead">

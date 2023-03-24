@@ -36,6 +36,7 @@ import json
 from .utils import create_notification, create_achievement_notification
 from .send_emails import Emailer
 from .helpers import login_prohibited, admin_prohibited, user_prohibited, anonymous_prohibited, anonymous_prohibited_with_id
+from dateutil.relativedelta import relativedelta, MO, SU
 
 # Create your views here.
 
@@ -91,13 +92,49 @@ def sign_up(request):
         form = SignUpForm()
     return render(request, 'sign_up.html', {'form': form})
 
-
 def log_out(request):
     logout(request)
     return redirect('home')
 
 def user_test(user):
     return user.is_anonymous == False
+
+def category_progress_email_check():
+
+    """Function that will send an email to the user when one of their categories is close to their weekly limit"""
+    """Limits the emails being sent to only when spending >=90% and has_email_sent=False to not fill up email inbox"""
+
+    def _make_percent(num, cat_name, user):
+                denom = Category.objects.filter(users__id = user.id).get(name=cat_name).week_limit
+                percent = (100 * (float(num)/float(denom)))
+                if percent > 100:
+                    return 100
+                return percent
+
+    for user in User.objects.filter(is_staff=False, is_superuser=False):
+
+        week_start = timezone.now().date() + relativedelta(weekday=MO(-1))
+        week_end = week_start + relativedelta(weekday=SU(1))
+        categories = Category.objects.filter(is_overall = False).filter(users__id = user.id)
+        val_dict = {}
+        for category in categories:
+            val_dict[category.name] = 0
+        expenditures = Expenditure.objects.filter(user=user, date_created__gte = week_start, date_created__lte = week_end, is_binned = False)
+        for expenditure in expenditures:
+            val_dict[expenditure.category.name] += expenditure.expense#dict from category name -> total expense
+        overall_spend = sum(val_dict.values())
+        overall = Category.objects.filter(users__id = user.id, is_overall=True)
+        overall_percent = _make_percent(overall_spend, overall.get(name="Overall"), user)
+
+        if overall_percent >= 90 and not user.has_email_sent:
+            user.has_email_sent = True
+            user.save()
+            Emailer.send_spending_limit_notification("Spending Limits", user.email, user.first_name)
+        elif overall_percent < 90 and  user.has_email_sent:
+            user.has_email_sent = False
+            user.save()
+        else:
+            pass
 
 @user_passes_test(user_test, login_url='log_out')
 @anonymous_prohibited
@@ -108,6 +145,7 @@ def landing_page(request):
             expenditure = form.save(commit=False)
             expenditure.user = request.user
             expenditure.save()
+            category_progress_email_check()
             activity_name = f'You\'ve created a \"{expenditure.title}\" expenditure of \"{expenditure.category.name}\" category with {expenditure.expense} expense'
             user_activity = Activity.objects.create(user=request.user, image = "images/expenditure.png", name = activity_name, points = 15)
             activity_points(request, user_activity.points)
@@ -295,6 +333,7 @@ class UserEditView(generic.UpdateView):
 
         return super().form_valid(form)
 
+@anonymous_prohibited
 def forum_home(request):
     all_forum_categories = Forum_Category.objects.all()
     num_posts = Post.objects.all().count()
@@ -431,7 +470,7 @@ def get_forum_user_info(points, avatars, tier_colours, user_levels, user_tier_na
         user_tier_names[forum_object.user.id] = ""
     return points, avatars, tier_colours, user_levels, user_tier_names
 
-@login_required
+@anonymous_prohibited
 def create_post(request):
     context = {}
     form = PostForm(request.POST or None, request.FILES or None)
@@ -451,6 +490,7 @@ def create_post(request):
     })
     return render(request, "forum/create_post.html", context)
 
+@anonymous_prohibited_with_id
 def delete_post(request, id):
     try:
         post = Post.objects.get(id = id)
@@ -464,6 +504,7 @@ def delete_post(request, id):
         pass
     return redirect('forum_home')
 
+@anonymous_prohibited_with_id
 def edit_post(request, id):
     try:
         post = Post.objects.get(id=id)
@@ -482,6 +523,7 @@ def edit_post(request, id):
         return redirect('forum_home')
     return render(request, 'forum/edit_post.html', {'form' : form})
 
+@anonymous_prohibited_with_id
 def delete_comment(request, id):
     try:
         comment = Comment.objects.get(id=id)
@@ -495,6 +537,7 @@ def delete_comment(request, id):
         pass
     return redirect('forum_home')
 
+@anonymous_prohibited_with_id
 def edit_comment(request, id):
     try:
         comment = Comment.objects.get(id=id)
@@ -516,6 +559,7 @@ def edit_comment(request, id):
     except Comment.DoesNotExist:
         return redirect('forum_home')
 
+@anonymous_prohibited_with_id
 def delete_reply(request, id):
     try:
         reply = Reply.objects.get(id=id)
@@ -529,6 +573,7 @@ def delete_reply(request, id):
         pass
     return redirect('forum_home')
 
+@anonymous_prohibited_with_id
 def edit_reply(request, id):
     try:
         reply = Reply.objects.get(id=id)
@@ -590,6 +635,7 @@ def check_forum_user_achievements(request):
         except IntegrityError:
             pass
 
+@anonymous_prohibited
 def latest_posts(request):
     posts = Post.objects.all().filter(approved=True)[:10]
     context = {
@@ -1267,6 +1313,7 @@ def report(request):
     return render(request, 'report.html', context)
 
 @csrf_exempt
+@anonymous_prohibited
 def save_item_position(request):
     if request.method == 'POST':
         user = request.user
@@ -1585,4 +1632,3 @@ def user_demote(request):
             return redirect('admin_dashboard')
     else:
         return redirect('admin_dashboard')
-

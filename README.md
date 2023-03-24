@@ -51,4 +51,6 @@ $ python3 manage.py test
 ## Sources
 The packages used by this application are specified in `requirements.txt`
 
+Partial implementation of open source tutorial on YouTube. https://www.youtube.com/watch?v=YXmsi13cMhw&t=2075s&ab_channel=SelmiTech
+
 
