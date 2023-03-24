@@ -26,6 +26,7 @@ class UpdateUserLevelTest(TestCase):
         user_level.refresh_from_db()
         self.assertEqual(user_level.level.name, "Level 2")
 
+
     def test_update_user_level_level_up_with_new_levels(self):
         user_level = UserLevel.objects.get(user=self.user)
         user_level.points = 500

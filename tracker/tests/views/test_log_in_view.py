@@ -41,6 +41,14 @@ class LogInViewTestCase(TestCase, LogInTester):
         self.assertEqual(len(messages_list),1)
         self.assertEqual(messages_list[0].level,messages.ERROR)
 
+    def test_invalid_form(self):
+        form_input = {'email':'james@example.org'}
+        response = self.client.post(self.url, form_input)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'home.html')
+        form = response.context['form']
+        self.assertTrue(isinstance(form, LogInForm))
+
     def test_successful_log_in(self):
         form_input = {'email':'james@example.org', 'password':'Lu123'}
         response = self.client.post(self.url, form_input, follow=True)

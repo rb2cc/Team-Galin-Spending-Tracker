@@ -9,6 +9,8 @@ from tracker.views import getDateListAndDailyExpenseList, landing_page
 from django.utils import timezone
 from django.test import TestCase, TransactionTestCase
 from tracker.tests.helpers import delete_avatar_after_test
+from datetime import timedelta
+from django.utils import timezone
 
 class LandingPageViewTest(TransactionTestCase):
 
@@ -42,6 +44,43 @@ class LandingPageViewTest(TransactionTestCase):
         self.assertEqual(Expenditure.objects.filter(user=self.user).count(), 1)
         activity_name = f'You\'ve created a "Test Expenditure" expenditure of "{self.category.name}" category with 100.0 expense'
         self.assertEqual(Activity.objects.filter(user=self.user, name=activity_name).count(), 1)
+        self.assertRedirects(response, self.url)
+
+    def test_landing_page_post_request_percent_greater_than_100(self):
+        data = {
+            'title': 'Test Expenditure',
+            'category': self.category.id,
+            'expense': 200.0,
+            'description': 'Test description',
+        }
+        response = self.client.post(self.url, data)
+        self.assertEqual(Expenditure.objects.filter(user=self.user).count(), 1)
+        activity_name = f'You\'ve created a "Test Expenditure" expenditure of "{self.category.name}" category with 200.0 expense'
+        self.assertEqual(Activity.objects.filter(user=self.user, name=activity_name).count(), 1)
+        self.assertRedirects(response, self.url)
+
+    def test_landing_page_post_request_percent_less_than_90_and_email_sent(self):
+        self.user.has_email_sent = True
+        self.user.save()
+        data = {
+            'title': 'Test Expenditure',
+            'category': self.category.id,
+            'expense': 80,
+            'description': 'Test description',
+        }
+        response = self.client.post(self.url, data)
+        self.assertRedirects(response, self.url)
+
+    def test_landing_page_post_request_percent_greater_than_90_and_email_sent(self):
+        self.user.has_email_sent = True
+        self.user.save()
+        data = {
+            'title': 'Test Expenditure',
+            'category': self.category.id,
+            'expense': 95,
+            'description': 'Test description',
+        }
+        response = self.client.post(self.url, data)
         self.assertRedirects(response, self.url)
 
     def test_progress_percentage_100(self):
@@ -117,6 +156,25 @@ class LandingPageViewTest(TransactionTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(UserAchievement.objects.filter(user=self.user).count(), 1)
         self.assertEqual(Expenditure.objects.filter(user=self.user).count(), 1)
+
+    def test_not_same_date(self):
+        exp1 = Expenditure.objects.create(
+            user=self.user,
+            title='Test Expenditure',
+            category=self.category,
+            expense=100,
+            date_created = timezone.now() - timezone.timedelta(days=2)
+        )
+        exp2 = Expenditure.objects.create(
+            user=self.user,
+            title='Test Expenditure 2',
+            category=self.category,
+            expense=100,
+            date_created = timezone.now() - timezone.timedelta(days=1)
+        )
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 200)
+
 
     def test_landing_page_with_existing_avatar_template(self):
         url = reverse('my_avatar')

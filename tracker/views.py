@@ -130,7 +130,7 @@ def category_progress_email_check():
             user.has_email_sent = True
             user.save()
             Emailer.send_spending_limit_notification("Spending Limits", user.email, user.first_name)
-        elif overall_percent < 90 and  user.has_email_sent:
+        elif overall_percent < 90 and user.has_email_sent:
             user.has_email_sent = False
             user.save()
         else:
@@ -260,6 +260,8 @@ def getDateListAndDailyExpenseList(objectList, num):
         dailyExpenseList.append(x.expense)
     for x in range(0, len(dateList)):
         try:
+            print(dateList[x])
+            print(dateList[x+1])
             while dateList[x] == dateList[x+1]:
                 dailyExpenseList[x] += dailyExpenseList[x+1]
                 dailyExpenseList.pop(x+1)
